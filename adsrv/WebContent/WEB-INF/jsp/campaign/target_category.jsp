@@ -1,0 +1,204 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ include file="../common/common.jsp" %>
+<%@page import="java.text.DecimalFormat"%>
+<%@page import="java.util.Calendar"%>
+<%@page import="net.sf.json.JSONArray"%>
+<%@page import="net.sf.json.JSONObject"%>
+<%@page import="tv.pandora.adsrv.common.util.StringUtil"%>
+<%@page import="tv.pandora.adsrv.common.util.DateUtil"%>    
+<%@page import="tv.pandora.adsrv.domain.Campaign"%>    
+<%@page import="tv.pandora.adsrv.domain.User"%>    
+<%	
+try
+{
+	String tgtype = StringUtil.isNullReplace(request.getParameter("tgtype"),"1");
+
+	Map map = (Map)request.getAttribute("response");
+
+	List<Map<String,String>> codelist = (List<Map<String,String>>)map.get("codelist");   
+	List<Map<String,String>> tgcodelist = (List<Map<String,String>>)map.get("tgcodelist");   
+	
+	JSONArray code_data = JSONArray.fromObject(tgcodelist);
+	      
+%>  
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prism Ad Network</title>
+    <!-- css start -->
+    <link rel="stylesheet" href="../css/bootstrap.css">
+    <link rel="stylesheet" href="../css/bootstrap-theme.css">
+    <link rel="stylesheet" href="../css/design.css">
+   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- css end -->
+    
+    
+    
+
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
+
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
+  <link rel="stylesheet" href="/resources/demos/style.css">
+
+  <script src="../js/bootstrap.js"></script>
+  <script src="../js/basic.js"></script>
+ <script src="../js/common.js"></script>
+<script>
+  $(document).ready(function() {
+		
+		/*********************** 타겟 선택 데이터 출력 *****************************/
+		var code_data = <%=code_data%>;
+		var cur_code = "";
+		var htmlstr = "";
+		for(var k=0; k<code_data.length; k++) {
+			if(cur_code != code_data[k].entname) {
+				cur_code = code_data[k].entname;
+			}
+			htmlstr = '<option value="'+code_data[k].tvalue+'"';
+			if(code_data[k].isdefault=="1"){  
+				htmlstr += ' selected';				
+			}
+			htmlstr += '>'+code_data[k].tname+'</option>';
+			
+			
+			$("#"+code_data[k].entname).append(htmlstr);
+			console.log(htmlstr);
+		}
+		/*********************** 데이터 선택 시 숫자 리턴 *****************************/
+		$("select[multiple='multiple']").each(function(e){		
+			
+			var id = $(this).attr("id");
+			console.log('<input type="text" id="'+id+'_num" name="'+id+'" value="0" class="tvalue debug"/>');
+			$("#numValue").append('<input type="text" id="'+id+'_num" name="'+id+'" value="0" class="tvalue debug"/>');
+		});
+
+		$("select[multiple='multiple']").change(function(e){		
+			
+			var id = $(this).attr("id");
+			var multipleValues = $(this).val() || [];
+			var total = 0;
+			$.each(multipleValues,function() {
+				total += parseInt(this, 10);
+			});
+			$("#"+id+"_num").val(total);
+		});
+		
+		$("#btnRegist").on("click", function(e){
+			e.preventDefault();
+			$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
+			if($.trim($("#targetname").val()).length==0){
+				$("#targetname").css("border-color","red").focus();
+				$("#warningMsg").text("타겟팅 이름을 입력해주세요.");
+				return;
+			}else {
+		
+					var total = 0;
+					for(var i=0;i<$(".tvalue").size();i++){
+						total += parseInt($(".tvalue").eq(i).val(), 10);
+					}
+					if(total==0){
+						$("#category").css("border-color","red").focus();
+						$("#warningMsg").text("카테고리를 선택해 주세요.");
+						return;
+					}
+				
+			}
+			if(confirm("타겟팅을 등록하시겠습니까?")){
+				$("#frmRegist").submit();					
+			}
+		});
+
+	});
+  </script>
+  
+
+
+</head>
+
+<body>
+    <div class="container-fluid containerBg">
+        <div class="containerBox">
+        <%@ include file="../common/header.jsp"  %>
+				<section class="sectionBox">
+                <div class="boxTitle">
+                    <!-- title Start -->
+                    <div class="title">타겟팅 등록</div>
+                    <div class="breadcrumbs"><span class="glyIcon"><img src="../img/navIcon.png" alt=""></span> 현재위치 : 캠페인 > 타겟팅 > 타겟팅 등록 > 시스템 </div>
+                    <!-- title End -->
+                </div>
+                <!-- tap menu Start -->
+                <div class="tapBox2">
+                    <nav class="tapMenu">
+                        <ul>
+                        <%for(int i=0;i<codelist.size();i++){ 
+                                	Map<String,String> code = codelist.get(i);
+                         %>
+                                <li><a href="cpmgr.do?a=targetForm&tgtype=<%=String.valueOf(code.get("isid")) %>" class="<%=tgtype.equals(String.valueOf(code.get("isid")))?"active":"" %>" value="<%=String.valueOf(code.get("isid")) %>"><%=String.valueOf(code.get("isname")) %></a>
+						   		</li>                          
+						  <%} %> 
+                        </ul>
+                    </nav>
+                </div>
+                <!-- tap menu End -->
+                <!-- add Table Start -->
+               <form id="frmRegist" name="frmRegist" method="post" action="cpmgr.do?a=targetRegist">
+                <input type="hidden" name="tgtype" value="<%=tgtype%>"/>
+                <div id="numValue">
+                </div>
+                    <table class="addTable" style="width:600px;">
+                        <colgroup>
+                        <col width="20%">
+                        <col width="80%">
+                        </colgroup>
+                        <tr>
+                            <th>타겟팅명</th>
+                            <td class="form-inline">
+                                <input type="text" name="targetname" id="targetname" class="form-control input-sm" style="width:300px">                               
+                            </td>
+                        </tr>
+                         <tr>
+                            <th>카테고리</th>
+                            <td style='height:400px;'>
+                                <select id="category" multiple="multiple" class="form-control input-sm" style='height:380px;'>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <!-- add Table End -->
+                <!-- button group Start -->
+                <div class="buttonGroup" style="width:600px;">
+               	<span id="warningMsg" style="color:#a00"></span>
+                    <button type="button" class="btn btn-danger btn-sm" id="btnRegist">등록</button>
+                </div>
+                <!-- button group End -->
+            </section>
+
+
+
+
+
+        </div>
+    </div>
+<%
+} catch(Exception e) {
+    e.getMessage();
+}
+%> 
+
+    
+</body>
+
+</html>

@@ -1,0 +1,90 @@
+ /* css 에 한글내용이 있는경우 한글이 깨지지 않도록 설정  */
+ 
+ @charset "utf-8";
+
+ html, body {
+     width: 100%;
+     height: 100%;
+ }
+ /* login */
+ 
+ .loginBg {
+     position: absolute;
+     display: table;
+     background-color: #ebebeb;
+     width: 100%;
+     height: 100% !important;
+     min-height: 100%;
+ }
+ .loginBg > .loginBox {
+     position: relative;
+     width: 420px;
+     margin: 0 auto;
+     display: table-cell;
+     vertical-align: middle;
+     overflow: auto;
+     padding-bottom: 40px;
+ }
+ .loginBg > .loginBox > h1 {
+     margin-bottom: 10px;
+ }
+ .loginBg > .loginBox > .textBox {
+     width: 100%;
+     border: 1px solid;
+     border-top-left-radius: 0.5em;
+     border-top-right-radius: 0.5em;
+     background-color: #1b2029;
+ }
+ .loginBg > .loginBox > .textBox > h1 {
+     font-size: 30px;
+     font-weight: bold;
+     padding-left: 23px;
+     color: #fff;
+ }
+ .loginBg > .loginBox > .textBox > p {
+     font-family: 돋움, Dotum;
+     font-size: 12px;
+     padding-left: 23px;
+     color: #fff;
+ }
+
+ .loginBg > .loginBox > .formBox {
+ 	color: #b7b7b7;
+ 	background-color: #fff;
+ 	border-left: 1px solid;
+ 	border-right: 1px solid;
+ 	border-bottom: 1px solid;
+     border-bottom-left-radius: 0.5em;
+     border-bottom-right-radius: 0.5em;
+ 	width: 100%;
+ 	min-height: 378px;
+ }
+
+ .loginBg > .loginBox > .formBox > img {
+ 	padding-top: 40px;
+ 	display: block;
+ 	margin: 0 auto;
+ }
+
+ .loginBg > .loginBox > .formBox > .formCon {
+ 	padding: 33px 20px 33px 10px;
+ }
+
+.control-label {
+ 	font-size: 12px !important;
+ 	color: #555555 !important;
+ 	font-weight: normal !important;
+ }
+
+ .control-label2 {
+     font-size: 12px !important;
+     color: #555555 !important;
+     font-weight: normal !important;
+     line-height: 22px;
+     margin-top: -15px;
+ }
+
+
+.iconColor {
+	color: #bdbdbd;
+}

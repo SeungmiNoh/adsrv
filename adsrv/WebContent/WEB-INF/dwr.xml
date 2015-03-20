@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- 무조건 첫행에 기입 -->
+
+ <!DOCTYPE dwr PUBLIC
+     "-//GetAhead Limited//DTD Direct Web Remoting 2.0//EN"
+     "http://getahead.org/dwr/dwr20.dtd">
+
+   
+ <dwr>
+   <allow>
+     <!-- 서비스 모듈(자바 빈즈) 설정 -->
+     <create creator="new" javascript="Test">
+     <!-- 디폴트 생성자로 새로운 객체를 생성하고,
+     클라이언트가(JavaScript) Test라는 이름으로 접근 가능하도록 한다. -->
+       <param name="class" value="tv.pandora.adsrv.dwr.Test"/>
+       <include method="getMessage"/><!-- 호출가능한 메서드 -->
+     </create>
+
+    <create creator="spring" javascript="MasDwrService">
+        <param name="beanName" value="masDwrService"/>
+    </create>
+     <convert converter="bean" match="tv.pandora.adsrv.domain.*"/>
+    </allow>
+ </dwr>
+
+ 
+ 

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    <sqlMap namespace="UsermgrSQL">
+   <typeAlias alias="user" type="tv.pandora.adsrv.domain.User" />
+	
+	<select id="getUserLogin" resultClass="user"  >
+		select userid, username, p.usertype, u.perid, p.pername, u.corpid, c.corpname, c.`ismain` 
+		  from users u
+				inner join users_permission p on u.perid = p.`perid`
+				inner join corporation c on u.corpid = c.corpid
+		where loginid = '$loginid$'
+		  and passwd = md5('$passwd$')
+	</select>
+	<select id="getUserList" resultClass="user" parameterClass="java.util.Map">
+		select a.userid, a.username, a.loginid, a.corpid, c.corpname, a.perid, p.pername, 
+		       a.updatedate, a.updateuser, b.username as updateusername,
+		       c.corptype, i.isname as corptypename
+		  from users a
+				left join corporation c on a.corpid = c.corpid
+				left join users_permission p on p.perid = a.perid
+				left join users b on a.updateuser = b.userid
+				left join code_instance i on i.code = 'corptype' and c.corptype = i.isid 
+		where a.stat = 1
+			  <isNotEmpty property="corpid"> and a.corpid = $corpid$ </isNotEmpty> 
+			  <isNotEmpty property="corptype"> and c.corptype = $corptype$ </isNotEmpty> 
+			  <isNotEmpty property="perid"> and a.perid = $perid$ </isNotEmpty> 
+			  <isNotEmpty property="ismgr"> and a.ismgr = $ismgr$ </isNotEmpty> 
+		      <isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	   order by <isNotEmpty property="order_str"> $order_str$ ,</isNotEmpty>
+		          a.userid desc
+         	<isNotEmpty property="max">
+          limit $skip$,$max$
+          </isNotEmpty>;		 	  
+	</select>
+	<select id="getUserCnt" resultClass="Integer" parameterClass="java.util.Map">
+		select count(*)
+		  from users a
+				left join corporation c on a.corpid = c.corpid
+				left join users_permission p on p.perid = a.perid
+		where a.stat = 1
+			  <isNotEmpty property="loginid"> and a.loginid = '$loginid$' </isNotEmpty> 
+			  <isNotEmpty property="corpid"> and a.corpid = $corpid$ </isNotEmpty> 
+			  <isNotEmpty property="perid"> and a.perid = $perid$ </isNotEmpty> 
+			  <isNotEmpty property="ismgr"> and a.ismgr = $ismgr$ </isNotEmpty> 
+		      <isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	</select>	
+ 	<select id="getCorpList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		select a.corpname, a.corpid, a.corpname, 
+		       a.corptype, p.isname as corptypename,
+		       a.insertdate, a.insertuser, u.username as insertusername
+		 from corporation a  
+		      left join users u on a.insertuser = u.userid
+		      left join code_instance p on p.code = 'corptype' and a.corptype = p.isid 
+		 where a.stat = 1
+		 	<isNotEmpty property="corpid"> and a.corpid = $corpid$ </isNotEmpty>
+		 	<isNotEmpty property="corptype"> and corptype = '$corptype$' </isNotEmpty>
+		 	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+		 order by a.insertdate desc
+         <isNotEmpty property="max">
+          limit $skip$,$max$
+          </isNotEmpty>;
+ 	</select>  
+ 	<select id="getCorpCnt" resultClass="Integer" parameterClass="java.util.Map">
+		select count(*)
+		 from corporation a  
+		 where a.stat = 1
+		 	<isNotEmpty property="corptype"> and corptype = '$corptype$' </isNotEmpty>
+		 	<isNotEmpty property="corpname"> and corpname = '$corpname$' </isNotEmpty>
+		 	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	</select>  
+	<insert id="addCorporation" parameterClass="java.util.Map">	
+		insert into adsrv.corporation
+		    (corpid,
+		     corpname,
+		     corptype,
+		     insertdate,
+		     insertuser,
+		     updatedate,
+		     updateuser,
+		     stat)
+		values (0,
+		        '$corpname$',
+		        '$corptype$',
+		        '$insertdate$',
+		        $insertuser$,
+		        now(),
+		        $insertuser$,
+		        1
+		    );
+	</insert>
+	<update id="modCorporation" parameterClass="java.util.Map">
+		 update adsrv.corporation
+		    set <isNotEmpty property="corpname">corpname    = '$corpname$', </isNotEmpty>
+		        <isNotEmpty property="corptype">corptype    = '$corptype$', </isNotEmpty>
+		        <isNotEmpty property="cate_sid">cate_sid    = $cate_sid$, </isNotEmpty>
+		        updatedate  = now(),
+		        updateuser  = $updateuser$
+		  where corpid = $corpid$;
+ 	</update>
+	
+	<insert id="addUser" parameterClass="java.util.Map">
+		insert into adsrv.users
+		            (userid,
+		             loginid,
+		             passwd,
+		             username,
+		             perid,
+		             corpid,
+		             stat,
+		             allowip,
+		             insertdate,
+		             insertuser,
+		             updatedate,
+		             updateuser)
+		values (0,
+		        '$loginid$',
+		        md5('$passwd$'),
+		        '$username$',
+		        $perid$,
+		        $corpid$,
+		        1,
+		        '$allowip$',
+		        'insertdate',
+		        'insertuser',
+		        'updatedate',
+		        'updateuser'
+		        );
+       </insert> 
+      	<update id="modUser" parameterClass="java.util.Map">  
+       update adsrv.users
+          set <isNotEmpty property="loginid">loginid       = '$loginid$', </isNotEmpty>        
+              <isNotEmpty property="passwd">passwd        = md5('$passwd$'),  </isNotEmpty>   
+              <isNotEmpty property="username">username      = '$username$', </isNotEmpty>       
+              <isNotEmpty property="perid">perid         = $perid$,   </isNotEmpty>          
+              <isNotEmpty property="corpid">corpid        = $corpid$, </isNotEmpty>           
+              <isNotEmpty property="stat">stat          = $stat$,   </isNotEmpty>                
+              <isNotEmpty property="allowip">allowip       = '$allowip$',  </isNotEmpty>       
+              updatedate    = now(),
+              updateuser    = $updateuser$
+            where userid = $userid$
+	</update>
+	
+</sqlMap>
+	 

@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    <sqlMap namespace="CpmgrSQL">
+    <typeAlias alias="cp" type="tv.pandora.adsrv.domain.Campaign" />
+    <typeAlias alias="ads" type="tv.pandora.adsrv.domain.Ads" />
+	<select id="getCpList" resultClass="cp" parameterClass="java.util.Map">
+		select a.cpid, a.cpname, a.startdate, a.enddate, 
+				a.clientid, c.corpname as clientname,
+				a.agencyid, g.corpname as agencyname,
+				a.medrepid, r.corpname as medrepname,
+				a.tcid, t.username as tcname, a.budget,
+			    a.insertdate, a.updatedate, a.insertuser, a.updateuser 
+		 from campaign a
+		      left join corporation c on a.clientid = c.corpid
+		      left join corporation g on a.agencyid = g.corpid
+		      left join corporation r on a.medrepid = r.corpid
+		      left join users t on a.tcid = t.userid
+	</select>
+	<select id="getCpCnt" resultClass="Integer" parameterClass="java.util.Map">
+		select count(*)
+		 from campaign a
+		      left join corporation c on a.clientid = c.corpid
+		      left join corporation g on a.agencyid = g.corpid
+		      left join corporation r on a.medrepid = r.corpid
+		      left join users t on a.tcid = t.userid
+	</select>
+	  
+	<select id="getCampaign" resultClass="cp" parameterClass="java.util.Map">
+		select a.cpid, a.cpname, a.startdate, a.enddate, 
+				a.clientid, c.corpname as clientname,
+				a.agencyid, g.corpname as agencyname,
+				a.medrepid, r.corpname as medrepname,
+				a.tcid, t.username as tcname, a.budget,
+			    a.insertdate, a.updatedate, a.insertuser, a.updateuser, u.username as updateusername
+		 from campaign a
+		      left join corporation c on a.clientid = c.corpid
+		      left join corporation g on a.agencyid = g.corpid
+		      left join corporation r on a.medrepid = r.corpid
+		      left join users t on a.tcid = t.userid
+		      left join users u on a.updateuser = u.userid
+		  where a.cpid = $cpid$
+	</select> 
+ 	<select id="getAutoCorpList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		select a.corpname as label, a.corpid as value, a.corpname as id
+		 from adsrv.corporation a  
+		 where stat = 1
+		 	and corptype = '$corptype$'
+		 order by corpname
+	</select>  
+	<select id="getCodeList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		select a.code, a.isid, a.isname, text, isdefault
+		 from code_instance a  
+		      <isNotEmpty property="tbname"> inner join code_entity b on b.tbname = '$tbname$' and a.code = b.code</isNotEmpty>
+		 where a.stat = 1
+		 	<isNotEmpty property="code"  prepend="and"> a.code = '$code$' </isNotEmpty>
+		 order by code, a.idx
+	</select>  
+      
+	<insert id="addCampaign" parameterClass="java.util.Map">	
+	insert into adsrv.campaign
+            (cpid,
+             cpname,
+             startdate,
+             enddate,
+             clientid,
+             <isNotEmpty property="agencyid">agencyid, </isNotEmpty>
+             <isNotEmpty property="medrepid">medrepid, </isNotEmpty>
+             <isNotEmpty property="aeid">aeid, </isNotEmpty>
+             budget,
+             <isNotEmpty property="tcid">tcid, </isNotEmpty>
+             stat,
+             insertdate,
+             updatedate,
+             insertuser,
+             updateuser)
+		values (0,
+	        '$cpname$',
+	        '$startdate$',
+	        '$enddate$',
+	        $clientid$,
+	        <isNotEmpty property="agencyid">$agencyid$, </isNotEmpty>
+	        <isNotEmpty property="medrepid">$medrepid$, </isNotEmpty>
+	        <isNotEmpty property="aeid">$aeid$, </isNotEmpty>
+	        '$budget$',
+	        <isNotEmpty property="tcid">$tcid$, </isNotEmpty>
+	        0,
+	        '$insertdate$',
+	        now(),
+	        $insertuser$,
+	        $insertuser$);
+	        
+	    	<selectKey resultClass="int">
+	         SELECT LAST_INSERT_ID()
+	        </selectKey>        
+	        
+	</insert>
+	<update id="modCampaign" parameterClass="java.util.Map">
+		update adsrv.campaign
+		set
+		  <isNotEmpty property="cpname">cpname      = '$cpname$', </isNotEmpty>    
+		  <isNotEmpty property="startdate">startdate   = '$startdate$', </isNotEmpty> 
+		  <isNotEmpty property="enddate">enddate     = '$enddate$', </isNotEmpty>    
+		  <isNotEmpty property="clientid">clientid     = $clientid$, </isNotEmpty>      
+		  <isNotEmpty property="agencyid">agencyid    = $agencyid$, </isNotEmpty>     
+		  <isNotEmpty property="medrepid">medrepid    = $medrepid$, </isNotEmpty>     
+		  <isNotEmpty property="aeid">aeid        = $aeid$, </isNotEmpty>         
+		  <isNotEmpty property="budget">budget      = '$budget$', </isNotEmpty>     
+		  <isNotEmpty property="tcid">tcid        = $tcid$, </isNotEmpty> 
+		  <isNotEmpty property="stat"> stat = $stat$,</isNotEmpty>       
+		  updatedate  = now(),         
+		  updateuser  = $updateuser$		     
+		where cpid = $cpid$;	
+	</update>
+	<select id="getAdsList" resultClass="ads" parameterClass="java.util.Map">
+	select adsid, a.adsname, 
+	       a.startdate, a.start_hour, a.start_min, a.enddate, a.end_hour, a.end_min, 
+	       a.goaltype, a.period, a.salestype, a.prtype, 
+		   a.budget, a.book_total, a.goal_total, a.goal_daily, a.ads_state, st.isname as ads_statename,  
+	       a.insertuser, a.insertdate, a.updateuser, u.username as updateusername, a.updatedate       
+      from adsrv.ads a
+		   left join users u on a.updateuser = u.userid
+		   left join code_instance st on st.code = 'ads_state' and a.ads_state = st.isid
+     where a.cpid = $cpid$
+          <isNotEmpty property="stat" prepend="and"> a.stat = $stat$</isNotEmpty>
+	</select>
+	
+	<select id="getAds" resultClass="ads" parameterClass="java.util.Map">
+		select cpid, adsid, a.adsname, a.startdate, a.start_hour, a.start_min, a.enddate, a.end_hour, a.end_min, a.period,
+			a.goaltype, g.isname as goaltypename,
+			a.salestype, s.isname as salestypename,
+			a.prtype, p.isname as prtypename,
+			a.ads_state, st.isname as ads_statename,
+				   a.budget, a.book_total, a.goal_total, a.goal_daily, 
+			       a.insertuser, a.insertdate, a.updateuser, u.username as updateusername, a.updatedate       
+		      from adsrv.ads a
+				   left join users u on a.updateuser = u.userid
+				   left join code_instance p on p.code = 'prtype' and a.prtype = p.isid 
+				   left join code_instance g on g.code = 'goaltype' and a.goaltype = g.isid
+				   left join code_instance s on s.code = 'salestype' and a.salestype = s.isid
+				   left join code_instance st on st.code = 'ads_state' and a.ads_state = st.isid
+		     where a.adsid = $adsid$
+ 	</select>
+	<insert id="addAds" parameterClass="java.util.Map">
+	insert into adsrv.ads
+            (adsid,
+             adsname,
+             cpid,
+             startdate,
+             start_hour,
+             start_min,
+             enddate,
+             end_hour,
+             end_min,
+             goaltype,
+             period,
+             salestype,
+             prtype,
+             budget,
+             book_total,
+             goal_total,
+             goal_daily,
+             ads_state,
+             stat,
+             insertuser,
+             insertdate,
+             updateuser,
+             updatedate             
+		) values (0,
+		        '$adsname$',
+		        $cpid$,
+		        '$startdate$',
+		        '$start_hour$',
+		        '$start_min$',
+		        '$enddate$',
+		        '$end_hour$',
+		        '$end_min$',
+		        $goaltype$,
+		        $period$,
+		        $salestype$,
+		        $prtype$,
+		        '$budget$',
+		        '$book_total$',
+		        '$goal_total$',
+		        '$goal_daily$',
+		        1,
+		        1,
+		        $insertuser$,
+		        '$insertdate$',
+		        $insertuser$,
+		        now()
+		);
+	    	<selectKey resultClass="int">
+	         SELECT LAST_INSERT_ID()
+	        </selectKey>        
+	
+	</insert>
+	<update id="modAds" parameterClass="java.util.Map">
+	update adsrv.ads
+	set   <isNotEmpty property="adsname">adsname      = '$adsname$', </isNotEmpty>  
+	      <isNotEmpty property="startdate">startdate     = '$startdate$', </isNotEmpty> 
+	      <isNotEmpty property="start_hour">start_hour     = '$start_hour$', </isNotEmpty> 
+	      <isNotEmpty property="start_min">start_min     = '$start_min$', </isNotEmpty> 
+	      <isNotEmpty property="enddate">enddate       = '$enddate$', </isNotEmpty>   
+	      <isNotEmpty property="end_hour">end_hour       = '$end_hour$', </isNotEmpty>   
+	      <isNotEmpty property="end_min">end_min       = '$end_min$', </isNotEmpty>   
+	      <isNotEmpty property="goaltype">goaltype      = $goaltype$, </isNotEmpty>    
+	      <isNotEmpty property="period">period        = $period$, </isNotEmpty>      
+	      <isNotEmpty property="salestype">salestype     = $salestype$, </isNotEmpty>   
+	      <isNotEmpty property="prtype">prtype        = $prtype$, </isNotEmpty>      
+	      <isNotEmpty property="budget">budget        = '$budget$', </isNotEmpty>    
+	      <isNotEmpty property="book_total">book_total      = '$book_total$', </isNotEmpty>  
+	      <isNotEmpty property="goal_total">goal_total      = '$goal_total$', </isNotEmpty>  
+	      <isNotEmpty property="goal_daily">goal_daily   = '$goal_daily$' </isNotEmpty>
+	      <isNotEmpty property="ads_state">ads_state     = $ads_state$, </isNotEmpty>             
+	      <isNotEmpty property="stat">stat     = $stat$, </isNotEmpty>             
+	      updateuser    = $updateuser$,  
+	      updatedate    = now()          
+	where adsid = $adsid$
+	;
+	
+	</update>
+	
+	<insert id="addCreative" parameterClass="java.util.Map">	
+		insert into adsrv.creative
+            (crid,
+             crname,
+             agentid,
+             crtype,
+             crurl,
+             width,
+             height,
+             richmedia,
+             isprism,
+             stat,
+             insertdate,
+             insertuser,
+             updatedate,
+             updateuser
+        )values (
+        	0,
+	        '$crname$',
+	        $agentid$,
+	        $crtype$,
+	        '$crurl$',
+	        $width$,
+	        $height$,
+	        '$richmedia$',
+	        $isprism$,
+	        1,
+	        '$insertdate$',
+	        $insertuser$,
+	        now(),
+	        $insertuser$
+	      );
+ 	</insert>
+	
+	<update id="modCreative" parameterClass="java.util.Map">	
+		update adsrv.creative
+		set   <isNotEmpty property="crname">crname        = '$crname$', </isNotEmpty>     
+		      <isNotEmpty property="agentid">agentid       = $agentid$, </isNotEmpty>      
+		      <isNotEmpty property="crtype">crtype        = $crtype$, </isNotEmpty>       
+		      <isNotEmpty property="crurl">crurl         = '$crurl$', </isNotEmpty>      
+		      <isNotEmpty property="width">width         = $width$, </isNotEmpty>        
+		      <isNotEmpty property="height">height        = $height$, </isNotEmpty>       
+		      <isNotEmpty property="richmedia">richmedia     = '$richmedia$', </isNotEmpty>  
+		      <isNotEmpty property="isprism">isprism       = $isprism$, </isNotEmpty>      
+		      <isNotEmpty property="stat">stat          = $stat$, </isNotEmpty>
+		      updateuser    = $updateuser$,  
+		      updatedate    = now()          
+		where crid = $crid$;
+	</update>
+	
+	<insert id="addAdsHasCreative" parameterClass="java.util.Map">
+	insert into adsrv.ads_has_creative
+            (adsid,
+             crid,
+             startdate,
+             enddate,
+             weight,
+             cr_state,
+             insertuser,
+             updatedate,
+             updateuser,
+             insertdate)
+		values ($adsid$,
+		        $crid$,
+		        '$startdate$',
+		        '$enddate$',
+		        '$weight$',
+		        0,
+		        $insertuser$,
+		        now(),
+		        $insertuser$,
+		        '$insertdate$'
+		);
+  	</insert>
+ 	<update id="modAdsHasCreative" parameterClass="java.util.Map">
+		update adsrv.ads_has_creative
+		  set <isNotEmpty property="startdate">startdate     = $startdate$, </isNotEmpty>
+		      <isNotEmpty property="enddate">enddate       = $enddate$, </isNotEmpty>
+		      <isNotEmpty property="weight">weight        = $weight$, </isNotEmpty>
+		      <isNotEmpty property="cr_state">cr_state      = $cr_state$, </isNotEmpty> 
+		      <isNotEmpty property="stat">stat      = $stat$, </isNotEmpty> 
+		      updatedate    = now(),
+		      updateuser    = $updateuser$  
+		where adsid = $adsid$
+		  and crid = $crid$
+	
+	</update>
+ 
+ 
+ 
+      <insert id="addAdsHasSlot" parameterClass="java.util.Map">  
+        insert into adsrv.ads_has_slot
+            (adsid,
+             slotid,
+             slot_state,
+             insertdate,
+             insertuser,
+             updatedate,
+             updateuser)
+		values ($adsid$,
+		        $slotid$,
+		        0,
+		        '$insertdate$',
+		        $insertuser$,
+		        now(),
+		        $insertuser$
+		);
+	</insert>
+	
+
+    <update id="modAdsHasSlot" parameterClass="java.util.Map">
+		update adsrv.ads_has_slot
+		   set <isNotEmpty property="slot_state">slot_state = $slot_state$, </isNotEmpty>
+		      <isNotEmpty property="stat">stat      = $stat$, </isNotEmpty> 
+		       updatedate = now(),
+		       updateuser = $updateuser$  
+		 where adsid = $adsid$
+		   and slotid = $slotid$;   
+		</update>
+		
+	<select id="getTargetCodeList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+	   select a.entno, a.entname, tname, tseq, tvalue, x.text
+		 from
+		 (select a.code, a.isid, a.isname, text, isdefault
+		 from code_instance a  
+		      inner join code_entity b on b.tbname = 'target' and a.code = b.code
+		 where a.stat = 1
+		   and a.code = 'targettype' 
+		   and isid = $targettype$
+		 ) x
+		 left join target_entity a on x.isid = a.targettype		
+		 left join target_evalue b on a.entno = b.entno
+	</select>
+	<select id="getTargetList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		select a.targettype, i.isname as targettypename, a.tid, a.targetname, 
+		       a.updateuser, u.username as updateusername, a.updatedate 
+		 from target a		     
+		      left join users u on a.updateuser = u.userid
+		      left join code_instance i on i.code = 'targettype' and i.isid = a.targettype
+		 where a.stat = 1     
+		  	<isNotEmpty property="targettype"> and a.targettype = $targettype$ </isNotEmpty>
+		  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+		 order by a.updatedate desc
+         <isNotEmpty property="max">
+          limit $skip$,$max$
+          </isNotEmpty>;
+	</select>
+	<select id="getTargetCnt" resultClass="Integer" parameterClass="java.util.Map">
+		select count(*)
+		 from target a		     
+		      left join users u on a.updateuser = u.userid
+		      left join code_instance i on i.code = 'targettype' and i.isid = a.targettype
+		 where a.stat = 1     
+		  	<isNotEmpty property="targettype"> and a.targettype = $targettype$ </isNotEmpty>
+		  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	</select>
+	<insert id="addTarget" parameterClass="java.util.Map">
+		insert into adsrv.target
+            (tid,
+             targetname,
+             targettype,
+             updatedate,
+             updateuser,
+             stat
+          	) values (0,
+	        '$targetname$',
+	        $targettype$,
+	        now(),
+	        $updateuser$,
+	        1);
+	    	<selectKey resultClass="int">
+	         SELECT LAST_INSERT_ID()
+	        </selectKey>  	
+	</insert>
+	<insert id="addTargetSystem" parameterClass="java.util.Map">	
+		insert into adsrv.target_system
+	            (tid,
+	             freqday,
+	             freqcap,
+	             day,
+	             browser,
+	             time)
+		values ($tid$,
+		        $freqday$,
+		        $freqcap$,
+		        $day$,
+		        $browser$,
+		        $time$);
+	</insert>
+	<!-- 
+	<insert id="addTargetIP" parameterClass="java.util.Map">
+	
+		insert into adsrv.target_ip
+		            (tid,
+		             idx,
+		             ip_from,
+		             ip_to,
+		             ip_alias)
+		values 
+		($tid$,
+		        0,
+		        '$ip_from$',
+		        '$ip_to$',
+		        '$ip_alias$');
+	</insert> -->
+	<insert id="addTargetIP" parameterClass="java.util.HashMap">
+		INSERT INTO target_ip (
+			tid
+			, idx
+			, ip_from
+			, ip_to
+			, ip_alias
+		) 
+		<dynamic>
+			<iterate prepend="VALUES" conjunction=", " property="List">
+				( 
+					#List[].tid# 
+					, 0
+					, #List[].ip_from#
+					, #List[].ip_to#
+					, #List[].ip_alias#				
+				)
+			</iterate>
+		</dynamic>
+	</insert>
+	
+	
+	<insert id="addTargetCategory" parameterClass="java.util.Map">
+		insert into adsrv.target_category
+		            (tid,
+		             category)
+		values ($tid$,
+		        $category$);
+	</insert>
+	<insert id="addTargetCountry" parameterClass="java.util.Map">
+		insert into adsrv.target_country
+		            (tid,
+		             excflag,
+		             country1,
+		             country2,
+		             country3,
+		             country4,
+		             country5,
+		             country6,
+		             country7,
+		             country8)
+		values ($tid$,
+		        $excflag$,
+		        $country1$,
+		        $country2$,
+		        $country3$,
+		        $country4$,
+		        $country5$,
+		        $country6$,
+		        $country7$,
+		        $country8$);
+    </insert>
+	<insert id="addTargetChannel" parameterClass="java.util.Map">
+	    insert into adsrv.target_channel
+                (tid,
+                 cid,
+                 excflag,
+                 slotid)
+	    values ($tid$,
+	            0,
+	            $excflag$,
+	            $slotid$);
+     	<selectKey resultClass="int">
+         SELECT LAST_INSERT_ID()
+        </selectKey>  	
+	</insert>  
+        
+	<insert id="addTargetChannelID" parameterClass="java.util.Map">
+         INSERT INTO target_channel_id (
+			tid
+			, cid
+			, idx
+			, channelid
+			, channelname
+		) 
+		<dynamic>
+			<iterate prepend="VALUES" conjunction=", " property="List">
+				( 
+					#List[].tid# 
+					, #List[].cid# 
+					, 0
+					, #List[].channelid#
+					, #List[].channelname#			
+				)
+			</iterate>
+		</dynamic>
+      </insert>
+</sqlMap>
+	 

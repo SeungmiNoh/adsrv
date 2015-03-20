@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+<!-- Local Apache Commons DBCP DataSource that refers to a combined database -->
+	<!-- (see dataAccessContext-jta.xml for an alternative) -->
+	<!-- The placeholders are resolved from jdbc.properties through -->
+	<!-- the PropertyPlaceholderConfigurer in applicationContext.xml -->
+	<bean id="dataSourceMaster" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url_master}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxActive"><value>30</value></property>
+        <property name="maxIdle"><value>10</value></property>
+        <property name="maxWait"><value>1000</value></property>
+        <property name="removeAbandoned"><value>true</value></property>
+        <property name="removeAbandonedTimeout"><value>60</value></property>
+        <property name="defaultAutoCommit"><value>true</value></property>
+        <property name="validationQuery"><value>select 1</value></property>
+	</bean>
+	<!-- Transaction manager for a single JDBC DataSource -->
+	<!-- (see dataAccessContext-jta.xml for an alternative) -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSourceMaster"/>
+	</bean>
+
+	<!-- SqlMap setup for iBATIS Database Layer -->
+	<bean id="sqlMapClientMaster" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation" value="WEB-INF/sql-map-config.xml"/>
+		<property name="dataSource" ref="dataSourceMaster"/>
+	</bean>
+	<bean id="sqlMapClientTemplateMaster" 
+		class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+		<property name="sqlMapClient" ref="sqlMapClientMaster" />
+	</bean>
+
+	<!-- ========================= DAO DEFINITIONS: IBATIS IMPLEMENTATIONS ========================= -->
+	<bean id="usermgrDaoMaster" class="tv.pandora.adsrv.dao.ibatis.UsermgrDaoiBatis">
+		<property name="sqlMapClientTemplateMaster" ref="sqlMapClientTemplateMaster"/>
+	</bean>
+	<bean id="sitemgrDaoMaster" class="tv.pandora.adsrv.dao.ibatis.SitemgrDaoiBatis">
+		<property name="sqlMapClientTemplateMaster" ref="sqlMapClientTemplateMaster"/>
+	</bean>
+	<bean id="cpmgrDaoMaster" class="tv.pandora.adsrv.dao.ibatis.CpmgrDaoiBatis">
+		<property name="sqlMapClientTemplateMaster" ref="sqlMapClientTemplateMaster"/>
+	</bean></beans>
+	

@@ -1,0 +1,10 @@
+jdbc.driverClassName=com.mysql.jdbc.Driver
+#jdbc.url_master=jdbc:mysql://121.254.176.64/kakao?autoReconnect=true&maxReconnects=5&initialTimeout=3&useUnicode=true&characterEncoding=utf8
+jdbc.url_master=jdbc:mysql://121.254.176.68/kakao?autoReconnect=true&maxReconnects=5&initialTimeout=3&useUnicode=true&characterEncoding=utf8
+jdbc.username=adekorea
+jdbc.password=rhksgnsehd
+
+#jdbc.driverClassName2=oracle.jdbc.driver.OracleDriver
+#jdbc.url_master2=jdbc:mysql://121.254.176.68/adekorea?autoReconnect=true&maxReconnects=5&initialTimeout=3&useUnicode=true&characterEncoding=utf8
+#jjdbc.username2=adekorea
+#jdbc.password2=rhksgnsehd

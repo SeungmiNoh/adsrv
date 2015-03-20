@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<bean id="messageHandler" class="tv.pandora.adsrv.common.handler.MessageHandler">
+		<property name="messageSource" ref="messageSource" />
+	</bean>
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <property name="basenames">
+            <list>
+                <value>/WEB-INF/properties/message</value>
+            </list>
+        </property>
+        <property name="cacheSeconds" value="0" />
+    </bean>
+    <bean id="methodNameResolver" 
+        class="org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver">
+        <property name="paramName">
+            <value>a</value>
+        </property>
+    </bean>
+    <bean name="loginController" class="tv.pandora.adsrv.controller.LoginController">      
+        <property name="usermgrFacade" ref="usermgrFacade" />
+        <property name="messageHandler" ref="messageHandler" />
+        <property name="methodNameResolver" ref="methodNameResolver" />
+    </bean>
+    <bean name="usermgrController" class="tv.pandora.adsrv.controller.UsermgrController">      
+        <property name="usermgrFacade" ref="usermgrFacade" />
+        <property name="cpmgrFacade" ref="cpmgrFacade" />
+        <property name="messageHandler" ref="messageHandler" />
+        <property name="methodNameResolver" ref="methodNameResolver" />
+    </bean>
+    <bean name="sitemgrController" class="tv.pandora.adsrv.controller.SitemgrController">      
+        <property name="sitemgrFacade" ref="sitemgrFacade" />
+        <property name="cpmgrFacade" ref="cpmgrFacade" />
+        <property name="messageHandler" ref="messageHandler" />
+        <property name="methodNameResolver" ref="methodNameResolver" />
+    </bean>
+    <bean name="cpmgrController" class="tv.pandora.adsrv.controller.CpmgrController">      
+        <property name="cpmgrFacade" ref="cpmgrFacade" />
+        <property name="usermgrFacade" ref="usermgrFacade" />
+        <property name="sitemgrFacade" ref="sitemgrFacade" />
+        <property name="messageHandler" ref="messageHandler" />
+        <property name="methodNameResolver" ref="methodNameResolver" />
+    </bean> 
+
+    <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+   	   	<property name="interceptors">
+	       <list>
+	       <ref bean="loginCheckInterceptor" />
+	       </list>
+	  	</property>
+    	<property name="mappings">
+            <props>
+                 <!--  prop key="/user.do">userController</prop-->
+                 <prop key="/usermgr.do">usermgrController</prop>
+                 <prop key="/sitemgr.do">sitemgrController</prop>
+                 <prop key="/login.do">loginController</prop>
+                 <prop key="/cpmgr.do">cpmgrController</prop>
+                 
+                                     
+             </props>
+        </property> 
+     </bean>
+     <bean name="usermgrModel" class="tv.pandora.adsrv.model.UsermgrModel">
+         <property name="usermgrDaoMaster" ref="usermgrDaoMaster"/>
+         <property name="messageHandler" ref="messageHandler" />
+     </bean>
+     <bean name="sitemgrModel" class="tv.pandora.adsrv.model.SitemgrModel">
+         <property name="sitemgrDaoMaster" ref="sitemgrDaoMaster"/>
+         <property name="messageHandler" ref="messageHandler" />
+     </bean>
+     <bean name="cpmgrModel" class="tv.pandora.adsrv.model.CpmgrModel">
+         <property name="cpmgrDaoMaster" ref="cpmgrDaoMaster"/>
+         <property name="messageHandler" ref="messageHandler" />
+     </bean>
+         
+           <!-- ========================= FACADE ========================-->
+ 	<bean id="usermgrFacade" class="tv.pandora.adsrv.logic.UsermgrImpl">
+ 		<property name="usermgrModel" ref="usermgrModel"/>
+ 	</bean>
+  	<bean id="sitemgrFacade" class="tv.pandora.adsrv.logic.SitemgrImpl">
+ 		<property name="sitemgrModel" ref="sitemgrModel"/>
+ 	</bean>
+ 	<bean id="cpmgrFacade" class="tv.pandora.adsrv.logic.CpmgrImpl">
+ 		<property name="cpmgrModel" ref="cpmgrModel"/>
+ 	</bean> 
+     <bean id="masDwrService" class="tv.pandora.adsrv.dwr.MasDwrService">
+ 		<property name="usermgrModel" ref="usermgrModel"/>
+ 		<property name="sitemgrModel" ref="sitemgrModel"/>
+    </bean>		
+ 	   <!-- ========================= Interceptor ========================-->  
+    <bean id="loginCheckInterceptor" class="tv.pandora.adsrv.common.session.LoginCheckInterceptor" />
+ 	
+ 	<!-- ========================= VIEW DEFINITIONS ========================= -->
+    
+    <bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="order" value="1"/>
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>      
+    </bean>
+ </beans>

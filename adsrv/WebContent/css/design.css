@@ -1,0 +1,652 @@
+ /* css 에 한글내용이 있는경우 한글이 깨지지 않도록 설정  */
+ 
+ @charset "utf-8";
+ [hidden] {
+     display: none
+ }
+ /*  @import url("http://fonts.googleapis.com/earlyaccess/nanumgothic.css"); */
+ 
+ @import url(http://fonts.googleapis.com/css?family=Noto+Sans);
+ html, body {
+     width: 100%;
+     height: 100%;
+     /* font-family: Tahoma, sans-serif; */
+     /* font-family: NanumGothic, 나눔고딕, 'Nanum Gothic', "돋움", Dotum, sans-serif; */
+ }
+ * {
+     -webkit-text-size-adjust: none;
+ }
+ .btn {
+     font-size: 12px;
+ }
+ .center {
+     text-align: center;
+ }
+ label {
+     font-weight: normal;
+     font-size: 12px;
+     color: #555555;
+ }
+ hr {
+     border: none;
+ }
+ td {
+     white-space: nowrap;
+     ;
+ }
+ th {
+     white-space: nowrap;
+ }
+ /* container Start */
+ 
+ .containerBg {
+     position: absolute;
+     display: table;
+     background-color: #ebebeb;
+     width: 100%;
+     height: 100% !important;
+     min-height: 100%;
+ }
+ .containerBg > .containerBox {
+     position: relative;
+     width: 100%;
+     margin: 0 auto;
+     display: table-cell;
+ }
+ /* header nav start*/
+ 
+ .topMenu {
+     width: 100%;
+     background: url("../img/navBg.gif") repeat;
+     height: 108px;
+     margin-bottom: 10px;
+ }
+ .topMenu > header {
+     position: relative;
+     top: 0;
+     width: 1200px;
+     margin: 0 auto;
+     height: 108;
+ }
+ .topMenu > header > h1 {
+     margin: 0px;
+     padding: 13px 10px;
+ }
+ .topMenu > header > nav {
+     position: absolute;
+     top: 0;
+     margin-left: 200px;
+ }
+ .topMenu > header > nav > ul {
+     margin: 0;
+     padding: 0;
+ }
+ .topMenu > header > nav > ul > li {
+     position: relative;
+     vertical-align: top;
+     display: inline-block;
+     font-family: '나눔고딕', NanumGothic, 'fontng', 'Nanum Gothic';
+ }
+ .topMenu > header > nav > ul > li > a {
+     color: #fff;
+     display: block;
+     font-size: 14px;
+     line-height: 70px;
+     padding: 0 15px;
+     text-decoration: none;
+ }
+ .topMenu > header > nav > ul > li > a:hover, .topMenu > header > nav > ul > li > a.active {
+     color: #ffc172;
+     text-decoration: none;
+ }
+ /* sub menu Start */
+ 
+ .topMenu > header > nav > ul > li > a:hover .sub > ul {
+     left: auto;
+ }
+ .topMenu > header > nav > ul > li .sub {
+     position: absolute;
+     left: 10px;
+     width: 500px;
+     display: table;
+ }
+ .topMenu > header > nav > ul > li .subOver {
+     display: none;
+ }
+ .topMenu > header > nav > ul > li .sub > ul {
+     margin: 0;
+     padding: 0;
+ }
+ .topMenu > header > nav > ul > li .sub > ul > li {
+     display: inline-block;
+ }
+ .topMenu > header > nav > ul > li .sub > ul > li > a {
+     color: #1b2029;
+     display: block;
+     font-size: 12px;
+     line-height: 35px;
+     padding: 0 8px;
+     text-decoration: none;
+ }
+ .topMenu > header > nav > ul > li .sub > ul > li > a:hover, .topMenu > header > nav > ul > li .sub > ul > li > .active {
+     text-decoration: none;
+     border-bottom: 2px solid #d9534f;
+     line-height: 35px;
+ }
+ /* info Start */
+ 
+ .topMenu > header > .info {
+     display: block;
+     position: absolute;
+     top: 22px;
+     right: 0;
+ }
+ .topMenu > header > .info > span {
+     color: #fff;
+     font-size: 12px;
+     margin-right: 10px;
+ }
+ .infoBtnColor {
+     background-color: #424b54;
+     border-radius: 0;
+     color: #fff;
+ }
+ /* cont box Start */
+ 
+ .sectionBox {
+     position: relative;
+     display: table;
+     border: 1px solid #b7b7b7;
+     border-radius: 0.5em;
+     background-color: #fff;
+     width: 1200px;
+     min-height: 700px;
+     margin: 0 auto;
+     margin-bottom: 20px;
+     padding: 10px 20px 20px 20px;
+ }
+ .boxTitle {
+     display: block;
+     width: 100%;
+     height: 40px;
+     vertical-align: middle;
+     border-bottom: 2px solid #222222;
+     margin-bottom: 20px;
+     padding-top: 10px;
+ }
+ .boxTitle > .title {
+     font-size: 15px !important;
+     line-height: 10px;
+     font-weight: bold;
+     float: left;
+     color: #555555;
+ }
+ .boxTitle > .breadcrumbs {
+     font-size: 12px !important;
+     line-height: 10px;
+     float: right;
+     color: #999999;
+ }
+ .glyIcon {
+     display: inline-block;
+     padding-bottom: 1px;
+ }
+ .boxtitle2 {
+     display: inline-block;
+     width: 100%;
+     vertical-align: middle;
+     border-bottom: 1px solid #999999;
+     margin-bottom: 20px;
+ }
+ .boxtitle2 > .title3 {
+     font-size: 15px !important;
+     line-height: 20px;
+     float: left;
+     color: #555555;
+ }
+ .boxtitle2 > .saveBtn2 {
+     float: right;
+     position: relative;
+     bottom: -10px;
+ }
+ .boxtitle3 {
+     display: block;
+     width: 100%;
+     height: 45px;
+     vertical-align: top;
+     border-bottom: 1px dotted #d3d2d2;
+     margin-bottom: 10px;
+ }
+ .boxtitle3 > .title4 {
+     font-size: 12px !important;
+     line-height: 8px;
+     float: left;
+     color: #777;
+ }
+ .boxtitle3 > .saveBtn4 {
+     float: right;
+     position: relative;
+     bottom: -10px;
+ }
+ .outsaveBtn1 {
+     text-align: right;
+     width: 100%;
+     margin-top: -30px;
+ }
+ .formGroupPadd {
+     margin-right: 10px;
+ }
+ /* tabel position Start */
+ 
+ .textLeft {
+     text-align: left !important;
+ }
+ .textRight {
+     text-align: right !important;
+ }
+ .textCenter {
+     text-align: center !important;
+ }
+ .blockBox {
+     display: block;
+ }
+ /* list table Start */
+ 
+ .listTable {
+     border-top: 2px solid #d3d2d2;
+     width: 100%;
+     max-width: 1200px;
+     display: table;
+ }
+ .listTable th, .listTable td {
+     border-left: 1px solid #d3d2d2;
+     border-bottom: 1px solid #d3d2d2;
+     text-align: center;
+     /* 폰트사이즈 수정 */
+     
+     font-size: 9pt;
+ }
+ .listTable th:first-child, .listTable td:first-child {
+     border-left: none;
+ }
+ .listTable th {
+     color: #555555;
+     padding: 10px;
+     background-color: #ebebeb;
+ }
+ .listTable td {
+     color: #666666;
+     padding: 5px;
+ }
+ .listTable tbody.sum tr td {
+     background-color: #e5f4ff !important;
+ }
+ .listTable2 tbody.sum tr td {
+     background-color: #e5f4ff !important;
+ }
+ .thBg {
+     background-color: #dfdfdf !important;
+ }
+ .tdBg {
+     background-color: #f8f8f8 !important;
+ }
+ .listTable2 {
+     border-top: 2px solid #d3d2d2;
+     width: 100%;
+     max-width: 1200px;
+     display: table;
+ }
+ /*  .listTable2 tr:hover {
+    background-color: #fff5f5;
+    cursor: pointer;
+}
+.listTable2 .nohover tr:hover {
+    background-color: none !important;
+    cursor: default !important;
+}
+.listTable2 th:hover {
+    background-color: none;
+    cursor: default !important;
+} */
+ 
+ .listTable2 th, .listTable2 td {
+     border-left: 1px solid #d3d2d2;
+     border-bottom: 1px solid #d3d2d2;
+     font-size: 8pt;
+ }
+ .listTable2 th:first-child, .listTable2 td:first-child {
+     border-left: none;
+ }
+ .listTable2 th {
+     color: #555555;
+     padding: 10px;
+     background-color: #ebebeb;
+     text-align: center;
+ }
+ .listTable2 td {
+     color: #666666;
+     padding: 5px;
+     text-align: right;
+ }
+ .listTable3 {
+     border-top: 2px solid #d3d2d2;
+     width: 100%;
+     max-width: 1200px;
+     display: table;
+ }
+  .listTable3 th:first-child {
+     border-left: none;
+ }
+ .listTable3 td:first-child {
+     border-left: none;
+ }
+ .listTable3 th:last-child {
+     border-right: none;
+ }
+ .listTable3 td:last-child {
+     border-right: none;
+ }
+ .listTable3 th {
+     color: #555555;
+     padding: 10px;
+     background-color: #fcf8e3 !important;
+     text-align: center !important;
+     border-left: 1px solid #d3d2d2;
+     border-bottom: 1px solid #d3d2d2;
+     font-size: 8pt !important;
+ }
+ .listTable3 td {
+     color: #666666;
+     padding: 5px;
+     text-align: center !important;border-left: 1px solid #d3d2d2;
+     border-bottom: 1px solid #d3d2d2;
+     font-size: 8pt !important;
+ }
+ /* 리포트 테이블 폰트사이즈 9로 예시 */
+ 
+ .rptTable {
+     border-top: 2px solid #d3d2d2;
+     width: 100%;
+     max-width: 1200px;
+     display: table;
+ }
+ .rptTable th, .rptTable td {
+     border-left: 1px solid #d3d2d2;
+     border-bottom: 1px solid #d3d2d2;
+     text-align: center;
+     /* 폰트 사이즈 수정 */
+     
+     font-size: 9pt;
+ }
+ .rptTable th:first-child, .rptTable td:first-child {
+     border-left: none;
+ }
+ .rptTable th {
+     color: #555555;
+     padding: 10px;
+     background-color: #ebebeb;
+ }
+ .rptTable td {
+     color: #666666;
+     padding: 5px;
+ }
+ .listTable tbody.sum tr td {
+     background-color: #e5f4ff !important;
+ }
+ /* add Table Start */
+ 
+ .addTable, .viewTable {
+     border-top: 1px solid #d3d2d2;
+     border-left: 1px solid #d3d2d2;
+     border-right: 1px solid #d3d2d2;
+     width: 100%;
+ }
+ .addTable th, .viewTable th {
+     text-align: center;
+     font-size: 12px;
+ }
+ .addTable th {
+     color: #555555;
+     padding: 12px;
+     background-color: #ebebeb;
+     border-bottom: 1px solid #d3d2d2;
+     border-right: 1px solid #d3d2d2;
+     vertical-align: top;
+     text-align: left;
+ }
+ .addTable td {
+     color: #666666;
+     padding: 6px 10px 6px 12px;
+     text-align: left;
+     border-right: 1px solid #d3d2d2;
+     border-bottom: 1px solid #d3d2d2;
+     font-size: 12px;
+ }
+ .viewTable th {
+     color: #555555;
+     padding: 5px 10px;
+     background-color: #ebebeb;
+     border-bottom: 1px solid #d3d2d2;
+     vertical-align: top;
+     text-align: left;
+ }
+ .viewTable td {
+     color: #666666;
+     padding: 5px 10px;
+     text-align: left;
+     border-right: 1px solid #d3d2d2;
+     border-bottom: 1px solid #d3d2d2;
+     font-size: 12px;
+ }
+ .opacityTable {
+     width: 100%;
+ }
+ .opacityTable th {
+     border-left: 1px solid #fff !important;
+     border-right: 1px solid #fff !important;
+     border-bottom: 1px solid #fff !important;
+     background-color: #fff;
+     padding: 3px;
+ }
+ .opacityTable td {
+     border-left: 1px solid #fff !important;
+     border-right: 1px solid #fff !important;
+     border-bottom: 1px solid #fff !important;
+     background-color: #fff;
+     padding: 3px;
+ }
+ /* hide Table Start */
+ 
+ .hideBg {
+     background-color: #eeeeee;
+ }
+ .hideTable .hideContent tr:hover {
+     background-color: none;
+     cursor: none !important;
+ }
+ .hideTable {
+     width: 100%;
+     max-width: 1200px;
+     display: table;
+     margin: 5px 0 5px 0;
+     border-bottom: 2px solid #d3d2d2;
+ }
+ .hideTable th,  .hideTable td {
+     font-size: 8pt;
+ }
+ .hideTable th:first-child, .hideTable td:first-child {
+     border-left: none;
+ }
+ .hideTable th {
+     color: #fff;
+     padding: 10px;
+     background-color: #6d956d;
+     border-left: 1px solid #fff;
+     border-bottom: 1px solid #fff;
+ }
+ .hideTable td {
+     color: #666666;
+     padding: 5px;
+     background-color: #fff;
+     border-left: 1px solid #d3d2d2;
+     border-bottom: 1px solid #d3d2d2;
+ }
+ .greenTH {
+     background-color: #577757 !important;
+ }
+ .greenTD {
+     background-color: #e2eae2 !important;
+ }
+ /* button Group Start */
+ 
+ .buttonGroup {
+     width: 100%;
+     display: block;
+     padding: 10px 0;
+     text-align: right;
+ }
+ /* tapMenu Start */
+ 
+ .tapBox {
+     float: right;
+     display: block;
+     height: 27px;
+ }
+ .tapBox2 {
+     display: block;
+     height: 40px;
+     padding-left: 1px;
+ }
+ .tapBox3 {
+     display: block;
+     height: 28px;
+     padding-left: 1px;
+     border-bottom: 1px solid #999999;
+ }
+ .tapMenu > ul {
+     padding: 0;
+     margin: 0;
+ }
+ .tapMenu > ul > li {
+     display: inline-block;
+     vertical-align: top;
+     margin: -1px;
+ }
+ .tapMenu > ul > li > a {
+     width: 90px;
+     color: #fff;
+     display: block;
+     font-size: 12px;
+     font-weight: bold;
+     line-height: 29px;
+     text-decoration: none;
+     background-color: #454545;
+     text-align: center;
+ }
+ .tapMenu > ul > li > a:hover, .tapMenu > ul > li > a.active {
+     background-color: #d9534f;
+ }
+ .adsBox {
+     display: block;
+     text-align: left;
+     position: relative;
+     bottom: 5px;
+     z-index: 999;
+ }
+ .adsBox select {
+     vertical-align: middle;
+     position: absolute;
+     left: 80px;
+     top: 0;
+ }
+ .fileLink a {
+     display: inherit;
+     padding: 5px 0 5px 0;
+ }
+ .clickLinkBox {
+     padding: 2px 0 2px 0;
+     border-bottom: 1px dotted #d3d2d2;
+     margin: 5px 0 2px 0;
+     display: block;
+     width: 601px;
+ }
+ .clickLinkBox > .clickName {
+     display: inline-block;
+     width: 100px;
+ }
+ .clickLinkBox > .clicklink {
+     display: inline-block;
+     width: 463px;
+ }
+ /* input file Start */
+ 
+ .btn-file {
+     position: relative;
+     overflow: hidden;
+ }
+ .btn-file input[type=file] {
+     position: absolute;
+     top: 0;
+     right: 0;
+     min-width: 100%;
+     min-height: 100%;
+     font-size: 100px;
+     text-align: right;
+     filter: alpha(opacity=0);
+     opacity: 0;
+     outline: none;
+     background: white;
+     cursor: inherit;
+     display: block;
+ }
+ input[readonly] {
+     background-color: white !important;
+     cursor: text !important;
+ }
+ .choiceBtnBox {
+     display: block;
+ }
+ .choiceBtnBox span {
+     display: inline-block;
+     margin-top: 3px;
+ }
+ .dateText {
+     font-size: 12px;
+     display: block;
+     background-color: #F6F6F6;
+     padding: 10px;
+     width: 1200px;
+ }
+ .dateText .textBold {
+     font-weight: bold;
+     color: #CC3D3D;
+     line-height: 13px;
+ }
+ .dateText span {
+     padding-right: 3px;
+     font-weight: bold;
+     color: #CC3D3D;
+     line-height: 17px;
+ }
+ /* 그래프 박스 50% 정렬 */
+ 
+ .graphBox {
+     float: left;
+     width: 100%;
+     background-color: #fff;
+ }
+ .graphBox > .conLeft {
+     float: left;
+     width: 49%;
+     margin-right: 1%;
+ }
+ .graphBox > .conRight {
+     float: right;
+     width: 49%;
+     margin-left: 1%x;
+ }
+ .graphborderBox {
+     border: 1px solid #d3d2d2;
+     padding: 10px;
+     margin-bottom: 5px;
+ }
