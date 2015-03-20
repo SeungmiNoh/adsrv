@@ -7,6 +7,7 @@ import tv.pandora.adsrv.common.handler.MessageHandler;
 import tv.pandora.adsrv.dao.CpmgrDao;
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
+import tv.pandora.adsrv.domain.Target;
 
 public class CpmgrModel {
 	private MessageHandler messageHandler;
@@ -83,5 +84,40 @@ public class CpmgrModel {
 	public void addTargetChannelID(List<Map<String, String>> list){
     	cpmgrDaoMaster.addTargetChannelID(list);
     }
-
+	public List<Target> getTargetValList(Map<String, String> map){
+		return cpmgrDaoMaster.getTargetValList(map);
+    }
+	public Target getTargetValue(Map<String, String> map){
+		return cpmgrDaoMaster.getTargetValue(map);
+    }
+	public Target getTarget(Map<String, String> map){
+		return cpmgrDaoMaster.getTarget(map);
+    }
+	public Integer modTarget(Map<String, String> map){
+		return cpmgrDaoMaster.modTarget(map);
+	}
+	public Integer modTargetSystem(Map<String, String> map){
+		return cpmgrDaoMaster.modTargetSystem(map);
+	}
+	public Integer modTargetIP(Map<String, String> map){
+		return cpmgrDaoMaster.modTargetIP(map);
+	}
+	public void delTargetIP(Map<String, String> map){
+		cpmgrDaoMaster.delTargetIP(map);
+	}
+	public Integer modTargetCategory(Map<String, String> map){
+		return cpmgrDaoMaster.modTargetCategory(map);
+	}
+	public Integer modTargetCountry(Map<String, String> map){
+		return cpmgrDaoMaster.modTargetCountry(map);
+	}
+	public Integer modTargetChannel(Map<String, String> map){
+		return cpmgrDaoMaster.modTargetChannel(map);
+	}
+	public Integer modTargetChannelID(Map<String, String> map){
+		return cpmgrDaoMaster.modTargetChannelID(map);
+	}
+	public void delTargetChannelID(Map<String, String> map){
+		cpmgrDaoMaster.delTargetChannelID(map);
+	}
 }

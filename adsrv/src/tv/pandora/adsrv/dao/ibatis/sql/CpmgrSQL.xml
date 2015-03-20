@@ -3,6 +3,7 @@
     "http://ibatis.apache.org/dtd/sql-map-2.dtd">
     <sqlMap namespace="CpmgrSQL">
     <typeAlias alias="cp" type="tv.pandora.adsrv.domain.Campaign" />
+    <typeAlias alias="target" type="tv.pandora.adsrv.domain.Target" />
     <typeAlias alias="ads" type="tv.pandora.adsrv.domain.Ads" />
 	<select id="getCpList" resultClass="cp" parameterClass="java.util.Map">
 		select a.cpid, a.cpname, a.startdate, a.enddate, 
@@ -395,6 +396,63 @@
 	         SELECT LAST_INSERT_ID()
 	        </selectKey>  	
 	</insert>
+	<update id="modTarget" parameterClass="java.util.Map">
+		update adsrv.target
+		   set <isNotEmpty property="targetname">targetname = '$targetname$', </isNotEmpty>
+		       <isNotEmpty property="stat">stat = $stat$, </isNotEmpty>
+		       updatedate = now(),
+               updateuser = $updateuser$
+           where tid = $tid$;
+	</update>
+	<select id="getTarget" resultClass="target" parameterClass="java.util.Map">
+		select a.targettype, i.isname as targettypename, a.tid, a.targetname, i.text as targetmenu,
+		       a.updateuser, u.username as updateusername, a.updatedate 
+		 from target a		     
+		      left join users u on a.updateuser = u.userid
+		      left join code_instance i on i.code = 'targettype' and i.isid = a.targettype
+		 where a.stat = 1   
+		   and a.tid = $tid$  
+		  	       
+	</select>	
+	<select id="getSystemTargetValue" resultClass="target" parameterClass="java.util.Map">
+	 select a.tid, a.targetname, a.targettype, freqday, freqcap, day, browser, time
+	   from target a
+			left join target_system b on a.tid = b.tid 
+	  where a.tid = $tid$
+	</select>
+	
+	
+	
+	
+	<select id="getIpTargetValList" resultClass="target" parameterClass="java.util.Map">	
+	select a.tid, a.targetname, a.targettype, idx, ip_from, ip_to, ip_alias
+      from target a
+		   inner join target_ip b on a.tid = b.tid 
+	  where a.tid = $tid$
+	 order by idx
+	</select>
+	<select id="getCategoryTargetValue" resultClass="target" parameterClass="java.util.Map">
+	select a.tid, a.targetname, a.targettype, category
+  	  from target a
+		   inner join target_category b on a.tid = b.tid 
+	  where a.tid = $tid$
+	</select>
+	<select id="getChannelTargetValList" resultClass="target" parameterClass="java.util.Map">
+	  select a.tid, a.targetname, a.targettype, b.cid, b.`excflag`, b.`slotid`, c.channelid, c.channelname
+	   from target a
+			inner join target_channel b on a.tid = b.tid 
+			inner join target_channel_id c on a.tid = c.tid and b.cid = c.cid
+	  where a.tid = $tid$
+	  order by idx	
+	</select>	
+	<select id="getCountryTargetValue" resultClass="target" parameterClass="java.util.Map">	
+		select a.tid, a.targetname, a.targettype, 
+	           b.excflag, country1, country2, country3, country4, country5, country6, country7, country8
+		  from target a
+			   inner join target_country b on a.tid = b.tid 
+	     where a.tid = $tid$
+	</select>
+
 	<insert id="addTargetSystem" parameterClass="java.util.Map">	
 		insert into adsrv.target_system
 	            (tid,
@@ -410,22 +468,16 @@
 		        $browser$,
 		        $time$);
 	</insert>
-	<!-- 
-	<insert id="addTargetIP" parameterClass="java.util.Map">
-	
-		insert into adsrv.target_ip
-		            (tid,
-		             idx,
-		             ip_from,
-		             ip_to,
-		             ip_alias)
-		values 
-		($tid$,
-		        0,
-		        '$ip_from$',
-		        '$ip_to$',
-		        '$ip_alias$');
-	</insert> -->
+	<update id="modTargetSystem" parameterClass="java.util.Map">
+		update adsrv.target_system
+		   set freqday = $freqday$, 
+		       freqcap = $freqcap$, 
+		       day = $day$, 
+		       browser = $browser$, 
+		       time = $time$
+           where tid = $tid$;
+	</update>
+
 	<insert id="addTargetIP" parameterClass="java.util.HashMap">
 		INSERT INTO target_ip (
 			tid
@@ -433,6 +485,7 @@
 			, ip_from
 			, ip_to
 			, ip_alias
+			, stat
 		) 
 		<dynamic>
 			<iterate prepend="VALUES" conjunction=", " property="List">
@@ -441,12 +494,24 @@
 					, 0
 					, #List[].ip_from#
 					, #List[].ip_to#
-					, #List[].ip_alias#				
+					, #List[].ip_alias#	
+					, 1			
 				)
 			</iterate>
 		</dynamic>
 	</insert>
-	
+   <update id="modTargetIP" parameterClass="java.util.Map">
+		update adsrv.target_ip
+		   set stat = 0
+           where tid = $tid$
+             and cid = $cid$;
+	</update> 
+ 	<delete id="delTargetIP" parameterClass="java.util.HashMap">
+		delete 
+		  from target_ip
+		 where tid = $tid$
+		   and stat = 0
+	</delete>
 	
 	<insert id="addTargetCategory" parameterClass="java.util.Map">
 		insert into adsrv.target_category
@@ -455,6 +520,13 @@
 		values ($tid$,
 		        $category$);
 	</insert>
+	<update id="modTargetCategory" parameterClass="java.util.Map">
+		update adsrv.target_category
+		   set category = $category$
+           where tid = $tid$;
+	</update>
+	
+	
 	<insert id="addTargetCountry" parameterClass="java.util.Map">
 		insert into adsrv.target_country
 		            (tid,
@@ -478,6 +550,21 @@
 		        $country7$,
 		        $country8$);
     </insert>
+    <update id="modTargetCountry" parameterClass="java.util.Map">
+		update adsrv.target_country
+		   set excflag = $excflag$,
+		   	   country1 = $country1$,
+		   	   country2 = $country2$,
+		   	   country3 = $country3$,
+		   	   country4 = $country4$,
+		   	   country5 = $country5$,
+		   	   country6 = $country6$,
+		   	   country7 = $country7$,
+		   	   country8 = $country8$
+           where tid = $tid$;
+	</update>
+    
+    
 	<insert id="addTargetChannel" parameterClass="java.util.Map">
 	    insert into adsrv.target_channel
                 (tid,
@@ -492,7 +579,13 @@
          SELECT LAST_INSERT_ID()
         </selectKey>  	
 	</insert>  
-        
+     <update id="modTargetChannel" parameterClass="java.util.Map">
+		update adsrv.target_channel
+		   set excflag = $excflag$,
+		   	   slotid = $slotid$
+           where tid = $tid$
+             and cid = $cid$;
+	</update>       
 	<insert id="addTargetChannelID" parameterClass="java.util.Map">
          INSERT INTO target_channel_id (
 			tid
@@ -500,6 +593,7 @@
 			, idx
 			, channelid
 			, channelname
+			, stat
 		) 
 		<dynamic>
 			<iterate prepend="VALUES" conjunction=", " property="List">
@@ -508,10 +602,25 @@
 					, #List[].cid# 
 					, 0
 					, #List[].channelid#
-					, #List[].channelname#			
+					, #List[].channelname#	
+					, 1		
 				)
 			</iterate>
 		</dynamic>
       </insert>
+    <update id="modTargetChannelID" parameterClass="java.util.Map">
+		update adsrv.target_channel_id
+		   set stat = 0
+           where tid = $tid$
+             and cid = $cid$;
+	</update> 
+      <delete id="delTargetChannelID" parameterClass="java.util.HashMap">
+		delete 
+		  from target_channel_id
+		 where tid = $tid$
+		   and cid = $cid$
+		   and stat = 0;
+	  </delete>
+      
 </sqlMap>
 	 

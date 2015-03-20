@@ -15,8 +15,16 @@ import java.util.Map;
 
 
 
+
+
+
+
+
+
+
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
+import tv.pandora.adsrv.domain.Target;
 import tv.pandora.adsrv.model.CpmgrModel;
 
 
@@ -105,6 +113,40 @@ public class CpmgrImpl implements CpmgrFacade{
 	public void addTargetChannelID(List<Map<String, String>> list){
 		cpmgrModel.addTargetChannelID(list);
 	}
-
-	
+	public List<Target> getTargetValList(Map<String, String> map){
+		return cpmgrModel.getTargetValList(map);
+	}
+	public Target getTargetValue(Map<String, String> map){
+		return cpmgrModel.getTargetValue(map);
+	}
+	public Target getTarget(Map<String, String> map){
+		return cpmgrModel.getTarget(map);
+	}
+	public Integer modTarget(Map<String, String> map){
+		return cpmgrModel.modTarget(map);
+	}
+	public Integer modTargetSystem(Map<String, String> map){
+		return cpmgrModel.modTargetSystem(map);
+	}
+	public Integer modTargetIP(Map<String, String> map){
+		return cpmgrModel.modTargetIP(map);
+	}
+	public void delTargetIP(Map<String, String> map){
+		cpmgrModel.delTargetIP(map);
+	}
+	public Integer modTargetCategory(Map<String, String> map){
+		return cpmgrModel.modTargetCategory(map);
+	}
+	public Integer modTargetCountry(Map<String, String> map){
+		return cpmgrModel.modTargetCountry(map);
+	}
+	public Integer modTargetChannel(Map<String, String> map){
+		return cpmgrModel.modTargetChannel(map);
+	}
+	public Integer modTargetChannelID(Map<String, String> map){
+		return cpmgrModel.modTargetChannelID(map);
+	}
+	public void delTargetChannelID(Map<String, String> map){
+		cpmgrModel.delTargetChannelID(map);
+	}
 }

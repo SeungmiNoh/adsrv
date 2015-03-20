@@ -11,6 +11,7 @@ import tv.pandora.adsrv.common.util.StringUtil;
 import tv.pandora.adsrv.dao.CpmgrDao;
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
+import tv.pandora.adsrv.domain.Target;
 import tv.pandora.adsrv.domain.User;
 
 public class CpmgrDaoiBatis implements CpmgrDao {
@@ -181,6 +182,73 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 		param.put("List", list);
 		sqlMapClientTemplateMaster.insert("addTargetChannelID", param);
 	}
-
+	
+	
+	
+	public Integer modTarget(Map<String, String> map){
+		return sqlMapClientTemplateMaster.update("modTarget", map);
+	}
+	public Integer modTargetSystem(Map<String, String> map){
+		return sqlMapClientTemplateMaster.update("modTargetSystem", map);
+	}
+	public Integer modTargetIP(Map<String, String> map){
+		return sqlMapClientTemplateMaster.update("modTargetIP", map);
+	}
+	public void delTargetIP(Map<String, String> map){
+		sqlMapClientTemplateMaster.delete("delTargetIP", map);
+	}
+	public Integer modTargetCategory(Map<String, String> map){
+		return sqlMapClientTemplateMaster.update("modTargetCategory", map);
+	}
+	public Integer modTargetCountry(Map<String, String> map){
+		return sqlMapClientTemplateMaster.update("modTargetCountry", map);
+	}
+	public Integer modTargetChannel(Map<String, String> map){
+		return sqlMapClientTemplateMaster.update("modTargetChannel", map);
+	}
+	public Integer modTargetChannelID(Map<String, String> map){
+		return sqlMapClientTemplateMaster.update("modTargetChannelID", map);
+	}
+	public void delTargetChannelID(Map<String, String> map){
+		sqlMapClientTemplateMaster.delete("modTarget", map);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	@Override
+	public List<Target> getTargetValList(Map<String, String> map) {
+		String tgmenu = map.get("tgmenu");
+		tgmenu = tgmenu.substring(0,1).toUpperCase()+tgmenu.substring(1);
+		try {
+			return (List<Target>) sqlMapClientTemplateMaster.queryForList("get"+tgmenu+"TargetValList", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}		
+	}
+	@Override
+	public Target getTargetValue(Map<String, String> map) {
+		String tgmenu = map.get("tgmenu");
+		tgmenu = tgmenu.substring(0,1).toUpperCase()+tgmenu.substring(1);
+		try {
+			return (Target) sqlMapClientTemplateMaster.queryForObject("get"+tgmenu+"TargetValue", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}		
+	}
+	public Target getTarget(Map<String, String> map) {
+		try {
+			return (Target) sqlMapClientTemplateMaster.queryForObject("getTarget", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}		
+	}
 	
 }

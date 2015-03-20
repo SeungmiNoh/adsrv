@@ -16,6 +16,7 @@ import tv.pandora.adsrv.common.session.SessionUtil;
 import tv.pandora.adsrv.common.util.StringUtil;
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
+import tv.pandora.adsrv.domain.Target;
 import tv.pandora.adsrv.domain.User;
 
 import org.springframework.web.servlet.ModelAndView;
@@ -392,7 +393,7 @@ public class CpmgrController extends AdsrvMultiActionController
 		map.put("targettype", tgtype);
 		List<Map<String, String>> tgcodelist = cpmgrFacade.getTargetCodeList(map);
 		
-		String jsp = tgcodelist.get(0).get("text");
+		String jsp = tgcodelist.get(0).get("text")+"_view";
 		String menu = tgcodelist.get(0).get("isname");
 		
 		
@@ -421,9 +422,187 @@ public class CpmgrController extends AdsrvMultiActionController
 		resultMap.put("tgcodelist", tgcodelist);
 		resultMap.put("menu", menu);
 		resultMap.put("jsp", jsp);
+		resultMap.put("mode", "R");
 		
 		return new ModelAndView("campaign/target_"+jsp, "response", resultMap);
 	}
+	
+	public ModelAndView targetView(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String tid = StringUtil.isNullZero(request.getParameter("tid"));
+				
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("tid", tid);
+		Target tginfo = cpmgrFacade.getTarget(map);
+		
+		Integer tgtype = tginfo.getTargettype();
+		String tgmenu = tginfo.getTargetmenu();
+		
+		
+		map.put("tbname", "target");
+		List<Map<String, String>> codelist = cpmgrFacade.getCodeList(map);
+		
+		map.clear();
+		map.put("targettype", tgtype.toString());
+		List<Map<String, String>> tgcodelist = cpmgrFacade.getTargetCodeList(map);		
+		
+		
+		String menu = tgcodelist.get(0).get("isname");	
+				
+		Map<String, String> amap = new HashMap<String, String>();		
+		amap.put("tid", tid);
+		amap.put("tgtype", tgtype.toString());
+		amap.put("tgmenu", tgmenu);
+		
+		Target valueinfo = null;
+		List<Target> valuelist = null;
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		// 시스템, 카테고리, 국가 타겟팅
+		if(tgtype==1 || tgtype==3 || tgtype==4){					
+			valueinfo = cpmgrFacade.getTargetValue(amap);
+		} 
+		// IP, 채널 타겟팅
+		else if(tgtype==2 || tgtype==5){			
+			valuelist = cpmgrFacade.getTargetValList(amap);
+		} 
+		resultMap.put("tginfo", tginfo);
+		resultMap.put("valueinfo", valueinfo);
+		resultMap.put("valuelist", valuelist);
+		resultMap.put("codelist", codelist);
+		resultMap.put("tgcodelist", tgcodelist);
+		resultMap.put("menu", menu);
+		resultMap.put("mode", "E");
+		resultMap.put("tid", tid);
+		
+		
+		return new ModelAndView("campaign/target_"+tgmenu+"_view", "response", resultMap);
+	}
+	public ModelAndView targetUpdate(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String tid = StringUtil.isNull(request.getParameter("tid"));
+		String tgtype = StringUtil.isNullReplace(request.getParameter("tgtype"), "1");
+		String targetname = StringUtil.isNull(request.getParameter("targetname"));
+		
+		String userID = (String)SessionUtil.getAttribute("userID");
+		
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("tid", tid);
+		map.put("targetname", targetname);
+		map.put("updateuser", userID);
+		cpmgrFacade.modTarget(map);
+		
+		
+		Map<String, String> amap = new HashMap<String, String>();		
+		
+		// 시스템 타겟팅
+		if(tgtype.equals("1")){		
+			String freqday = StringUtil.isNullZero(request.getParameter("freqday"));
+			String freqcap = StringUtil.isNullZero(request.getParameter("freqcap"));
+			String day = StringUtil.isNullZero(request.getParameter("day"));
+			String browser = StringUtil.isNullZero(request.getParameter("browser"));
+			String time = StringUtil.isNullZero(request.getParameter("time"));		
+			amap.put("tid", tid);
+			amap.put("freqday", freqday);
+			amap.put("freqcap", freqcap);
+			amap.put("day", day);
+			amap.put("browser", browser);
+			amap.put("time", time);
+			cpmgrFacade.modTargetSystem(amap);
+		} 
+		// IP 타겟팅
+		else if(tgtype.equals("2")){
+			
+			String[] ip_from = request.getParameterValues("ip_from");
+			String[] ip_to = request.getParameterValues("ip_to");
+			String[] ip_alias = request.getParameterValues("ip_alias");
+			
+			
+			
+			ArrayList<Map<String,String>> list = new ArrayList<Map<String,String>>();
+			
+			for(int i=0; i<ip_from.length;i++){
+				if(!StringUtil.isNull(ip_from[i].trim()).equals("")) {
+					
+			         Map<String, String> ipmap = new HashMap<String, String>();
+
+			         ipmap.put("tid", tid);
+			         ipmap.put("ip_from", ip_from[i].trim());
+			         ipmap.put("ip_to", ip_to[i].trim());
+			         ipmap.put("ip_alias", StringUtil.isNull(ip_alias[i].trim()));
+					
+					System.out.println(i+") Map : " + ipmap);
+					list.add(ipmap);					
+				}
+			}
+			cpmgrFacade.modTargetIP(map);			
+			cpmgrFacade.addTargetIP(list);
+			cpmgrFacade.delTargetIP(map);			
+		} 
+		// 카테고리 타겟팅
+		else if(tgtype.equals("3")){
+			String category = StringUtil.isNullZero(request.getParameter("category"));
+			amap.put("tid", tid.toString());
+			amap.put("category", category);
+			cpmgrFacade.modTargetCategory(amap);
+		} 
+		// 국가 타겟팅
+		else if(tgtype.equals("4")){
+			String excflag = StringUtil.isNullZero(request.getParameter("excflag"));
+			String country1 = StringUtil.isNullZero(request.getParameter("country1"));
+			String country2 = StringUtil.isNullZero(request.getParameter("country2"));
+			String country3 = StringUtil.isNullZero(request.getParameter("country3"));
+			String country4 = StringUtil.isNullZero(request.getParameter("country4"));
+			String country5 = StringUtil.isNullZero(request.getParameter("country5"));
+			String country6 = StringUtil.isNullZero(request.getParameter("country6"));
+			String country7 = StringUtil.isNullZero(request.getParameter("country7"));
+			String country8 = StringUtil.isNullZero(request.getParameter("country8"));
+			
+			amap.put("tid", tid.toString());
+			amap.put("excflag", excflag);
+			amap.put("country1", country1);
+			amap.put("country2", country2);
+			amap.put("country3", country3);
+			amap.put("country4", country4);
+			amap.put("country5", country5);
+			amap.put("country6", country6);
+			amap.put("country7", country7);
+			amap.put("country8", country8);
+			
+			cpmgrFacade.modTargetCountry(amap);
+			
+		}
+		//채널 타겟팅
+		else if(tgtype.equals("5")){
+			String excflag = StringUtil.isNullZero(request.getParameter("excflag"));
+			String slotid = StringUtil.isNullZero(request.getParameter("slotid"));
+			amap.put("tid", tid.toString());
+			amap.put("excflag", excflag);
+			amap.put("slotid", slotid);
+		
+			Integer cid = cpmgrFacade.addTargetChannel(amap);
+			
+			String[] channelid = request.getParameterValues("channelid");
+			String[] channelname = request.getParameterValues("channelname");
+			
+			ArrayList<Map<String,String>> list = new ArrayList<Map<String,String>>();
+			
+			for(int i=0; i<channelid.length;i++){
+				if(!StringUtil.isNull(channelid[i].trim()).equals("")) {
+					
+			         Map<String, String> ipmap = new HashMap<String, String>();
+
+			         ipmap.put("tid", tid.toString());
+			         ipmap.put("cid", cid.toString());
+			         ipmap.put("channelid", channelid[i].trim());
+			         ipmap.put("channelname", StringUtil.isNull(channelname[i].trim()));
+					 list.add(ipmap);					
+				}
+			}
+			cpmgrFacade.modTargetChannelID(map);			
+			cpmgrFacade.addTargetChannelID(list);
+			cpmgrFacade.delTargetChannelID(map);			
+		}		
+		return new ModelAndView("redirect:cpmgr.do?a=targetView&tid="+tid, null);
+	}	
 	public ModelAndView targetRegist(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		String tgtype = StringUtil.isNullReplace(request.getParameter("tgtype"), "1");
 		String targetname = StringUtil.isNull(request.getParameter("targetname"));
@@ -542,5 +721,4 @@ public class CpmgrController extends AdsrvMultiActionController
 		}		
 		return new ModelAndView("redirect:cpmgr.do?a=targetList", null);
 	}	
-	
 }
