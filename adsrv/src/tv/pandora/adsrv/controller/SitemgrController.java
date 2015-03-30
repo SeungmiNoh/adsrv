@@ -1,6 +1,7 @@
 package tv.pandora.adsrv.controller;
 
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import tv.pandora.adsrv.common.Constant;
 import tv.pandora.adsrv.common.util.DateUtil;
 import tv.pandora.adsrv.common.session.SessionUtil;
 import tv.pandora.adsrv.common.util.StringUtil;
+
 
 
 
@@ -66,6 +68,8 @@ public class SitemgrController extends AdsrvMultiActionController
 	}	
 	public ModelAndView siteRegist(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
+		String siteid = StringUtil.isNull(request.getParameter("siteid"));
+
 		String corpid = StringUtil.isNull(request.getParameter("corpid"));
 		String sitetype = StringUtil.isNull(request.getParameter("sitetype"));
 		String sitename = StringUtil.isNull(request.getParameter("sitename"));
@@ -83,10 +87,17 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("sitetag", sitetag);
 		map.put("siteurl", siteurl);
 		map.put("memo", StringUtil.htmlEncode(memo));
-		map.put("insertdate", DateUtil.simpleDate2());
-		map.put("insertuser", userID);
 		
-		Integer siteid = sitemgrFacade.addSite(map);
+		if(siteid.equals("")) {
+			map.put("insertdate", DateUtil.simpleDate2());
+			map.put("insertuser", userID);
+			siteid = String.valueOf(sitemgrFacade.addSite(map));
+		} else {
+			map.put("siteid", siteid);
+			map.put("updatedate", DateUtil.simpleDate2());
+			map.put("updateuser", userID);
+			sitemgrFacade.modSite(map);
+		}
 		
 		return new ModelAndView("redirect:sitemgr.do?a=secList&s_siteid="+siteid, null);
 	}
@@ -133,6 +144,8 @@ public class SitemgrController extends AdsrvMultiActionController
 	}
 	public ModelAndView secRegist(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
+		String secid = StringUtil.isNull(request.getParameter("secid"));
+
 		String siteid = StringUtil.isNull(request.getParameter("siteid"));
 		String secname = StringUtil.isNull(request.getParameter("secname"));
 		String sectag = StringUtil.isNull(request.getParameter("sectag"));
@@ -146,11 +159,17 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("secname", secname.trim());
 		map.put("sectag", sectag);
 		map.put("memo", StringUtil.htmlEncode(memo));
-		map.put("insertdate", DateUtil.simpleDate2());
-		map.put("insertuser", userID);
 		
-		Integer secid = sitemgrFacade.addSection(map);
-		
+		if(secid.equals("")) {
+			map.put("insertdate", DateUtil.simpleDate2());
+			map.put("insertuser", userID);
+			secid = String.valueOf(sitemgrFacade.addSection(map));
+		} else {
+			map.put("secid", secid);
+			map.put("updatedate", DateUtil.simpleDate2());
+			map.put("updateuser", userID);
+			sitemgrFacade.modSection(map);
+		}
 		return new ModelAndView("redirect:sitemgr.do?a=secList&s_siteid="+siteid+"&s_secid="+secid, null);
 	}
 	public ModelAndView slotList(HttpServletRequest request, HttpServletResponse response) throws Exception {	
@@ -202,6 +221,7 @@ public class SitemgrController extends AdsrvMultiActionController
 	}
 	public ModelAndView slotRegist(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
+		String slotid = StringUtil.isNull(request.getParameter("slotid"));
 		String siteid = StringUtil.isNull(request.getParameter("siteid"));
 		String secid = StringUtil.isNull(request.getParameter("secid"));
 		String slotname = StringUtil.isNull(request.getParameter("slotname"));
@@ -221,11 +241,16 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("width", width.trim());
 		map.put("height", height.trim());
 		map.put("memo", StringUtil.htmlEncode(memo));
-		map.put("insertdate", DateUtil.simpleDate2());
-		map.put("insertuser", userID);
-		
-		Integer slotid = sitemgrFacade.addSlot(map);
-		
+		if(slotid.equals("")) {
+			map.put("insertdate", DateUtil.simpleDate2());
+			map.put("insertuser", userID);
+			slotid = String.valueOf(sitemgrFacade.addSlot(map));
+		} else {
+			map.put("slotid", slotid);
+			map.put("updatedate", DateUtil.simpleDate2());
+			map.put("updateuser", userID);
+			sitemgrFacade.modSlot(map);
+		}		
 		return new ModelAndView("redirect:sitemgr.do?a=slotList&s_siteid="+siteid+"&s_secid="+secid, null);
 	}
 	
@@ -255,8 +280,8 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("max", String.valueOf(max))	;
 		map.put("sch_text", sch_text);
 		map.put("sch_column", sch_column);
-		Integer totalCount = sitemgrFacade.getSlotGroupCnt(map);
-		List<Map<String, String>> grouplist = sitemgrFacade.getSlotGroupList(map);
+		Integer totalCount = sitemgrFacade.getSlgroupCnt(map);
+		List<Map<String, String>> grouplist = sitemgrFacade.getSlgroupList(map);
 
 		map.clear();
 		map.put("order_str", "sitename");
@@ -282,6 +307,7 @@ public class SitemgrController extends AdsrvMultiActionController
 	
 	public ModelAndView slotGroupRegist(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
+		String groupid = StringUtil.isNull(request.getParameter("groupid"));	
 		String groupname = StringUtil.isNull(request.getParameter("groupname"));	
 		String width = StringUtil.isNull(request.getParameter("width"));
 		String height = StringUtil.isNull(request.getParameter("height"));
@@ -297,39 +323,38 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("width", width.trim());
 		map.put("height", height.trim());
 		map.put("memo", StringUtil.htmlEncode(memo));
-		map.put("insertdate", DateUtil.simpleDate2());
-		map.put("insertuser", userID);
-		
-		Integer groupid = sitemgrFacade.addSlotGroup(map);
+		if(groupid.equals("")) {
+			map.put("insertdate", DateUtil.simpleDate2());
+			map.put("insertuser", userID);
+			groupid = String.valueOf(sitemgrFacade.addSlgroup(map));
+		} else {
+			map.put("groupid", groupid);
+			map.put("updatedate", DateUtil.simpleDate2());
+			map.put("updateuser", userID);
+			sitemgrFacade.modSlgroup(map);
+			//sitemgrFacade.modSlotGroupHasSlot(map); // 상태 0으로 변경
+		}				
 		
 		/********************** 그룹내 슬롯 저장 ***************************/
 		Map<String, String> amap = new HashMap<String, String>();
 		try{
 			String slotid[] = request.getParameterValues("slotid");
 		
+			ArrayList<Map<String,String>> list = new ArrayList<Map<String,String>>();
 
 			for(int i=0; i<slotid.length; i++) {
 				amap.clear();
 	            amap.put("groupid", groupid.toString());               
 	            amap.put("slotid", slotid[i]);               
-    			amap.put("stat"      , "1");
     			amap.put("insertdate", DateUtil.simpleDate2());
-    			amap.put("insertuser", userID);									
-				sitemgrFacade.addSlotGroupHasSlot(amap);
-			
+    			amap.put("insertuser", userID);		
+    			list.add(amap);
 			}
+			sitemgrFacade.addSlgroupSlot(list);
 
 		} catch(Exception e) {		
 			
-			System.out.println(e.getMessage());
-			/****************** 오류 발생 시 캠페인 정보 삭제 ************************
-			Map<String, String> dmap = new HashMap<String, String>();
-			dmap.put("cpid", String.valueOf(icpid));
-			dmap.put("stat", "-3");
-			adeFacade.delRevCp(dmap);
-			if(ipid>0){
-				adeFacade.delRevCpmed(dmap);				
-			}*/
+			System.out.println(e.getMessage());			
 			response.setCharacterEncoding("EUC-KR"); 
 			Writer w = response.getWriter();
 			w.write("<script>"); 

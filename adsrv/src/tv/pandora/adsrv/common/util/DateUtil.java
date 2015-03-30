@@ -137,6 +137,19 @@ public class DateUtil {
 		}
 		return newdate;
 	}
+	public static String getTimeStr(String str) {
+		String newdate = "";
+		if(str.length()<21){
+			newdate = str;
+		} else {
+			try{
+				newdate = str.substring(0, 16);
+			}catch(Exception e){
+				 e.printStackTrace();
+			}	
+		}
+		return newdate;
+	}
 	//입력 날짜의 요일
 		public static Integer getWeekday(String Sday){
 			

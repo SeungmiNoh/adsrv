@@ -104,40 +104,90 @@ public class SitemgrDaoiBatis implements SitemgrDao {
 		}
 	}
 	
-	public List<Map<String,String>> getSlotGroupList(Map<String, String> map){
+	public List<Map<String,String>> getSlgroupList(Map<String, String> map){
 		try {
-			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getSlotGroupList", map);
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getSlgroupList", map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
-	public Integer getSlotGroupCnt(Map<String, String> map){
+	public List<Map<String,String>> getSlgroupInSlotList(Map<String, String> map){
 		try {
-			return (Integer) sqlMapClientTemplateMaster.queryForObject("getSlotGroupCnt", map);
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getSlgroupList", map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
-	public Integer addSlotGroup(Map<String, String> map){
+	public Integer getSlgroupCnt(Map<String, String> map){
 		try {
-			return (Integer) sqlMapClientTemplateMaster.insert("addSlotGroup", map);
+			return (Integer) sqlMapClientTemplateMaster.queryForObject("getSlgroupCnt", map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
-	public Integer modSlotGroup(Map<String, String> map){
+	public Integer addSlgroup(Map<String, String> map){
 		try {
-			return (Integer) sqlMapClientTemplateMaster.update("modSlotGroup", map);
+			return (Integer) sqlMapClientTemplateMaster.insert("addSlgroup", map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
-	public Integer addSlotGroupHasSlot(Map<String, String> map){
+	public Integer modSlgroup(Map<String, String> map){
 		try {
-			return (Integer) sqlMapClientTemplateMaster.insert("addSlotGroupHasSlot", map);
+			return (Integer) sqlMapClientTemplateMaster.update("modSlgroup", map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
+	public void addSlgroupSlot(List<Map<String, String>> list){
+		try {
+			sqlMapClientTemplateMaster.insert("addSlgroupSlot", list);
+		} catch (EmptyResultDataAccessException e) {
+			
+		}
+	}
+	public void modSlgroupSlot(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.update("modSlgroupSlot", map);
+		} catch (EmptyResultDataAccessException e) {
+			
+		}
+	}
+	public void delSlgroupSlot(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.delete("delSlgroupSlot", map);
+		} catch (EmptyResultDataAccessException e) {
+			
+		}
+	}
+	public Map<String,String> getSite(Map<String, String> map){
+		try {
+			return (Map<String,String>) sqlMapClientTemplateMaster.queryForObject("getSite", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+	public Map<String,String> getSection(Map<String, String> map){
+		try {
+			return (Map<String,String>) sqlMapClientTemplateMaster.queryForObject("getSection", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+	public Map<String,String> getSlot(Map<String, String> map){
+		try {
+			return (Map<String,String>) sqlMapClientTemplateMaster.queryForObject("getSlot", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+	public Map<String,String> getSlgroup(Map<String, String> map){
+		try {
+			return (Map<String,String>) sqlMapClientTemplateMaster.queryForObject("getSlgroup", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
 
 }

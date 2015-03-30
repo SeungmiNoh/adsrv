@@ -13,12 +13,14 @@ try
 {
 	String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
 	String s_type = StringUtil.isNull(request.getParameter("s_type"));
+	String s_per = StringUtil.isNull(request.getParameter("s_per"));
 	
 	Map<String,Object> map = (Map<String,Object>)request.getAttribute("response");
 
 	List<User> userlist = (List<User>)map.get("userlist");   
 	
 	List<Map<String,String>> codelist = (List<Map<String,String>>)map.get("codelist");   
+	List<Map<String,String>> perlist = (List<Map<String,String>>)map.get("perlist");   
 
     Integer skip = (Integer)map.get("skip");
     Integer max = (Integer)map.get("max");
@@ -65,32 +67,78 @@ try
 
 
 $(function(){
-	
-	$("#btnPopup").click(function(e){
+
+	$("a.usermod").click(function(e){		
 		e.preventDefault();
-		$('#myModal').modal();
-		$('#corpname').focus();
-		$("input:radio[name='corptype']:radio[value=1]").prop('checked',true);
+		$(".debug").val("");
+		$('#myModal').modal();	
+		var userid = $(this).attr("userid");
+
+		MasDwrService.getUser(userid,
+		   		function(data) {
+					$("#userid").val(userid);
+					$("#corpname").html('<span class="point label label-'+data.text+'" style="width:80px; margin-right:10px">'+data.corptypename+'</span>'+data.corpname);                       
+					$("#corpid").val(data.corpid);
+					$("#username").val(data.username);
+					$("#loginid").val(data.loginid);
+					$("#passwd").val(data.passwd);
+					$("#ipstr").val(data.ipstr);
+					$("#perid").val(data.perid);
+					$("#updatedate").html(getYMDHM(data.updatedate,'-'));
+					$("#updateusername").html(data.updateusername);
+			});
+		
+		
+		
+		
+		
+	});
+
+	
+	$('#frmRegist').change(function(e){	
+		$("#change").val("change");
 	});
 
 
 	$("#btnRegist").on("click", function(e){		
+		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
 		e.preventDefault();
-		if($.trim($("#corpname").val()).length==0){
-			$("#corpname").css("border-color","red").focus();
+		
+		var chk_pw = checkPwd($("#passwd").val());
+		var loginid = $("#loginid").val();
+		
+		if($.trim($("#username").val()).length==0){
+			$("#username").css("border-color","red").focus();
 			$("#warningMsg").text("이름을 입력해주세요.");
 			return;
 		}
+		else if($.trim($("#loginid").val()).length<6 || $.trim($("#loginid").val()).length > 20){
+			$("#loginid").css("border-color","red").focus();
+			$("#warningMsg").text("로그인 아이디는 6자 이상 20자 이하로 입력해주세요.");
+			return;
+		}
+		else if(!chk_pw){
+			$("#passwd").css("border-color","red").focus();
+			$("#warningMsg").text("비밀번호 형식이 맞지 않습니다.");
+			return;
+		}
+		else if($("#perid").val()==0){
+			$("#perid").css("border-color","red").focus();
+			$("#warningMsg").text("유저 권한을 선택해주세요.");
+			return;
+		}
 		else{	
-			var cname = $('#corpname').val();			
-			MasDwrService.getCorpCnt(cname,
+						
+			MasDwrService.getUserCnt(loginid, $("#userid").val(),
 		   		function(data) {
 					if(data>0) {
-						$("#corpname").css("border-color","red").select();
-						$("#warningMsg").text("중복된 이름이 있습니다.");
+						$("#loginid").css("border-color","red").select();
+						$("#warningMsg").text(loginid +"는 사용할 수 없는 아이디 입니다.");
 						return;				
 					} else {
-						$("#formRegist").submit();	
+						if(confirm("사용자를 등록하시겠습니까?")) {
+							$("#frmRegist").submit();	
+						}
 					}
 			});
 		}
@@ -126,6 +174,16 @@ $(function(){
                                 <%} %>                                
                            </select>
                         </div>
+                        <div class="form-group">
+                            <select name="s_per" class="form-control input-sm">
+                                <option value="">권한</option>
+                                <%for(int i=0;i<perlist.size();i++){ 
+                                	Map<String,String> per = perlist.get(i);
+                                %>
+                                <option value="<%=String.valueOf(per.get("perid")) %>" <%=s_per.equals(String.valueOf(per.get("perid")))?"selected":"" %>><%=String.valueOf(per.get("pername")) %></option>                               
+                                <%} %>                                
+                           </select>
+                        </div>
                         <div class="form-group formGroupPadd">
                             <select name="sch_type" class="form-control input-sm">
                             <option value="username">사용자</option>
@@ -141,9 +199,8 @@ $(function(){
                     </div>
                 </form>
                 <!-- search group End -->
-                <!-- saveBtn Start -->
+                <!-- saveBtn Start 
   				<div class="outsaveBtn1">
-                    <!--  a class="btn btn-danger" href="#" data-toggle="modal" data-target="#myModal" id="btnPopup">업체등록</a-->
                     <a class="btn btn-danger" href="#"  data-target="#myModal" id="btnPopup">업체등록</a>
                 </div>                  
                 <!-- saveBtn End -->
@@ -154,7 +211,6 @@ $(function(){
 				<col width="40">
 			    <col width="160"><!-- 아이디 -->
 			    <col width="160"><!-- 사용자명 -->
-				<col width="160"><!-- 계정 -->
 				<col width="260"><!-- 업체명 -->
 			    <col width="180"><!-- 권한 -->
 			    <col width="160"><!-- 등록일 -->
@@ -165,7 +221,6 @@ $(function(){
                             <th>No</th>
                             <th>아이디</th>
                             <th>사용자명</th>
-                            <th>계정</th>
                             <th>업체명</th>  
                             <th>권한</th>
                             <th>등록일</th>
@@ -186,12 +241,13 @@ for(int k=0; k<userlist.size(); k++){
                     
                         <tr>
                             <td><%=skip+(k+1) %></td>
-                             <td class="textLeft"><%=user.getLoginid() %></a></td>                           
-                            <td class="textLeft"><%=user.getUsername() %></a></td>                           
-                            <td><%=user.getCorptypename() %></td>
-                            <td class="textLeft"><a href="usermgr.do?a=corpView"><%=user.getCorpname() %></a></td>                           
-                            <td class="textLeft"><%=user.getPername() %></a></td>                           
-                            <td><%=user.getUpdatedate() %></td>
+                             <td class="textLeft"><%=user.getLoginid() %></td>                           
+                            <td class="textLeft"><a class="usermod" href="#none" userid=<%=user.getUserid()%>><%=user.getUsername() %></a></td>                           
+                            <td class="textLeft">
+                            <span class="point label label-<%=user.getText() %>" style="width:80px; margin-right:10px"><%=user.getCorptypename() %></span>                                                     
+                            <a href="usermgr.do?a=corpView&corpid=<%=user.getCorpid()%>"><%=user.getCorpname() %></a></td>                           
+                            <td class="textLeft"><%=user.getPername() %></td>                           
+                            <td><%=DateUtil.getYMDHM(user.getUpdatedate(),"-") %></td>
                             <td><%=user.getUpdateusername() %></td>                            
                         </tr>
 <%} %>                        
@@ -215,7 +271,7 @@ for(int k=0; k<userlist.size(); k++){
         </div>
     </div>
 
-    <!-- modal Start -->
+     <!-- modal Start -->
     <div class="modal fade" id="myModal">
         <!-- modal-lg  | default | modal-sm -->
         <div class="modal-dialog modal-lg">
@@ -223,49 +279,84 @@ for(int k=0; k<userlist.size(); k++){
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title">사용자 등록</h4>
+                    <h4 class="modal-title">사용자 정보 수정</h4>
                 </div>
                 <div class="modal-body">
                     <!-- search form Start -->
-                    <form id="formRegist" name="formRegist" method="post" action="usermgr.do?a=corpRegist">
+                    <form id="frmRegist" name="frmRegist" method="post" action="usermgr.do?a=userRegist">
+                    <input type="hidden" name="a" value="userRegist"/>
+                    <input type="text" id="change" name="change" value="" class="debug"/>
+                    <input type="text" id="userid" name="userid" value="" class="debug"/>				
                         <table class="addTable">
                             <colgroup>
                                 <col width="20%">
                                     <col width="">
                             </colgroup>
                             <tr>
-                                <th>업체명</th>
+                                <th>업체<span style="color:red"> * </span></th>
                                 <td class="form-inline">
-                                    <input type="text" name="corpname" id="corpname" class="form-control input-sm" width="">
-                                    <!--  a class="btn btn-success btn-sm"  href="javascript:msg('승미')" role="button">중복확인</a-->
+                                    <input type="hidden" name="corpid" id="corpid" value=""/>
+                                    <div id="corpname"></div>
                                 </td>
                             </tr>
-                            <tr>
-                                <th>업체구분</th>
-                                <td>
-                                    <label class="radio-inline">
-                                        <input type="radio" name="corptype" value="1"> 광고주
-                                    </label>
-                                    <label class="radio-inline">
-                                        <input type="radio" name="corptype" value="2"> 대행사
-                                    </label>
-                                    <label class="radio-inline">
-                                        <input type="radio" name="corptype" value="3"> 미디어렙
-                                    </label>
-                                    <label class="radio-inline">
-                                        <input type="radio" name="corptype" value="4"> 미디어
-                                    </label>   
+               				<tr>
+                                <th>사용자 이름<span style="color:red"> * </span></th>
+                                <td class="form-inline">
+                                    <input type="text" name="username" id="username" class="form-control input-sm" style="width:160px">
                                 </td>
-                            </tr> 
+                            </tr>               				
+                            <tr>
+                                <th>로그인아이디<span style="color:red"> * unique </span></th>
+                                <td class="form-inline">
+                                    <input type="text" name="loginid" id="loginid" class="form-control input-sm" style="width:160px">
+                                </td>
+                            </tr>
+               				<tr>
+                                <th>비밀번호<span style="color:red"> * </span></th>
+                                <td class="form-inline">
+                                    <input type="text" name="passwd" id="passwd" class="form-control input-sm" style="width:160px">
+                                    <span style="color:green;font-size:8pt;margin-left:20px">* 최소 1개의 숫자 혹은 특수 문자를 포함하여 6~20자로 입력해주세요.</span>
+                                </td>
+                            </tr>
+                			<tr>
+                                <th>권한<span style="color:red"> * </span></th>
+                                <td class="form-inline">
+                                    <select id="perid" name="perid" class="form-control input-sm" style="width:140px">
+	                                <option value="">권한</option>
+	                                <%for(int i=0;i<perlist.size();i++){ 
+	                                	Map<String,String> per = perlist.get(i);
+	                                %>
+	                                <option value="<%=String.valueOf(per.get("perid")) %>"><%=String.valueOf(per.get("pername")) %></option>                               
+	                                <%} %>                                
+                           			</select>
+                                </td>
+                            </tr>
+                            
+                			<tr>
+                                <th>허용아이피</th>
+                                <td class="form-inline">
+                                    <input type="text" name="ipstr" id="ipstr" class="form-control input-sm" mexlength=200 style="width:360px">
+                                    <br/>
+                                    <span style="color:green;font-size:8pt;margin-left:0px">
+                                     * 허용 아이피는 , 구분자로 복수 입력 가능하며 아이피 대역은 %로 구분합니다.(최대 200byte 입력가능). 
+                                    <br/>ex)192.168.0.1,192.168.0.%</span>
+                                </td>
+                            </tr>
+                			<tr>
+                                <th>현재 아이피</th>
+                                <td class="form-inline">
+                                   <%=request.getRemoteHost()%>
+                                </td>
+                            </tr>                             
                             <tr>                           
                         <th>등록일</th>
-                            <td class="form-inline">
-                                <%=DateUtil.getYMD(DateUtil.curDate()) %>
+                            <td class="form-inline" id="updatedate">
+                                
                             </td>
                         </tr> 
                         <tr>                       
                         <th>등록자</th>
-                            <td class="form-inline">
+                            <td class="form-inline" id="updateusername">
                                 <%=userName %>
                             </td>
                         </tr>                        
@@ -294,7 +385,7 @@ for(int k=0; k<userlist.size(); k++){
 </body>
 <%
 } catch(Exception e) {
-    out.println(e.getMessage());
+    e.getMessage();
 }
 %>
 </html>

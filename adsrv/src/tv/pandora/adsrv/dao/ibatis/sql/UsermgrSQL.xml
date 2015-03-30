@@ -5,9 +5,9 @@
    <typeAlias alias="user" type="tv.pandora.adsrv.domain.User" />
 	
 	<select id="getUserLogin" resultClass="user"  >
-		select userid, username, p.usertype, u.perid, p.pername, u.corpid, c.corpname, c.`ismain` 
+		select userid, username, p.usertype, u.perid, p.pername, u.corpid, c.corpname, c.ismain 
 		  from users u
-				inner join users_permission p on u.perid = p.`perid`
+				inner join permission p on u.perid = p.perid
 				inner join corporation c on u.corpid = c.corpid
 		where loginid = '$loginid$'
 		  and passwd = md5('$passwd$')
@@ -15,13 +15,14 @@
 	<select id="getUserList" resultClass="user" parameterClass="java.util.Map">
 		select a.userid, a.username, a.loginid, a.corpid, c.corpname, a.perid, p.pername, 
 		       a.updatedate, a.updateuser, b.username as updateusername,
-		       c.corptype, i.isname as corptypename
+		       c.corptype, i.isname as corptypename, i.text
 		  from users a
 				left join corporation c on a.corpid = c.corpid
-				left join users_permission p on p.perid = a.perid
+				left join permission p on p.perid = a.perid
 				left join users b on a.updateuser = b.userid
 				left join code_instance i on i.code = 'corptype' and c.corptype = i.isid 
 		where a.stat = 1
+			  <isNotEmpty property="userid"> and a.userid = $userid$ </isNotEmpty> 
 			  <isNotEmpty property="corpid"> and a.corpid = $corpid$ </isNotEmpty> 
 			  <isNotEmpty property="corptype"> and c.corptype = $corptype$ </isNotEmpty> 
 			  <isNotEmpty property="perid"> and a.perid = $perid$ </isNotEmpty> 
@@ -36,19 +37,105 @@
 	<select id="getUserCnt" resultClass="Integer" parameterClass="java.util.Map">
 		select count(*)
 		  from users a
+		  		<isNotEmpty property="sch_text">
 				left join corporation c on a.corpid = c.corpid
-				left join users_permission p on p.perid = a.perid
+				left join permission p on p.perid = a.perid
+				</isNotEmpty>
 		where a.stat = 1
 			  <isNotEmpty property="loginid"> and a.loginid = '$loginid$' </isNotEmpty> 
+			  <isNotEmpty property="userid"> and a.userid = $userid$ </isNotEmpty> 
+			  <isNotEmpty property="not_userid"> and a.userid != $not_userid$ </isNotEmpty> 
 			  <isNotEmpty property="corpid"> and a.corpid = $corpid$ </isNotEmpty> 
 			  <isNotEmpty property="perid"> and a.perid = $perid$ </isNotEmpty> 
 			  <isNotEmpty property="ismgr"> and a.ismgr = $ismgr$ </isNotEmpty> 
 		      <isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
 	</select>	
- 	<select id="getCorpList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+	<select id="getUserPerList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		select perid, pername 
+		  from permission
+	     where stat = 1
+	</select>
+	<select id="getMenuList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		select menu_id, menu_name, writeflag, subflag
+		  from web_menu
+	     order by idx
+	</select>
+	<select id="getPerSchemaList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+	 select x.*, <![CDATA[(ifnull(y.menu_val,0) & svalue)  ]]> as ischoice
+		from (select b.perid, b.pername, a.menu_id, a.menu_name, a.menu_schema, isname, a.idx, c.isid as svalue, c.idx as idx2
+				from permission b, web_menu a
+					 left join code_instance c on c.code = 'menu_schema' and <![CDATA[(a.menu_schema & c.isid)]]> > 0   
+			 ) x
+ 			 left join permission_menu y on x.menu_id = y.menu_id and x.perid =  y.perid
+ 		order by x.perid, x.idx, idx2
+ 	</select>
+ 	<select id="getUserPerSchema" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+	select x.*, <![CDATA[(ifnull(y.menu_val,0) & svalue)]]>  as ischoice
+      from (select a.`menu_id`, a.`menu_name`, isname, c.isid as svalue
+			  from web_menu a
+				   left join code_instance c on c.`code` = 'menu_schema'  and <![CDATA[(a.menu_schema & c.isid)]]> > 0   
+			 order by a.idx, c.idx
+			) x
+		    left join permission_menu y on x.menu_id = y.menu_id and y.perid = #perid#
+ 	</select>
+  	<insert id="addPermission" parameterClass="java.util.Map">
+ 	insert into adsrv.permission
+            (perid,
+             pername,
+             <isNotEmpty property="usertype">usertype,</isNotEmpty>
+             stat,
+             updatedate,
+             updateuser)
+	values (0,
+	        '$pername$',
+	        <isNotEmpty property="usertype">'$usertype$',</isNotEmpty>
+	        $stat$,
+	        $updatedate$,
+	        $updateuser$);
+	  	<selectKey resultClass="int">
+         SELECT LAST_INSERT_ID()
+       	</selectKey>
+     
+ 	</insert>
+ 	<insert id="addPermissionMenu" parameterClass="java.util.Map">
+		 insert into adsrv.permission_menu
+		            (perid,
+		             menu_id,
+		             menu_val,
+		             stat)
+			<dynamic>
+			<iterate prepend="VALUES" conjunction=", " property="List">
+				( 
+					#List[].perid# 
+					, #List[].menu_id#
+					, #List[].menu_val#	
+					, 1		
+				)
+			</iterate>
+		</dynamic>	 	        
+    </insert>
+    <update id="modPermission" parameterClass="java.util.Map">
+    	update permission
+    	   set pername = '$pername$',
+    	       updatedate = $updatedate$,
+    	       updateuser = $updateuser$
+    	 where perid = $perid$
+     </update>     
+     <update id="modPermissionMenu" parameterClass="java.util.Map">
+    	update permission
+    	   set stat = 0
+    	 where perid = $perid$
+     </update>       
+     <delete id="delPermissionMenu" parameterClass="java.util.Map">
+    	delete 
+    	  from permission
+    	 where perid = $perid$
+    	   and stat = 0
+     </delete>
+     <select id="getCorpList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
 		select a.corpname, a.corpid, a.corpname, 
 		       a.corptype, p.isname as corptypename,
-		       a.insertdate, a.insertuser, u.username as insertusername
+		       a.insertdate, a.insertuser, u.username as insertusername, p.text
 		 from corporation a  
 		      left join users u on a.insertuser = u.userid
 		      left join code_instance p on p.code = 'corptype' and a.corptype = p.isid 
@@ -61,12 +148,29 @@
           limit $skip$,$max$
           </isNotEmpty>;
  	</select>  
+ 	
+ 	
+ 	 	<select id="getCorporation" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+ 	select a.*, p.isname as corptypename, p.text,    
+     	   u.username as insertusername, u2.username as updateusername   
+      from (select a.corpname, a.corpid, a.corptype, a.insertdate, a.insertuser, a.updatedate, a.updateuser     
+              from corporation a        
+             where a.stat = 1       
+               and a.corpid = $corpid$     
+        	)a     
+        	left join users u on a.insertuser = u.userid      
+         	left join users u2 on a.updateuser = u2.userid    
+            left join code_instance p on p.code = 'corptype' and a.corptype = p.isid         
+ 	 	</select> 
+
+ 	
  	<select id="getCorpCnt" resultClass="Integer" parameterClass="java.util.Map">
 		select count(*)
 		 from corporation a  
 		 where a.stat = 1
-		 	<isNotEmpty property="corptype"> and corptype = '$corptype$' </isNotEmpty>
-		 	<isNotEmpty property="corpname"> and corpname = '$corpname$' </isNotEmpty>
+		 	<isNotEmpty property="not_corpid"> and corpid != #not_corpid# </isNotEmpty>
+		 	<isNotEmpty property="corptype"> and corptype = #corptype# </isNotEmpty>
+		 	<isNotEmpty property="corpname"> and corpname = #corpname# </isNotEmpty>
 		 	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
 	</select>  
 	<insert id="addCorporation" parameterClass="java.util.Map">	
@@ -80,26 +184,26 @@
 		     updateuser,
 		     stat)
 		values (0,
-		        '$corpname$',
-		        '$corptype$',
-		        '$insertdate$',
-		        $insertuser$,
-		        now(),
-		        $insertuser$,
+		        #corpname#,
+		        #corptype#,
+		        #insertdate#,
+		        #insertuser#,
+		        #insertdate#,
+		        #insertuser#,
 		        1
 		    );
 	</insert>
 	<update id="modCorporation" parameterClass="java.util.Map">
 		 update adsrv.corporation
-		    set <isNotEmpty property="corpname">corpname    = '$corpname$', </isNotEmpty>
-		        <isNotEmpty property="corptype">corptype    = '$corptype$', </isNotEmpty>
-		        <isNotEmpty property="cate_sid">cate_sid    = $cate_sid$, </isNotEmpty>
-		        updatedate  = now(),
-		        updateuser  = $updateuser$
-		  where corpid = $corpid$;
+		    set <isNotEmpty property="corpname">corpname    = #corpname#, </isNotEmpty>
+		        <isNotEmpty property="corptype">corptype    = #corptype#, </isNotEmpty>
+		        <isNotEmpty property="cate_sid">cate_sid    = #cate_sid#, </isNotEmpty>
+		        updatedate  = #updatedate#,
+		        updateuser  = #updateuser#
+		  where corpid = #corpid#;
  	</update>
 	
-	<insert id="addUser" parameterClass="java.util.Map">
+	<insert id="addUser" parameterClass="user">
 		insert into adsrv.users
 		            (userid,
 		             loginid,
@@ -108,37 +212,37 @@
 		             perid,
 		             corpid,
 		             stat,
-		             allowip,
+		             ipstr,
 		             insertdate,
 		             insertuser,
 		             updatedate,
 		             updateuser)
 		values (0,
-		        '$loginid$',
-		        md5('$passwd$'),
-		        '$username$',
-		        $perid$,
-		        $corpid$,
+		        #loginid#,
+		        md5(#passwd#),
+		        #username#,
+		        #perid#,
+		        #corpid#,
 		        1,
-		        '$allowip$',
-		        'insertdate',
-		        'insertuser',
-		        'updatedate',
-		        'updateuser'
+		        #ipstr#,
+		        #insertdate#,
+		        #insertuser#,
+		        #insertdate#,
+		        #insertuser#
 		        );
        </insert> 
-      	<update id="modUser" parameterClass="java.util.Map">  
+      	<update id="modUser" parameterClass="user">  
        update adsrv.users
-          set <isNotEmpty property="loginid">loginid       = '$loginid$', </isNotEmpty>        
-              <isNotEmpty property="passwd">passwd        = md5('$passwd$'),  </isNotEmpty>   
-              <isNotEmpty property="username">username      = '$username$', </isNotEmpty>       
-              <isNotEmpty property="perid">perid         = $perid$,   </isNotEmpty>          
-              <isNotEmpty property="corpid">corpid        = $corpid$, </isNotEmpty>           
-              <isNotEmpty property="stat">stat          = $stat$,   </isNotEmpty>                
-              <isNotEmpty property="allowip">allowip       = '$allowip$',  </isNotEmpty>       
-              updatedate    = now(),
-              updateuser    = $updateuser$
-            where userid = $userid$
+          set <isNotEmpty property="loginid">loginid       = #loginid#, </isNotEmpty>        
+              <isNotEmpty property="passwd">passwd        = md5(#passwd#),  </isNotEmpty>   
+              <isNotEmpty property="username">username      = #username#, </isNotEmpty>       
+              <isNotEmpty property="perid">perid         = #perid#,   </isNotEmpty>          
+              <isNotEmpty property="corpid">corpid        = #corpid#, </isNotEmpty>           
+              <isNotEmpty property="stat">stat          = #stat#,   </isNotEmpty>                
+              <isNotEmpty property="ipstr">ipstr       = #ipstr#,  </isNotEmpty>       
+              updatedate    = #updatedate#,
+              updateuser    = #updateuser#
+            where userid = #userid#
 	</update>
 	
 </sqlMap>

@@ -5,10 +5,12 @@
  	<select id="getSiteList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
 		select a.sitename, a.siteid, a.sitename, sitetag, siteurl, a.corpid, c.corpname,
 		       a.sitetype, p.isname as sitetypename,
-		       a.insertdate, a.insertuser, u.username as insertusername
+		       a.insertdate, a.insertuser, u.username as insertusername,
+		       a.updatedate, a.updateuser, u2.username as updateusername
 		 from site a  
 		      left join corporation c on a.corpid = c.corpid
 		      left join users u on a.insertuser = u.userid
+		      left join users u2 on a.updateuser = u2.userid
 		      left join code_instance p on p.code = 'sitetype' and a.sitetype = p.isid 
 		 where a.stat = 1
 		 	<isNotEmpty property="siteid"> and siteid = $siteid$ </isNotEmpty>
@@ -24,53 +26,90 @@
 		select count(*)
 		 from site a  
 		 where a.stat = 1
-	<dynamic prepend="where">	 
+		 	<isNotEmpty property="not_siteid"> and siteid != $not_siteid$ </isNotEmpty>
 		 	<isNotEmpty property="sitetag"> and sitetag = '$sitetag$' </isNotEmpty>
 		 	<isNotEmpty property="sitetype"> and sitetype = '$sitetype$' </isNotEmpty>
 		 	<isNotEmpty property="sitename"> and sitename = '$sitename$' </isNotEmpty>
 		 	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
-	</dynamic>
-	</select>  
 	
+	</select>  
+	<select id="getSite" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		select a.sitename, a.siteid, a.sitename, sitetag, siteurl, a.memo, a.corpid, c.corpname,
+		       a.sitetype, p.isname as sitetypename, a.memo,
+		       a.insertdate, a.insertuser, u.username as insertusername,
+		       a.updatedate, a.updateuser, u2.username as updateusername
+		 from site a  
+		      left join corporation c on a.corpid = c.corpid
+		      left join users u on a.insertuser = u.userid
+		      left join users u2 on a.updateuser = u2.userid
+		      left join code_instance p on p.code = 'sitetype' and a.sitetype = p.isid 
+		 where a.stat = 1
+		 	and siteid = $siteid$ 
+ 	</select>  
+ 	
 	<select id="getSectionList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
 	select a.sitename, a.siteid, a.sitename, sitetag, siteurl, a.corpid, 
 		       a.sitetype, p.isname as sitetypename,
 		       b.secid, b.secname, b.sectag, 
-		       b.insertdate, b.insertuser, u.username as insertusername
-		 from site a  
-		      left join section b on a.siteid = b.siteid
+		       b.insertdate, b.insertuser, u.username as insertusername,
+		       a.updatedate, a.updateuser, u2.username as updateusername
+		 from section b
+		      left join site a on a.siteid = b.siteid
 		      left join users u on b.insertuser = u.userid
 		      left join code_instance p on p.code = 'sitetype' and a.sitetype = p.isid 
-		 where a.stat = 1
-		 	<isNotEmpty property="siteid"> and a.siteid = $siteid$ </isNotEmpty>
+		      left join users u2 on b.updateuser = u2.userid
+		 where b.stat = 1
+		 	<isNotEmpty property="secid"> and b.secid = $secid$ </isNotEmpty>
+		 	<isNotEmpty property="siteid"> and b.siteid = $siteid$ </isNotEmpty>
 		 	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>		 
 		 order by <isNotEmpty property="order_str"> $order_str$ ,</isNotEmpty>
 		          a.siteid desc, b.secid
          	<isNotEmpty property="max">
           limit $skip$,$max$
           </isNotEmpty>;	
-    </select>  
+    </select> 
+     
 	<select id="getSectionCnt" resultClass="Integer" parameterClass="java.util.Map">
 	select count(*)
-		 from site a  
-		      left join section b on a.siteid = b.siteid
+		 from section b  
+		      left join site a on a.siteid = b.siteid
 	where a.stat = 1
+		 	<isNotEmpty property="not_secid"> and b.secid != $not_secid$ </isNotEmpty>
 		 	<isNotEmpty property="siteid"> and b.siteid = $siteid$ </isNotEmpty>
 		 	<isNotEmpty property="sectag"> and b.sectag = '$sectag$' </isNotEmpty>
 		 	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
  	</select>  
+ 	
+ 	<select id="getSection" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+	select a.sitename, a.siteid, a.sitename, sitetag, siteurl, a.corpid, 
+		       a.sitetype, p.isname as sitetypename,
+		       b.secid, b.secname, b.sectag, b.memo,
+		       b.insertdate, b.insertuser, u.username as insertusername,
+		       b.updatedate, b.updateuser, u2.username as updateusername
+		 from section b
+		      left join site a on a.siteid = b.siteid
+		      left join users u on b.insertuser = u.userid
+		      left join code_instance p on p.code = 'sitetype' and a.sitetype = p.isid 
+		      left join users u2 on b.updateuser = u2.userid
+		 where b.stat = 1
+		 	and b.secid = $secid$
+    </select> 
+ 	
+ 	
 	<select id="getSlotList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
 	select a.sitename, a.siteid, a.sitename, sitetag, siteurl, a.corpid, 
 		       a.sitetype, p.isname as sitetypename,
 		       b.secid, b.secname, b.sectag, 
 		       c.slotid, c.slotname, c.slottag, c.width, c.height,
-		       c.insertdate, c.insertuser, u.username as insertusername
-		 from site a  
-		      left join section b on a.siteid = b.siteid
-		      left join slot c on c.secid = b.secid
+		       c.insertdate, c.insertuser, u.username as insertusername,
+		       c.updatedate, c.updateuser, u2.username as updateusername
+		 from slot c  
+		      left join section b on b.secid = c.secid
+		      left join site a on a.siteid = b.siteid
 		      left join users u on c.insertuser = u.userid
+		      left join users u2 on c.updateuser = u2.userid
 		      left join code_instance p on p.code = 'sitetype' and a.sitetype = p.isid 
-		 where a.stat = 1
+		 where c.stat = 1
 		 	<isNotEmpty property="siteid"><isNotEqual property="siteid" compareValue="0"> and a.siteid = $siteid$ </isNotEqual></isNotEmpty>
 		 	<isNotEmpty property="width"> and c.width = $width$ </isNotEmpty>
 		 	<isNotEmpty property="height"> and c.height = $height$ </isNotEmpty>
@@ -85,17 +124,33 @@
  	</select>  
 	<select id="getSlotCnt" resultClass="Integer" parameterClass="java.util.Map">
 	select count(*)
-		 from site a  
-		      left join section b on a.siteid = b.siteid
-		      left join slot c on c.secid = b.secid
-		 where a.stat = 1
-		 	<isNotEmpty property="siteid"> and c.siteid = $siteid$ </isNotEmpty>
+		 from slot c  
+	      left join section b on b.secid = c.secid
+		      left join site a on b.siteid = a.siteid
+	   where c.stat = 1
+	 		<isNotEmpty property="not_slotid"> and slotid != $not_slotid$ </isNotEmpty>
+			<isNotEmpty property="siteid"> and c.siteid = $siteid$ </isNotEmpty>
 		 	<isNotEmpty property="secid"> and c.secid = $secid$ </isNotEmpty>
 		 	<isNotEmpty property="slotid"> and c.slotid = $slotid$ </isNotEmpty>
 		 	<isNotEmpty property="slottag"> and c.slottag = '$slottag$' </isNotEmpty>
 		 	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>		 
  	</select>  
-	
+	<select id="getSlot" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+	select a.sitename, a.siteid, a.sitename, sitetag, siteurl, a.corpid, 
+		       a.sitetype, p.isname as sitetypename,
+		       b.secid, b.secname, b.sectag, c.memo,
+		       c.slotid, c.slotname, c.slottag, c.width, c.height,
+		       c.insertdate, c.insertuser, u.username as insertusername,
+		       c.updatedate, c.updateuser, u2.username as updateusername
+		 from slot c  
+		      left join section b on b.secid = c.secid
+		      left join site a on a.siteid = b.siteid
+		      left join users u on c.insertuser = u.userid
+		      left join users u2 on c.updateuser = u2.userid
+		      left join code_instance p on p.code = 'sitetype' and a.sitetype = p.isid 
+		 where c.stat = 1
+		 	and c.slotid = $slotid$
+ 	</select> 
 	<insert id="addSite" parameterClass="java.util.Map">	
 	insert into adsrv.site (
 	    siteid,
@@ -117,10 +172,10 @@
 	    '$sitename$',
 	    $corpid$,
 	    <isNotEmpty property="siteurl">'$siteurl$',</isNotEmpty>
-	    <isNotEmpty property="memo">'$memo$',</isNotEmpty>
+	    <isNotEmpty property="memo">'$$',</isNotEmpty>
 	    1,
 	    '$insertdate$',
-	    now(),
+	    '$insertdate$',
 	    $insertuser$,
 	    $insertuser$
 	);
@@ -135,9 +190,10 @@
 		      <isNotEmpty property="sitetag">sitetag   = '$sitetag$',    </isNotEmpty>  
 		      <isNotEmpty property="sitename">sitename  = '$sitename$', </isNotEmpty>  
 		      <isNotEmpty property="siteurl">siteurl   = '$siteurl$',  </isNotEmpty>  
+		      <isNotEmpty property="memo">memo   = '$memo$',  </isNotEmpty>  
 		      <isNotEmpty property="stat">stat      = $stat$,              </isNotEmpty>
 		      <isNotEmpty property="corpid">corpid    = $corpid$,   </isNotEmpty>    
-		      updatedtae = now(),
+		      updatedtae = $updatedtae$,
 		      updateuser = $updateuser$
 		where siteid = $siteid$
 		;
@@ -161,8 +217,8 @@
 	        $siteid$,
 	        <isNotEmpty property="memo">'$memo$',</isNotEmpty>
 	        1,
-	        '$insertdate$',
-	        now(),
+	        $insertdate$,
+	        $insertdate$,
 	        $insertuser$,
 	        $insertuser$);
 
@@ -174,7 +230,7 @@
 		      <isNotEmpty property="siteid">siteid    = $siteid$, </isNotEmpty>   
 		      <isNotEmpty property="memo">memo      = '$memo$',  </isNotEmpty>   
 		      <isNotEmpty property="stat">stat      = $stat$, </isNotEmpty>
-		      updatedate = now(),
+		      updatedate = $updatedate$,
 		      updateuser = $updateuser$
 		where secid = $secid$;
 	</update>
@@ -188,7 +244,6 @@
 	             secid,
 	             width,
 	             height,
-	             <isNotEmpty property="scrtype">scrtype, </isNotEmpty>
 	             <isNotEmpty property="memo">memo, </isNotEmpty>
 	             insertdate,
 	             updatedate,
@@ -201,10 +256,9 @@
 		        $secid$,
 		        '$width$',
 		        '$height$',
-		        <isNotEmpty property="scrtype">$scrtype$, </isNotEmpty>
 		        <isNotEmpty property="memo">'$memo$',</isNotEmpty>
 		        '$insertdate$',
-		        now(),
+		        '$insertdate$',
 		        $insertuser$,
 		        $insertuser$);
 	
@@ -212,47 +266,53 @@
 	<update id="modSlot" parameterClass="java.util.Map">
 	update adsrv.slot
 	  set slotname  = '$slotname$',  
-	      slottag   = $slottag$,     
-	      siteid    = $siteid$,      
-	      secid     = $secid$,       
+	      slottag   = '$slottag$',     
 	      width     = '$width$',     
 	      height    = '$height$',    
-	      scrtype   = $scrtype$,     
 	      memo      = '$memo$',      
-	      updatedate =now(),         
-	      updateuser =$insertuser$
+	      updatedate =$updatedate$,         
+	      updateuser =$updateuser$
 	where slotid = $slotid$
     ;
 	</update>
-	<select id="getSlotGroupList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
-	 select x.groupid, x.groupname, x.width, x.height, x.updatedate, x.updateuser, u.username as updateusername,
-          	count(distinct x.siteid) sitecnt, count(x.slotid) slotcnt
-       from (select a.groupid, a.groupname, a.width, a.height, a.updatedate, a.updateuser, c.siteid, b.slotid,
-                    sitename, secname
-               from slotgroup a
-           	      	left join slotgroup_has_slot b on a.groupid = b.groupid
-           	      	left join slot c on c.slotid = b.slotid
-           	      	left join section d on c.secid = d.secid
-          	      	left join site e on d.siteid = e.siteid
+	<select id="getSlgroup" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+       select a.groupid, a.groupname, a.width, a.height, 		       
+               a.insertdate, a.insertuser, u.username as insertusername,
+		       a.updatedate, a.updateuser, u2.username as updateusername
+		 from slotgroup a
+		      left join users u on a.insertuser = u.userid
+		      left join users u2 on a.updateuser = u2.userid
 		 where a.stat = 1
-		 	<isNotEmpty property="width"> and a.width = $width$ </isNotEmpty>
-		 	<isNotEmpty property="height"> and a.height = $height$ </isNotEmpty>
-		 	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
-    		) x
-       		 left join users u on x.updateuser = u.userid
-        group by x.groupid
-	 order by <isNotEmpty property="order_str"> $order_str$ ,</isNotEmpty>
-		          x.groupid desc
-         	<isNotEmpty property="max">
-          limit $skip$,$max$       ;
-          </isNotEmpty>
+	      and a.groupid = $groupid$ 	
      </select>
- 	<select id="getSlotGroupCnt" resultClass="Integer" parameterClass="java.util.Map">
+	<select id="getSlgroupList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+   select x.groupid, x.groupname, x.width, x.height, x.updatedate, x.updateuser, u.username as updateusername,
+          count(distinct x.siteid) sitecnt, count(x.slotid) slotcnt
+     from (select STRAIGHT_JOIN 
+                  a.groupid, a.groupname, a.width, a.height, a.updatedate, a.updateuser, c.secid, c.siteid, b.slotid,
+                  sitename, secname
+			 from slotgroup a
+				  left join slotgroup_slot b on b.groupid = a.groupid
+				  left join slot c on b.slotid = c.slotid
+				  left join section d on c.secid = d.secid
+          		  left join site e on d.siteid = e.siteid
+			 where a.stat = 1
+			 	<isNotEmpty property="width"> and a.width = $width$ </isNotEmpty>
+			 	<isNotEmpty property="height"> and a.height = $height$ </isNotEmpty>
+			 	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>		 			
+    		) x
+       		left join users u on x.updateuser = u.userid
+       group by x.groupid
+	   order by <isNotEmpty property="order_str"> $order_str$ ,</isNotEmpty>
+		          x.groupid desc
+         	<isNotEmpty property="max">limit $skip$,$max$ </isNotEmpty>
+     </select>
+ 	<select id="getSlgroupCnt" resultClass="Integer" parameterClass="java.util.Map">
 	 select count(distinct x.groupid)
        from (select a.groupid, a.groupname, a.width, a.height, a.updatedate, a.updateuser, c.siteid, b.slotid,
                     sitename, secname
                from slotgroup a
-           	      	left join slotgroup_has_slot b on a.groupid = b.groupid
+           	      	left join slotgroup_slot b on a.groupid = b.groupid
            	      	left join slot c on c.slotid = b.slotid
            	      	left join section d on c.secid = d.secid
           	      	left join site e on d.siteid = e.siteid
@@ -263,8 +323,18 @@
 		 	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
     		) x
       </select>
-    
-	<insert id="addSlotGroup" parameterClass="java.util.Map">
+   	  <select id="getSlgroupInSlotList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+           select b.idx, c.secid, c.siteid, b.slotid, c.width, c.height, 
+                  sitename, secname
+			 from slotgroup_slot b 
+				  left join slot c on b.slotid = c.slotid
+				  left join section d on c.secid = d.secid
+          		  left join site e on d.siteid = e.siteid
+			 where b.groupid = $groupid$
+			 order by b.idx
+      </select>
+  
+	<insert id="addSlgroup" parameterClass="java.util.Map">
 		insert into adsrv.slotgroup
 	            (groupid,
 	             groupname,
@@ -286,7 +356,7 @@
 		        1,
 		        '$insertdate$',
 		        $insertuser$,
-		        now(),
+		        '$insertdate$',
 		        $insertuser$);
 	    <selectKey resultClass="int">
         SELECT LAST_INSERT_ID()
@@ -294,7 +364,7 @@
 	
 	</insert>
 	
-	<update id="modSlotGroup" parameterClass="java.util.Map">
+	<update id="modSlgroup" parameterClass="java.util.Map">
 	   update adsrv.slotgroup
           set <isNotEmpty property="groupname">groupname     = '$groupname$', </isNotEmpty>
               <isNotEmpty property="siteid">siteid        = $siteid$, </isNotEmpty>     
@@ -302,31 +372,43 @@
               <isNotEmpty property="height">height        = '$height$', </isNotEmpty>   
               <isNotEmpty property="memo">memo          = '$memo$', </isNotEmpty>     
               <isNotEmpty property="stat">stat          = $stat$, </isNotEmpty>            
-              updatedate    = now(),         
-              updateuser    = updateuser   
+              updatedate    = $updatedate$,         
+              updateuser    = $updateuser$   
         where groupid = $groupid$
-	;
+ 	;
 	</update>
-	<insert id="addSlotGroupHasSlot" parameterClass="java.util.Map">
-		insert into adsrv.slotgroup_has_slot
+	<insert id="addSlgroupSlot" parameterClass="java.util.Map">
+		insert into adsrv.slotgroup_slot
 	            (groupid,
 	             slotid,
-	             insertdate,
-	             insertuser,
+	             idx,
+	             stat,
 	             updatedate,
 	             updateuser)
-		values ($groupid$,
-		        $slotid$,
-		        '$insertdate$',
-		        $insertuser$,
-		        now(),
-		        $insertuser$);
+		<dynamic>
+			<iterate prepend="VALUES" conjunction=", " property="List">
+				( 
+					#List[].groupid# 
+					, #List[].slotid#
+					, 0
+					, 1
+					, now()
+					, #List[].insertuser#	
+					, 1		
+				)
+			</iterate>
+		</dynamic>	             		
 	</insert>
-	<delete id="delSlotGroupHasSlot" parameterClass="java.util.Map">
+	<update id="modSlgroupSlot" parameterClass="java.util.Map">
+	update adsrv.slotgroup_slot
+	   set stat = 0
+	 where groupid = #groupid#
+	</update>
+	<delete id="delSlgroupSlot" parameterClass="java.util.Map">
 		delete 
-		from adsrv.slotgroup_has_slot
-		where groupid = $groupid$
-		 and slotid = $slotid$;
+		from adsrv.slotgroup_slot
+		where groupid = #groupid#
+		  and stat = 0;
 	</delete>
 	
 </sqlMap>

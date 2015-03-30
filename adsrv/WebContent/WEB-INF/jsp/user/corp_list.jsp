@@ -54,36 +54,95 @@ try
   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
   <script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
   <link rel="stylesheet" href="/resources/demos/style.css">
- <script type="text/javascript" src="/dwr/engine.js"></script>
-<script type="text/javascript" src="/dwr/util.js"></script>
-<script type="text/javascript" src="/dwr/interface/MasDwrService.js"></script>
-  <script src="../js/bootstrap.js"></script>
-  <script src="../js/basic.js"></script>
- <script src="../js/common.js"></script>
+  <script type="text/javascript" src="/dwr/engine.js"></script>
+  <script type="text/javascript" src="/dwr/util.js"></script>
+  <script type="text/javascript" src="/dwr/interface/MasDwrService.js"></script>
+
   
 <script type="text/javascript">
-function msg(n){
-	alert("msg"+n);
-	Test.getMessage(n, view);
-}
-function view(data){
-	alert(data);
-	viewData.innerHtml= data;
-}
-
 $(function(){
 	
 	$("#btnPopup").click(function(e){
-		//$(".modify").css("display","none");
-		//$(".modal-title").text("업체 등록");
+		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
 		e.preventDefault();
 		$('#myModal').modal();
+		$(".modify").css("display", "none");
+		$(".new").css("display", "");
+		$(".cvalue").val(""); //값 초기화	 (corpid, beforetype, change)	
 		$('#corpname').focus();
 		$("input:radio[name='corptype']:radio[value=1]").prop('checked',true);
 	});
+	$('#frmRegist').change(function(e){	
+		$("#change").val("change");
+	});
+	$("span[name=corpmod]").click(function(e){	
+		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
+		$(".cvalue").val(""); //값 초기화	 (corpid, beforetype, change)	
+		var corpid = $(this).attr("corpid");
+		$('#myModal').modal();
+		
+		
+		$(".modify").css("display","");
+		$(".new").css("display", "none");
+		
+		MasDwrService.getCorporation(corpid,
+		   		function(data) {
+					console.log(data.error);
+					$("#corpid").val(corpid);
+					$("#beforetype").val(data.corptype);
+				    $("#corpname").val(data.corpname);
+					$("input:radio[name='corptype']:radio[value="+data.corptype+"]").prop('checked',true);
+					$("#updatedate").html(getYMDHM(data.updatedate, '-'));
+					$("#updateuser").html(data.updateusername);
+				});
+	});
 
+	$("#btnUpdate").on("click", function(e){		
+		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
+		e.preventDefault();
+		if($("#change").val() != "change"){
+			alert("변경된 내용이 없습니다.");
+			return;
+		}
+		else if($.trim($("#corpname").val()).length==0){
+			$("#corpname").css("border-color","red").focus();
+			$("#warningMsg").text("이름을 입력해주세요.");
+			return;
+		}
+		else{	
+			var cname = $('#corpname').val();	
+			var cid = $('#corpid').val();	
+			MasDwrService.getCorpCnt(cname, cid,
+		   		function(data) {
+					if(data>0) {
+						$("#corpname").css("border-color","red").select();
+						$("#warningMsg").text("중복된 이름이 있습니다.");
+						return;				
+					} else {
+						var qstr = "";
+						console.log("beforetype="+$("#beforetype").val());
+						console.log("corptype="+$("input:radio[name='corptype']:checked").val());
+						
+						
+						
+						
+						if($("input:radio[name='corptype']:checked").val() != $("#beforetype").val()) {
+							qstr = "업체 구분을 변경되면 이미 등록된 캠페인의 정보가\r\n제대로 보이지 않을 수 있습니다.\r\n업체 정보를 수정하시겠습니까?";
+						} else {
+							qstr = "기존 캠페인의 정보도 같이 수정됩니다.\r\n업체 정보를 수정하시겠습니까?";
+						}
+						if(confirm(qstr)){
+							$("#frmRegist").submit();	
+						}
 
+						
+					}
+			});
+		}
+		
+	});
 	$("#btnRegist").on("click", function(e){		
+		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
 		e.preventDefault();
 		if($.trim($("#corpname").val()).length==0){
 			$("#corpname").css("border-color","red").focus();
@@ -91,15 +150,20 @@ $(function(){
 			return;
 		}
 		else{	
-			var cname = $('#corpname').val();			
-			MasDwrService.getCorpCnt(cname,
+			var cname = $('#corpname').val();	
+			var cid = $('#corpid').val();	
+			MasDwrService.getCorpCnt(cname, 
 		   		function(data) {
 					if(data>0) {
 						$("#corpname").css("border-color","red").select();
 						$("#warningMsg").text("중복된 이름이 있습니다.");
 						return;				
-					} else {
-						$("#formRegist").submit();	
+					} else {						
+						if(confirm("업체를 등록하시겠습니까?")){
+							$("#frmRegist").submit();	
+						}
+
+						
 					}
 			});
 		}
@@ -183,7 +247,9 @@ for(int k=0; k<corplist.size(); k++){
                         <tr>
                             <td><%=skip+(k+1) %></td>
                             <td><%=corp.get("corptypename") %></td>
-                            <td class="textLeft"><a href="usermgr.do?a=corpView&corpid=<%=String.valueOf(corp.get("corpid"))%>"><%=corp.get("corpname") %></a></td>                           
+                             <td class="textLeft">
+                             <span name="corpmod" corpid="<%=String.valueOf(corp.get("corpid"))%>" role="button" class="point label label-<%=corp.get("text") %>" style="cursor:pointer; width:80px; margin-right:10px"><%=corp.get("corptypename") %></span>                           
+                             <a href="usermgr.do?a=corpView&corpid=<%=String.valueOf(corp.get("corpid"))%>"><%=corp.get("corpname") %></a></td>                           
                             <td><%=DateUtil.getYMD(String.valueOf(corp.get("insertdate"))) %></td>
                             <td><%=corp.get("insertusername") %></td>                            
                         </tr>
@@ -216,11 +282,14 @@ for(int k=0; k<corplist.size(); k++){
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title">업체 등록</h4>
+                    <h4 class="modal-title new">업체 등록</h4><h4 class="modal-title modify">업체 수정</h4>
                 </div>
                 <div class="modal-body">
                     <!-- search form Start -->
-                    <form id="formRegist" name="formRegist" method="post" action="usermgr.do?a=corpRegist">
+                    <form id="frmRegist" name="frmRegist" method="post" action="usermgr.do?a=corpRegist">
+                    <input type="text" id="corpid" name="corpid" class="cvalue">
+                    <input type="text" id="beforetype" name="beforetype" class="cvalue">
+                    <input type="text" id="change" name="change" value="" class="cvalue">
                         <table class="addTable">
                             <colgroup>
                                 <col width="20%">
@@ -250,24 +319,31 @@ for(int k=0; k<corplist.size(); k++){
                                     </label>   
                                 </td>
                             </tr> 
-                            <tr>                           
-                        <th>등록일</th>
-                            <td class="form-inline">
-                                <%=DateUtil.getYMD(DateUtil.curDate()) %>
-                            </td>
-                        </tr> 
-                        <tr>                       
-                        <th>등록자</th>
-                            <td class="form-inline">
-                                <%=userName %>
-                            </td>
-                        </tr>                        
+                            <tr class="new">                           
+                        	<th>등록일자</th>
+                            <td class="form-inline"><%=DateUtil.getYMD(DateUtil.curDate()) %></td>
+                        	</tr> 
+	                        <tr class="new">                       
+	                        <th>등록인</th>
+	                            <td class="form-inline"><%=userName %></td>
+	                        </tr>  
+                            <tr class="modify">                           
+                        	<th>최종수정</th>
+                            <td class="form-inline" id="updatedate"><%=DateUtil.getYMD(DateUtil.curDate()) %></td>
+                        	</tr> 
+	                        <tr class="modify">                       
+	                        <th>수정인</th>
+	                            <td class="form-inline" id="updateuser"><%=userName %></td>
+	                        </tr>                        
+                        
+                                              
                         </table>
                     </form>
                  </div>
                 <div class="modal-footer">
                 	<span id="warningMsg" style="color:#a00"></span>
-                    <button type="button" class="btn btn-danger btn-sm" id="btnRegist">등록</button>                    
+                    <button type="button" class="new btn btn-danger btn-sm" id="btnRegist">등록</button>                    
+                    <button type="button" class="modify btn btn-danger btn-sm" id="btnUpdate">수정</button>                    
                     <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
                 </div>
             </div>
@@ -280,6 +356,7 @@ for(int k=0; k<corplist.size(); k++){
     <!-- modal End -->
 
     <!-- js start -->
+    <script src="../js/common.js"></script>
     <script src="../js/jquery-1.11.1.js"></script>
     <script src="../js/bootstrap.js"></script>
     <script src="../js/basic.js"></script>

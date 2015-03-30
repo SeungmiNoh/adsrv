@@ -14,7 +14,7 @@
 try
 {
 	
-	Map map = (Map)request.getAttribute("response");
+	Map<String,Object> map = (Map<String,Object>)request.getAttribute("response");
 
 	/*
 	List<Map<String, String>> clientlist = (List<Map<String, String>>)map.get("clientlist");     
@@ -110,9 +110,9 @@ try
 				$("#cpname").css("border-color","green");
 			}
 			if(confirm("캠페인을 등록하시겠습니까?")){
-				alert("submit");
+				
 				$("#frmRegCp").submit();					
-				alert("fff");
+				
 			}
 		});
 

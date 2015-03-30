@@ -63,39 +63,62 @@ try
 
 
 $(function(){
-	
+	$(".debug").css("display","none");
+	$.ajax({		    
+		url : "cpmgr.do?a=auto_corp&corptype=4",
+	    datatype:"json",
+	    success:function(data, type){	     
+	        test = eval("(" + data + ")");	     
+	        for(var k=0; k<test.length; k++) {
+	        	$('#media').append('<option value="'+test[k].value+'">'+test[k].label+'</option>');
+	        }
+		}
+	}); 
 	
 	$("#btnPopup").click(function(e){
-		
-		
-		//$(".modify").css("display","none");
-		//$(".modal-title").text("업체 등록");
-		
-		$.ajax({		    
-			url : "cpmgr.do?a=auto_corp&corptype=4",
-		    datatype:"json",
-		    success:function(data, type){	     
-		        test = eval("(" + data + ")");	     
-		        for(var k=0; k<test.length; k++) {
-		        	$('#media').append('<option value="'+test[k].value+'">'+test[k].label+'</option>');
-		        }
-			}
-		});  	 
-
-		
-		
-		
+		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
 		e.preventDefault();
 		$('#myModal').modal();
+		$(".modify").css("display", "none");
+		$(".new").css("display", "");
+		$(".debug").val(""); //값 초기화	 (siteid, change)	
 		$('#sitename').focus();
 		$("input:radio[name='sitetype']:radio[value=1]").prop('checked',true);
 	});
+	
+	$('#frmRegist').change(function(e){	
+		$("#change").val("change");
+	});
 
-
+	$("a[name=sitemod]").click(function(e){	
+		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
+		$(".debug").val(""); //값 초기화	 (siteid, beforetype, change)	
+		var siteid = $(this).attr("siteid");
+		$('#myModal').modal();
+		
+		
+		$(".modify").css("display","");
+		$(".new").css("display", "none");
+		
+		MasDwrService.getSite(siteid,
+		   		function(data) {
+					console.log(data.error);
+					$("#corpname").html(data.corpname);
+					$("#siteid").val(siteid);
+					$("#sitename").val(data.sitename);
+					$("#sitetag").val(data.sitetag);
+					$("#siteurl").val(data.siteurl);
+					$("#memo").val(data.memo);
+					$("input:radio[name='sitetype']:radio[value="+data.sitetype+"]").prop('checked',true);
+					$("#updatedate").html(getYMDHM(data.updatedate, '-'));
+					$("#updateuser").html(data.updateusername);
+				});
+	});
+	
 	$("#btnRegist").on("click", function(e){		
 		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
 		e.preventDefault();
-		
+	
 		if($("#media").val()==0){
 			$("#media").css("border-color","red").focus();
 			$("#warningMsg").text("미디어를 선택해주세요.");
@@ -112,27 +135,78 @@ $(function(){
 			$("input:radio[name='sitetype']").css("border-color","red").focus();
 			$("#warningMsg").text("스크린을 선택해주세요.");
 			return;
-		} /*else if(($("#siteurl").val()).length > 0 && ($("#siteurl").val()).length > $("#siteurl").attr("maxlength")){
-			$("#siteurl").css("border-color","red").focus();
-			var maxleng = $("#siteurl").attr("maxlength");
-			$("#warningMsg").text("URL은 "+maxleng+"자 이하로 입력하셔야 합니다.");
-			return;
-		} else if(($("#memo").val()).length > 0 && ($("#memo").val()).length > $("#memo").attr("maxlength")){
-			$("#memo").css("border-color","red").focus();
-			var maxleng = $("#siteurl").attr("maxlength");	
-			$("#warningMsg").text("설명은 "+maxleng+"자 이하로 입력하셔야 합니다.");
-			return;
-		}*/
+		} else if(($("#siteurl").val()).length > 0){
+			var chk_url = checkURL("http://"+$("#siteurl").val());
+			
+			if(!chk_url) {
+				console.log("잉?"+chk_url);
+				$("#siteurl").css("border-color","red").focus();
+				var maxleng = $("#siteurl").attr("maxlength");
+				$("#warningMsg").text("URL 형식이 맞지 않습니다.");
+				return;
+			}
+		} 
 		else{	
 			var cname = $('#sitetag').val();			
-			MasDwrService.getSiteCnt(cname,
+			console.log("cname="+cname);
+			MasDwrService.getSiteCnt(cname, 0, 
+		   		function(data) {				
+					if(data>0) {
+						$("#sitetag").css("border-color","red").select();
+						$("#warningMsg").text("중복된 태그 아이디가 있습니다.");
+						return;				
+					} else {
+						if(confirm("사이트를 등록 하시겠습니까?")) {
+							$("#frmRegist").submit();	
+						}
+					}
+			});
+		}
+		
+	});
+	$("#btnUpdate").on("click", function(e){		
+		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
+		e.preventDefault();
+		
+		
+		if($("#change").val() != "change"){
+			alert("변경된 내용이 없습니다.");
+			return;
+		}else if($.trim($("#sitename").val()).length==0){
+			$("#sitename").css("border-color","red").focus();
+			$("#warningMsg").text("사이트 이름을 입력해주세요.");
+			return;
+		} else if($.trim($("#sitetag").val()).length==0){
+			$("#sitetag").css("border-color","red").focus();
+			$("#warningMsg").text("태그 아이디를 입력해주세요.");
+			return;
+		} else if($("input:radio[name='sitetype']").is(":checked") == false ){
+			$("input:radio[name='sitetype']").css("border-color","red").focus();
+			$("#warningMsg").text("스크린을 선택해주세요.");
+			return;
+		} else if(($("#siteurl").val()).length > 0){
+			
+			var chk_url = checkURL("http://"+$("#siteurl").val());
+			if(!chk_url) {
+				$("#siteurl").css("border-color","red").focus();
+				var maxleng = $("#siteurl").attr("maxlength");
+				$("#warningMsg").text("URL 형식이 맞지 않습니다.");
+				return;
+			}
+		} 
+		else{	
+			var cname = $('#sitetag').val();			
+			var cid = $('#siteid').val();			
+			MasDwrService.getSiteCnt(cname, cid, 
 		   		function(data) {
 					if(data>0) {
 						$("#sitetag").css("border-color","red").select();
 						$("#warningMsg").text("중복된 태그 아이디가 있습니다.");
 						return;				
 					} else {
-						$("#frmRegist").submit();	
+						if(confirm("사이트 정보를 수정 하시겠습니까?")) {
+							$("#frmRegist").submit();	
+						}
 					}
 			});
 		}
@@ -188,7 +262,8 @@ $(function(){
                 <table class="listTable">
 				<colgroup>
 				<col width="40">
-				<col width="100"><!-- 스크린 -->
+				<col width="160"><!-- 업체명 -->
+				<col width="80"><!-- 스크린 -->
 				<col width="160"><!-- 사이트명 -->
 				<col width="160"><!-- 태그 -->
 				<col width="220"><!-- URL -->
@@ -198,6 +273,7 @@ $(function(){
 				<thead>
                         <tr>
                             <th>No</th>
+                            <th>업체</th>  
                             <th>스크린</th>
                             <th>사이트명</th>  
                             <th>태그</th>  
@@ -220,11 +296,12 @@ for(int k=0; k<sitelist.size(); k++){
                     
                         <tr>
                             <td><%=skip+(k+1) %></td>
+                            <td class="textLeft"><span class="modify label label-warning" style="margin-right:10px">미디어</span><%=site.get("corpname") %></td>
                             <td><%=site.get("sitetypename") %></td>
-                            <td class="textLeft"><a href="sitemgr.do?a=siteView"><%=site.get("sitename") %></a></td>                           
+                            <td class="textLeft"><a href="#none" name="sitemod" siteid="<%=String.valueOf(site.get("siteid"))%>"><%=site.get("sitename") %></a></td>                           
                             <td class="textLeft"><a href="sitemgr.do?a=secList&s_siteid=<%=String.valueOf(site.get("siteid"))%>"><%=site.get("sitetag") %></a></td>                           
-                            <td class="textLeft"><%=site.get("siteurl") %></td>
-                            <td><%=DateUtil.getYMD(String.valueOf(site.get("insertdate"))) %></td>
+                            <td class="textLeft"><%=StringUtil.isNotNull(site.get("siteurl"),"http://") %></td>
+                           <td><%=DateUtil.getYMD(String.valueOf(site.get("insertdate"))) %></td>
                             <td><%=site.get("insertusername") %></td>                            
                         </tr>
 <%} %>                        
@@ -256,79 +333,87 @@ for(int k=0; k<sitelist.size(); k++){
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title">사이트 등록</h4>
-                </div>
+                    <h4 class="modal-title new">사이트 등록</h4><h4 class="modal-title modify">사이트 수정</h4>
+                 </div>
                 <div class="modal-body">
                     <!-- search form Start -->
                     <form id="frmRegist" name="frmRegist" method="post" action="sitemgr.do?a=siteRegist">
-                        <table class="addTable">
-                            <colgroup>
-                                <col width="20%">
-                                    <col width="">
-                            </colgroup>
-                            <tr>
-                                <th>미디어<span style="color:red"> * </span></th>
-                                <td>                              
-                                	<select id="media" name="corpid" class="form-control input-sm" style="width:360px">
-                                	<option value="0"></option>
-                                	</select>
-	 					         </td>
-                            </tr>
-                            <tr>
-                                <th>사이트명<span style="color:red"> * </span></th>
-                                <td class="form-inline">
-                                    <input type="text" name="sitename" id="sitename" class="form-control input-sm" width="240px">                                    
-                                </td>
-                            </tr>
-                             <tr>
-                                <th>태그 아이디<span style="color:red"> * </span></th>
-                                <td class="form-inline">
-                                    <input type="text" name="sitetag" id="sitetag" class="form-control input-sm" width="240px" placeholder="">
-                                </td>
-                            </tr>
-                             <tr>
-                                <th>스크린<span style="color:red"> * </span></th>
-                                <td>
-                                <%for(int i=0;i<codelist.size();i++){ 
-                                	Map<String,String> code = codelist.get(i);
-                                %>
-                                <label class="radio-inline"><input type="radio" name="sitetype" value="<%=String.valueOf(code.get("isid")) %>"> <%=String.valueOf(code.get("isname")) %></label>                               
-                                <%} %>
-                                </td>
-                            </tr> 
-                        <tr>                           
-                             <tr>
-                                <th>URL</th>
-                                <td class="form-inline">
-                                    <input type="text" name="siteurl" id="siteurl" class="form-control input-sm" width="360px" maxlength="60">                                    
-                                </td>
-                            </tr>                           
-    					<tr>
-                                <th>설명</th>
-                                <td class="textLeft">
-                                    <textarea name="memo" id="memo" class="form-control" rows="6"  maxlength="100"></textarea>
-                                </td>
-                            </tr>
-                         
-                        <tr>                           
-                        <th>등록일</th>
-                            <td class="form-inline">
-                                <%=DateUtil.getYMD(DateUtil.curDate()) %>
-                            </td>
-                        </tr> 
-                        <tr>                       
-                        <th>등록자</th>
-                            <td class="form-inline">
-                                <%=userName %>
-                            </td>
-                        </tr>                        
-                        </table>
+                     <input type="hidden" name="a" value="siteRegist">
+                     <input type="text" id="siteid" name="siteid" class="debug">
+                     <input type="text" id="change" name="change" value="" class="debug">
+                      <table class="addTable">
+                          <colgroup>
+                              <col width="20%">
+                                  <col width="">
+                          </colgroup>
+                          <tr>
+                              <th>미디어<span style="color:red"> * </span></th>
+                              <td>                              
+                              	<select id="media" name="corpid" class="new form-control input-sm" style="width:220px">
+                              	<option value="0"></option>
+                              	</select>
+                              	<span class="modify label label-warning" style="width:80px; margin-right:10px">미디어</span><span class="modify" id="corpname"></span>
+					         </td>
+                          </tr>
+                          <tr>
+                              <th>사이트명<span style="color:red"> * </span></th>
+                              <td class="form-inline">
+                                  <input type="text" name="sitename" id="sitename" class="form-control input-sm" width="240px">                                    
+                              </td>
+                          </tr>
+                           <tr>
+                              <th>태그 아이디<span style="color:red"> * unique </span></th>
+                              <td class="form-inline">
+                                  <input type="text" name="sitetag" id="sitetag" class="form-control input-sm" width="240px" placeholder="">
+                              </td>
+                          </tr>
+                           <tr>
+                              <th>스크린<span style="color:red"> * </span></th>
+                              <td>
+                              <%for(int i=0;i<codelist.size();i++){ 
+                              	Map<String,String> code = codelist.get(i);
+                              %>
+                              <label class="radio-inline"><input type="radio" name="sitetype" value="<%=String.valueOf(code.get("isid")) %>"> <%=String.valueOf(code.get("isname")) %></label>                               
+                              <%} %>
+                              </td>
+                          </tr> 
+                      <tr>                           
+                           <tr>
+                              <th>URL</th>
+                              <td class="form-inline">
+                                  http://&nbsp;<input type="text" name="siteurl" id="siteurl" class="form-control input-sm" style="width:320px" maxlength="60">                                    
+                              </td>
+                          </tr>                           
+  					<tr>
+                              <th>설명</th>
+                              <td class="textLeft">
+                                  <textarea name="memo" id="memo" class="form-control" rows="6"  maxlength="100" style="width:360px"></textarea>
+                              </td>
+                          </tr>
+						<tr class="new">                           
+                      	<th>등록일자</th>
+                          <td class="form-inline"><%=DateUtil.getYMD(DateUtil.curDate()) %></td>
+                      	</tr> 
+                       <tr class="new">                       
+                       <th>등록인</th>
+                           <td class="form-inline"><%=userName %></td>
+                       </tr>  
+                          <tr class="modify">                           
+                      	<th>최종수정</th>
+                          <td class="form-inline" id="updatedate"><%=DateUtil.getYMD(DateUtil.curDate()) %></td>
+                      	</tr> 
+                       <tr class="modify">                       
+                       <th>수정인</th>
+                           <td class="form-inline" id="updateuser"><%=userName %></td>
+                       </tr>                        
+                       </table>
                     </form>
                  </div>
                 <div class="modal-footer">
                 	<span id="warningMsg" style="color:#a00"></span>
-                    <button type="button" class="btn btn-danger btn-sm" id="btnRegist">등록</button>                    
-                    <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+                     <button type="button" class="new btn btn-danger btn-sm" id="btnRegist">등록</button>                    
+                    <button type="button" class="modify btn btn-danger btn-sm" id="btnUpdate">수정</button>                    
+                   <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
                 </div>
             </div>
             <!-- /.modal-content -->

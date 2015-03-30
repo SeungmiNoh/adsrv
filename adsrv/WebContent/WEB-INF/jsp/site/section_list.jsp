@@ -24,7 +24,6 @@ try
     Integer max = (Integer)map.get("max");
     
     String totalCount = map.get("totalCount").toString();
-    String countPerPage = map.get("countPerPage").toString();
     String nowPage = map.get("nowPage").toString();
 
 %>  
@@ -65,18 +64,102 @@ try
 
 
 $(function(){
+	$(".debug").css("display","none");
 	
 	$("#btnPopup").click(function(e){
+		
+		$("#frmRegist input, #frmRegist select").val("");
 		if($("#s_siteid").val()!=0){
-			$("#siteid").val($("#s_siteid").val());
+			var siteid = $("#s_siteid").val();
+			$("#siteid").val(siteid);
+						
+			var sitetag = $("select[name='siteid'] option[value="+siteid+"]:selected").attr("sitetag");
+			console.log("sitetag="+sitetag);
+			//var sitetag = $("#siteid option:selected").attr("sitetag");
+			$("#sitetag").val(sitetag);
 		}		
 		e.preventDefault();
 		$('#myModal').modal();
+		$(".modify").css("display", "none");
+		$(".new").css("display", "");
+		$(".debug").val(""); //값 초기화	 (siteid, change)	
 		$('#sitename').focus();
 		$("input:radio[name='sitetype']:radio[value=1]").prop('checked',true);
 	});
+	$('#frmRegist').change(function(e){	
+		$("#change").val("change");
+	});
+	$('#siteid').change(function(e){	
+		var siteid = $("#siteid").val();
+		console.log("siteid="+siteid);
+			var sitetag = $("select[name='siteid'] option[value="+siteid+"]:selected").attr("sitetag");
+		console.log("sitetag="+sitetag);
+				$("#sitetag").val(sitetag);
+	});	
+	
+	
+	
+	$("a[name=secmod]").click(function(e){	
+		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
+		$(".debug").val(""); //값 초기화	 (secid, beforetype, change)	
+		var secid = $(this).attr("secid");
+		$('#myModal').modal();
+		
+		
+		$(".modify").css("display","");
+		$(".new").css("display", "none");
+		
+		MasDwrService.getSection(secid,
+		   		function(data) {
+					console.log(data.error);
+					$("#secid").val(secid);
+					$("#siteid").val(data.siteid);
+					$("#sitename").text(data.sitename);
+					$("#sitetag").val(data.sitetag);
+					$("#secname").val(data.secname);
+					$("#sectag").val(data.sectag);
+					$("#memo").val(data.memo);
+					$("#updatedate").html(getYMDHM(data.updatedate, '-'));
+					$("#updateuser").html(data.updateusername);
+				});
+	});
 
-
+	$("#btnUpdate").on("click", function(e){		
+		e.preventDefault();
+		if($("#change").val() != "change"){
+			alert("변경된 내용이 없습니다.");
+			return;
+		}else if($.trim($("#secname").val()).length==0){
+			$("#secname").css("border-color","red").focus();
+			$("#warningMsg").text("섹션 이름을 입력해주세요.");
+			return;
+		} else if($.trim($("#sectag").val()).length==0){
+			$("#sectag").css("border-color","red").focus();
+			$("#warningMsg").text("태그 아이디를 입력해주세요.");
+			return;
+		} 
+		else{	
+			var cname = $('#sectag').val();			
+			var siteid = $('#siteid').val();		
+			var secid = $('#secid').val();		
+			console.log("siteid="+siteid);
+			console.log("secid="+secid);
+			MasDwrService.getSecCnt(cname, siteid, secid,
+					
+				function(data) {
+					var cnt = parseInt(data,10);
+					if(cnt>0) {
+						$("#sectag").css("border-color","red").select();
+						$("#warningMsg").text("사이트 내에 중복된 태그 아이디가 있습니다.\r\n다른 태그 아이디를 입력해주세요.");
+						return;				
+					} else {
+						if(confirm("섹션 정보를 수정 하시겠습니까?")) {
+							$("#frmRegist").submit();	
+						}					
+					}
+			});
+		}		
+	});
 	$("#btnRegist").on("click", function(e){		
 		e.preventDefault();
 		if($("#siteid").val()==0){
@@ -91,28 +174,27 @@ $(function(){
 			$("#sectag").css("border-color","red").focus();
 			$("#warningMsg").text("태그 아이디를 입력해주세요.");
 			return;
-		} /*else if($("#memo").val().length > $("#memo").attr("maxlength")){
-			$("#memo").css("border-color","red").focus();
-			$("#warningMsg").text($("#siteurl").attr("maxlength")+"자 이하로 입력하셔야 합니다.");
-			return;
-		}*/
+		} 
 		else{	
 			var cname = $('#sectag').val();			
 			var siteid = $('#siteid').val();		
 			
-			MasDwrService.getSecCnt(cname, siteid, 
+			MasDwrService.getSecCnt(cname, siteid, 0,  
 					
-					function(data) {
-					if(data>0) {
-						$("#sectag").css("border-color","red").select();
-						$("#warningMsg").text("사이트 내에 중복된 태그 아이디가 있습니다.\r\n다른 태그 아이디를 입력해주세요.");
-						return;				
-					} else {
-						$("#formRegist").submit();	
-					}
-			});
-		}
-		
+				function(data) {
+						var cnt = parseInt(data,10);
+						if(cnt>0) {
+							$("#sectag").css("border-color","red").select();
+							$("#warningMsg").text("사이트 내에 중복된 태그 아이디가 있습니다.\r\n다른 태그 아이디를 입력해주세요.");
+							return;				
+						} else {
+							if(confirm("섹션을 등록하시겠습니까?")) {
+								$("#frmRegist").submit();	
+							}					
+						}
+					
+				});
+		}		
 	});
 });
 </script>
@@ -197,7 +279,7 @@ for(int k=0; k<seclist.size(); k++){
                             <td><%=skip+(k+1) %></td>
                             <td><%=sec.get("sitetypename") %></td>
                             <td class="textLeft"><a href="sitemgr.do?a=siteView"><%=sec.get("sitename") %></a></td>                           
-                            <td class="textLeft"><%=sec.get("secname") %></td>
+                            <td class="textLeft"><a href="#none" name="secmod" secid="<%=String.valueOf(sec.get("secid"))%>"><%=sec.get("secname") %></a></td>
                             <td class="textLeft"><a href="sitemgr.do?a=slotList&secid=<%=String.valueOf(sec.get("secid"))%>"><%=sec.get("sectag") %></td>
                             <td><%=DateUtil.getYMD(String.valueOf(sec.get("insertdate"))) %></td>
                             <td><%=sec.get("insertusername") %></td>                            
@@ -226,17 +308,20 @@ for(int k=0; k<seclist.size(); k++){
     <!-- modal Start -->
     <div class="modal fade" id="myModal">
         <!-- modal-lg  | default | modal-sm -->
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog default">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title">섹션 등록</h4>
+                    <h4 class="modal-title new">섹션 등록</h4><h4 class="modal-title modify">섹션 수정</h4>
                 </div>
                 <div class="modal-body">
                     <!-- search form Start -->
-                    <form id="formRegist" name="formRegist" method="post" action="sitemgr.do?a=secRegist">
-                        <table class="addTable">
+                     <form id="frmRegist" name="frmRegist" method="post" action="sitemgr.do?a=secRegist">
+                    	<input type="hidden" name="a" value="secRegist">
+                      	<input type="text" id="secid" name="secid" class="debug">
+                     	<input type="text" id="change" name="change" value="" class="debug">
+                       <table class="addTable" style="width:560px">
                             <colgroup>
                                 <col width="20%">
                                     <col width="">
@@ -244,55 +329,64 @@ for(int k=0; k<seclist.size(); k++){
                             <tr>
                                 <th>사이트<span style="color:red"> * </span></th>
                                 <td>                              
-                                	<select id="siteid" name="siteid" class="form-control input-sm" style="width:360px">
-                                	<option value="0"></option>
+                                	<select id="siteid" name="siteid" class="new form-control input-sm" style="width:160px">
+                                	<option value="">선택</option>
 	                                <%for(int i=0;i<sitelist.size();i++){ 
 	                                	Map<String,String> site = sitelist.get(i);
 	                                %>
-	                                <option value="<%=String.valueOf(site.get("siteid")) %>" <%=s_type.equals(String.valueOf(site.get("sitename")))?"selected":"" %>><%=site.get("sitename") %></option>                               
+	                                <option value="<%=String.valueOf(site.get("siteid")) %>" sitetag="<%=site.get("sitetag") %>" <%=s_type.equals(String.valueOf(site.get("sitename")))?"selected":"" %>><%=site.get("sitename") %></option>                               
 	                                <%} %>
                                 	</select>
+                                	
+                                	<span id="sitename" class="modify"></span>
 	 					         </td>
                             </tr>
                             <tr>
+                      
                                 <th>섹션명<span style="color:red"> * </span></th>
                                 <td class="form-inline">
                                     <input type="text" name="secname" id="secname" class="form-control input-sm" width="240px">                                    
                                 </td>
                             </tr>
                             <tr>
-                                <th>태그 아이디<span style="color:red"> * </span></th>
+                                <th>태그 아이디<span style="color:red"> * unique</span></th>
                                 <td class="form-inline">
-                                    <input type="text" name="sectag" id="sectag" class="form-control input-sm" width="240px" placeholder="">
+                                    <input type="text" id="sitetag" class="form-control input-sm" width="180px" placeholder="" readonly="readonly">&nbsp;/&nbsp;<input type="text" name="sectag" id="sectag" class="form-control input-sm" width="240px" placeholder="">
                                 </td>
                             </tr>
                         <tr>
                                 <th>설명</th>
                                 <td class="textLeft">
-                                    <textarea name="memo" class="form-control" rows="6"  maxlength="100"></textarea>
+                                    <textarea name="memo" class="form-control" rows="6"  maxlength="100" style="width:360px"></textarea>
                                 </td>
                             </tr>
                          
                         <tr>                           
-                        <th>등록일</th>
-                            <td class="form-inline">
-                                <%=DateUtil.getYMD(DateUtil.curDate()) %>
-                            </td>
-                        </tr> 
-                        <tr>                       
-                        <th>등록자</th>
-                            <td class="form-inline">
-                                <%=userName %>
-                            </td>
-                        </tr>                        
-                        </table>
+ 						<tr class="new">                           
+                      	<th>등록일자</th>
+                          <td class="form-inline"><%=DateUtil.getYMD(DateUtil.curDate()) %></td>
+                      	</tr> 
+                       <tr class="new">                       
+                       <th>등록인</th>
+                           <td class="form-inline"><%=userName %></td>
+                       </tr>  
+                          <tr class="modify">                           
+                      	<th>최종수정</th>
+                          <td class="form-inline" id="updatedate"><%=DateUtil.getYMD(DateUtil.curDate()) %></td>
+                      	</tr> 
+                       <tr class="modify">                       
+                       <th>수정인</th>
+                           <td class="form-inline" id="updateuser"><%=userName %></td>
+                       </tr>                        
+                         </table>
                     </form>
                  </div>
                 <div class="modal-footer">
-                	<span id="warningMsg" style="color:#a00;font-size:9pt"></span>
-                    <button type="button" class="btn btn-danger btn-sm" id="btnRegist">등록</button>                    
-                    <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
-                </div>
+                	<span id="warningMsg" style="color:#a00;font-size:8pt"></span>
+                      <button type="button" class="new btn btn-danger btn-sm" id="btnRegist">등록</button>                    
+                    <button type="button" class="modify btn btn-danger btn-sm" id="btnUpdate">수정</button>                    
+                   <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+               </div>
             </div>
             <!-- /.modal-content -->
         </div>

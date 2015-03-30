@@ -89,7 +89,8 @@
      <bean id="masDwrService" class="tv.pandora.adsrv.dwr.MasDwrService">
  		<property name="usermgrModel" ref="usermgrModel"/>
  		<property name="sitemgrModel" ref="sitemgrModel"/>
-    </bean>		
+		<property name="cpmgrModel" ref="cpmgrModel"/>
+     </bean>		
  	   <!-- ========================= Interceptor ========================-->  
     <bean id="loginCheckInterceptor" class="tv.pandora.adsrv.common.session.LoginCheckInterceptor" />
  	

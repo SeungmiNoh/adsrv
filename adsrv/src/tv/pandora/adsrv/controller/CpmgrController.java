@@ -1,8 +1,10 @@
 package tv.pandora.adsrv.controller;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -16,9 +18,12 @@ import tv.pandora.adsrv.common.session.SessionUtil;
 import tv.pandora.adsrv.common.util.StringUtil;
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
+import tv.pandora.adsrv.domain.Creative;
 import tv.pandora.adsrv.domain.Target;
 import tv.pandora.adsrv.domain.User;
 
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 public class CpmgrController extends AdsrvMultiActionController
@@ -400,7 +405,7 @@ public class CpmgrController extends AdsrvMultiActionController
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
 		//채널타겟팅 사이트/섹션/위치 목록
-		if(jsp.equals("channel"))
+		if(tgtype.equals("5"))
 		{
 		
 			map.clear();
@@ -461,10 +466,30 @@ public class CpmgrController extends AdsrvMultiActionController
 		if(tgtype==1 || tgtype==3 || tgtype==4){					
 			valueinfo = cpmgrFacade.getTargetValue(amap);
 		} 
-		// IP, 채널 타겟팅
-		else if(tgtype==2 || tgtype==5){			
+		// 채널 타겟팅
+		else if(tgtype==5){			
+			valueinfo = cpmgrFacade.getTargetValue(amap);
 			valuelist = cpmgrFacade.getTargetValList(amap);
-		} 
+			
+			map.clear();
+			map.put("order_str", "slotname");
+			List<Map<String, String>> slotlist = sitemgrFacade.getSlotList(map);	
+			map.clear();
+			map.put("order_str", "sitename");
+			List<Map<String, String>> sitelist = sitemgrFacade.getSiteList(map);			
+			map.clear();
+			map.put("order_str", "secname");
+			List<Map<String, String>> seclist = sitemgrFacade.getSectionList(map);		
+			
+			resultMap.put("slotlist", slotlist);
+			resultMap.put("sitelist", sitelist);
+			resultMap.put("seclist", seclist);
+
+			
+		} // IP 타겟팅 
+		else if(tgtype==2 ){			
+			valuelist = cpmgrFacade.getTargetValList(amap);
+		} 		
 		resultMap.put("tginfo", tginfo);
 		resultMap.put("valueinfo", valueinfo);
 		resultMap.put("valuelist", valuelist);
@@ -578,7 +603,7 @@ public class CpmgrController extends AdsrvMultiActionController
 			amap.put("excflag", excflag);
 			amap.put("slotid", slotid);
 		
-			Integer cid = cpmgrFacade.addTargetChannel(amap);
+			//Integer cid = cpmgrFacade.addTargetChannel(amap);
 			
 			String[] channelid = request.getParameterValues("channelid");
 			String[] channelname = request.getParameterValues("channelname");
@@ -591,7 +616,7 @@ public class CpmgrController extends AdsrvMultiActionController
 			         Map<String, String> ipmap = new HashMap<String, String>();
 
 			         ipmap.put("tid", tid.toString());
-			         ipmap.put("cid", cid.toString());
+			         //ipmap.put("cid", cid.toString());
 			         ipmap.put("channelid", channelid[i].trim());
 			         ipmap.put("channelname", StringUtil.isNull(channelname[i].trim()));
 					 list.add(ipmap);					
@@ -698,7 +723,7 @@ public class CpmgrController extends AdsrvMultiActionController
 			amap.put("excflag", excflag);
 			amap.put("slotid", slotid);
 		
-			Integer cid = cpmgrFacade.addTargetChannel(amap);
+			cpmgrFacade.addTargetChannel(amap);
 			
 			String[] channelid = request.getParameterValues("channelid");
 			String[] channelname = request.getParameterValues("channelname");
@@ -711,7 +736,6 @@ public class CpmgrController extends AdsrvMultiActionController
 			         Map<String, String> ipmap = new HashMap<String, String>();
 
 			         ipmap.put("tid", tid.toString());
-			         ipmap.put("cid", cid.toString());
 			         ipmap.put("channelid", channelid[i].trim());
 			         ipmap.put("channelname", StringUtil.isNull(channelname[i].trim()));
 					 list.add(ipmap);					
@@ -721,4 +745,241 @@ public class CpmgrController extends AdsrvMultiActionController
 		}		
 		return new ModelAndView("redirect:cpmgr.do?a=targetList", null);
 	}	
+	public ModelAndView tmpList(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		
+		String page = StringUtil.isNullReplace(request.getParameter("p"),"1");
+		String sch_column = StringUtil.isNull(request.getParameter("sch_column"));
+		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+
+		Integer max = Constant.PAGE_LIST_L;
+		Integer skip = (Integer.parseInt(page)-1)*max;
+		
+		Map<String, String> map = new HashMap<String, String>();
+	    
+		map.put("skip", String.valueOf(skip))	;
+		map.put("max", String.valueOf(max))	;
+		map.put("sch_text", sch_text);
+		map.put("sch_column", sch_column);
+		Integer totalCount = cpmgrFacade.getTemplateCnt(map);
+		List<Map<String, String>> tmplist = cpmgrFacade.getTemplateList(map);
+		
+
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		resultMap.put("tmplist", tmplist);
+		resultMap.put("skip", skip);
+		resultMap.put("max", max);
+		resultMap.put("totalCount", totalCount);
+		resultMap.put("nowPage", page);		
+		return new ModelAndView("campaign/template_list", "response", resultMap);
+	}
+	public ModelAndView tmpForm(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		Map<String, Object> resultMap = new HashMap<String, Object>();		
+		resultMap.put("mode", "R");
+		return new ModelAndView("campaign/template_form", "response", resultMap);
+	}
+	public ModelAndView tmpView(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String tmpid = StringUtil.isNull(request.getParameter("tmpid"));
+		
+		Map<String, String> map = new HashMap<String, String>();
+	    
+		map.put("tmpid", tmpid);
+		
+		Map<String, String> tmp = cpmgrFacade.getTemplate(map);
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();		
+		resultMap.put("tmp", tmp);
+		resultMap.put("tmpid", tmpid);
+		resultMap.put("mode", "E");
+
+		return new ModelAndView("campaign/template_form", "response", resultMap);
+	}
+	public ModelAndView tmpSave(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		
+		String mode = StringUtil.isNull(request.getParameter("mode"));
+		String tmpid = StringUtil.isNull(request.getParameter("tmpid"));
+		String tmpname = StringUtil.isNull(request.getParameter("tmpname"));
+		String tmpcode = StringUtil.isNull(request.getParameter("tmpcode"));
+		String memo = StringUtil.isNull(request.getParameter("memo"));
+		
+		String userID = (String)SessionUtil.getAttribute("userID");
+		
+		Map<String, String> map = new HashMap<String, String>();
+	    
+		map.put("tmpname", tmpname);
+		map.put("memo", memo);
+		map.put("tmpcode", StringUtil.encodeURIComponent(tmpcode));
+		map.put("userid", userID);
+		if(!tmpid.equals("") && mode.equals("E")) {
+			map.put("tmpid", tmpid);				
+			cpmgrFacade.modTemplate(map);
+		} else {
+			cpmgrFacade.addTemplate(map);
+		}
+		
+		
+		return new ModelAndView("redirect:cpmgr.do?a=tmpList", null);
+	}
+	public ModelAndView crList(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		
+		String stat = StringUtil.isNull(request.getParameter("stat"));
+		String sday = StringUtil.isNull(request.getParameter("sday"));
+		String eday = StringUtil.isNull(request.getParameter("eday"));
+		String width = StringUtil.isNull(request.getParameter("width"));
+		String height = StringUtil.isNull(request.getParameter("height"));
+		String page = StringUtil.isNullReplace(request.getParameter("p"),"1");
+		String sch_column = StringUtil.isNull(request.getParameter("sch_column"));
+		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+
+		Integer max = Constant.PAGE_LIST_L;
+		Integer skip = (Integer.parseInt(page)-1)*max;
+		
+		Map<String, String> map = new HashMap<String, String>();
+	    
+		map.put("cr_state", stat);
+		map.put("sday", sday);
+		map.put("eday", eday);
+		map.put("width", width);
+		map.put("height", height);
+		map.put("skip", String.valueOf(skip))	;
+		map.put("max", String.valueOf(max))	;
+		map.put("sch_text", sch_text);
+		map.put("sch_column", sch_column);
+		Integer totalCount = cpmgrFacade.getCreativeCnt(map);
+		List<Creative> crlist = cpmgrFacade.getCreativeList(map);
+		
+		//광고상품 목록
+		map.put("code", "prtype");
+		List<Map<String, String>> codelist = cpmgrFacade.getCodeList(map);	
+		
+		//상태 목록
+		map.put("code", "cr_state");
+		List<Map<String, String>> stlist = cpmgrFacade.getCodeList(map);	
+		
+
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		resultMap.put("crlist", crlist);
+		resultMap.put("codelist", codelist);
+		resultMap.put("stlist", stlist);
+		resultMap.put("skip", skip);
+		resultMap.put("max", max);
+		resultMap.put("totalCount", totalCount);
+		resultMap.put("nowPage", page);		
+		return new ModelAndView("campaign/creative_list", "response", resultMap);
+	}
+	public ModelAndView crAddForm(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		
+		String clientid = StringUtil.isNull(request.getParameter("clientid"));
+		
+		Map<String, String> map = new HashMap<String, String>();	
+		
+		//광고상품 목록
+		map.put("code", "prtype");
+		List<Map<String, String>> codelist = cpmgrFacade.getCodeList(map);	
+
+		map.clear();
+		map.put("order_str", "tmpname")	;
+		List<Map<String, String>> tmplist = cpmgrFacade.getTemplateList(map);
+		
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		resultMap.put("codelist", codelist);
+		resultMap.put("tmplist", tmplist);
+
+		return new ModelAndView("campaign/creative_addform", "response", resultMap);
+	}/*
+	public ModelAndView fileUpload(HttpServletRequest request, HttpServletResponse response) throws Exception {			
+	{
+		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+		Iterator<String> iterator =  multipartRequest.getFileNames();
+		Map fileMap = null;
+
+			
+		
+		String sep = System.getProperty("file.separator");		
+		String orign_filename = "";	
+		String filename = "";
+		
+		String realpath = request.getRealPath("/files");
+		String levpath = "leave"+"/"+yymm;
+				
+				
+		boolean transresult = false;	
+		boolean isReject = false;	
+
+		String comment = "";
+		
+		int fno = 1;
+		
+		while(iterator.hasNext()) 
+		{
+			fileMap = (Map)multipartRequest.getFileMap();
+			fno++;
+			   
+		    String fileParameterName = iterator.next();
+		   
+		    MultipartFile multipartFile =  (MultipartFile) fileMap.get(fileParameterName);
+				
+				orign_filename = multipartFile.getOriginalFilename();
+				
+				if (multipartFile != null && !multipartFile.isEmpty() && multipartFile.getSize()>0)
+				{
+					try
+					{				
+						File serverDir = new File(realpath+sep+levpath+sep);
+					
+			System.out.println("=  serverDir ==="+serverDir);	
+						
+						String extension = orign_filename.substring(orign_filename.lastIndexOf(".")+1,orign_filename.length());							
+						filename = startday[0]+levtype+levid+userID+"_"+fno+"."+extension;		
+								
+			 System.out.println("=  filename ==="+filename);	
+			 
+			 String serverpath = realpath+sep+yymm+sep+filename;
+					
+				boolean chkext = new FileRepository().chkExtension1(extension);
+				boolean chksize = new FileRepository().chkFileSize(multipartFile.getSize());
+				
+				if(!chkext)
+				{
+					comment = "파일 : "+orign_filename+"\n업로드 가능한 파일이 아닙니다.";	
+					isReject = true;
+					break;
+				}
+				else if(!chksize)
+				{
+					comment = "파일 : "+orign_filename+"\n파일 사이즈는 3M를 넘을 수 없습니다.";					
+					isReject = true;
+					break;
+				}
+				else
+				{				
+					transresult = new FileRepository().saveFile(multipartFile, serverDir, serverDir.getPath() + sep + filename);																						
+				}
+			System.out.println("=  transresult1 ==="+transresult);	
+											
+					if(transresult) 
+					{
+						//이미지 서버 싱크 프로그램 실행
+						///*********** 로컬에서는 주석 처리 ******************
+						//executeSyncCommand();
+						
+						map.put("levid", String.valueOf(levid));
+						map.put("filepath", levpath+"/"+filename);
+						map.put("filename", orign_filename);
+						map.put("serverpath", levpath+sep+filename);
+						map.put("updateuser",  userID);
+						map.put("regdate",     DateUtil.simpleDate());
+						map.put("updatedate",  DateUtil.simpleDate());
+						adeFacade.addLeaveFile(map);						
+					}
+				} catch(Exception e) {
+					transresult = false;
+				}
+			}	
+		}
+	}
+	}*/
 }

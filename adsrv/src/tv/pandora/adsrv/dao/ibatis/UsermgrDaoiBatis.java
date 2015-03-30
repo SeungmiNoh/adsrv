@@ -16,6 +16,10 @@ import org.springframework.orm.ibatis.SqlMapClientTemplate;
 
 
 
+
+
+
+
 import tv.pandora.adsrv.dao.UsermgrDao;
 import tv.pandora.adsrv.domain.User;
 
@@ -56,21 +60,28 @@ public class UsermgrDaoiBatis implements UsermgrDao {
 			return null;
 		}
 	}
-	public Integer addUser(Map<String, String> map){
+	public Integer addUser(User user){
 		try {
-			return (Integer) sqlMapClientTemplateMaster.insert("addUser", map);
+			return (Integer) sqlMapClientTemplateMaster.insert("addUser", user);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
-	public Integer modUser(Map<String, String> map){
+	public Integer modUser(User user){
 		try {
-			return (Integer) sqlMapClientTemplateMaster.insert("modUser", map);
+			return (Integer) sqlMapClientTemplateMaster.insert("modUser", user);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
-	
+	public List<Map<String,String>> getUserPerList(Map<String, String> map){
+		try {
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getUserPerList", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
 	
 	public List<Map<String,String>> getCorpList(Map<String, String> map){
 		try {
@@ -106,6 +117,63 @@ public class UsermgrDaoiBatis implements UsermgrDao {
 			return (Map<String,String>) sqlMapClientTemplateMaster.queryForObject("getCorporation", map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
+		}
+	}
+	public List<Map<String, String>> getUserPerSchema(Map<String, String> map){
+		try {
+			return (List<Map<String, String>>) sqlMapClientTemplateMaster.queryForList("getUserPerSchema", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	public List<Map<String,String>> getPerSchemaList(Map<String, String> map){
+		try {
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getPerSchemaList", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+	public List<Map<String,String>> getMenuList(Map<String, String> map){
+		try {
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getMenuList", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+	public Integer addPermission(Map<String, String> map){
+		try {
+			return (Integer) sqlMapClientTemplateMaster.insert("addPermission", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+	public void addPermissionMenu(List<Map<String, String>> list){
+		try {
+			sqlMapClientTemplateMaster.insert("addPermissionMenu", list);
+		} catch (EmptyResultDataAccessException e) {
+			
+		}
+	}
+	public void modPermission(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.update("modPermission", map);
+		} catch (EmptyResultDataAccessException e) {
+			
+		}
+	}
+	public void modPermissionMenu(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.update("modPermissionMenu", map);
+		} catch (EmptyResultDataAccessException e) {
+			
+		}
+	}
+	public void delPermissionMenu(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.delete("delPermissionMenu", map);
+		} catch (EmptyResultDataAccessException e) {
+			
 		}
 	}
 }

@@ -58,20 +58,37 @@ public class SitemgrModel {
 	   	return sitemgrDaoMaster.modSlot(map);
 	}
 	
-	public List<Map<String,String>> getSlotGroupList(Map<String, String> map){
-	   	return sitemgrDaoMaster.getSlotGroupList(map);
+	public List<Map<String,String>> getSlgroupList(Map<String, String> map){
+	   	return sitemgrDaoMaster.getSlgroupList(map);
 	}
-	public Integer getSlotGroupCnt(Map<String, String> map){
-	   	return sitemgrDaoMaster.getSlotGroupCnt(map);
+	public Integer getSlgroupCnt(Map<String, String> map){
+	   	return sitemgrDaoMaster.getSlgroupCnt(map);
 	}
-	public Integer addSlotGroup(Map<String, String> map){
-	   	return sitemgrDaoMaster.addSlotGroup(map);
+	public Integer addSlgroup(Map<String, String> map){
+	   	return sitemgrDaoMaster.addSlgroup(map);
 	}
-	public Integer modSlotGroup(Map<String, String> map){
-	   	return sitemgrDaoMaster.modSlotGroup(map);
+	public Integer modSlgroup(Map<String, String> map){
+	   	return sitemgrDaoMaster.modSlgroup(map);
 	}
-	public Integer addSlotGroupHasSlot(Map<String, String> map){
-	   	return sitemgrDaoMaster.addSlotGroupHasSlot(map);
+	public void addSlgroupSlot(List<Map<String, String>> list){
+	   	sitemgrDaoMaster.addSlgroupSlot(list);
 	}
-	
+	public void modSlgroupSlot(Map<String, String> map){
+	   	sitemgrDaoMaster.modSlgroupSlot(map);
+	}
+	public void delSlgroupSlot(Map<String, String> map){
+	   	sitemgrDaoMaster.delSlgroupSlot(map);
+	}
+	public Map<String,String> getSite(Map<String, String> map){
+		return sitemgrDaoMaster.getSite(map);
+	}
+	public Map<String,String> getSection(Map<String, String> map){
+		return sitemgrDaoMaster.getSection(map);
+	}
+	public Map<String,String> getSlot(Map<String, String> map){
+		return sitemgrDaoMaster.getSlot(map);
+	}
+	public Map<String,String> getSlgroup(Map<String, String> map){
+		return sitemgrDaoMaster.getSlgroup(map);
+	}
 }

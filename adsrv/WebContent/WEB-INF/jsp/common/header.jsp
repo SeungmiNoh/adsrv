@@ -12,10 +12,15 @@ String userName = StringUtil.isNull((String)SessionUtil.getAttribute("userName")
 String userType = StringUtil.isNull((String)SessionUtil.getAttribute("userType") );
 
 String c_url = javax.servlet.http.HttpUtils.getRequestURL(request).toString(); 
+
 String temp = c_url.substring( c_url.indexOf("jsp")+4);
 String menu = temp.substring( 0,temp.indexOf("/"));
-
 %>
+<script>
+console.log("c_url=<%=c_url%>");
+console.log("temp=<%=temp%>");
+console.log("menu=<%=menu%>");
+</script>
                <section class="topMenu">
                 <header>
                     <h1><img src="../img/logo.gif" alt=""></h1>
@@ -33,6 +38,8 @@ String menu = temp.substring( 0,temp.indexOf("/"));
                                         <li><a href="cpmgr.do?a=crList">광고물</a>
                                         </li>
                                         <li><a href="cpmgr.do?a=targetList">타켓팅</a>
+                                        </li>
+                                       <li><a href="cpmgr.do?a=tmpList">템플릿</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -74,7 +81,7 @@ String menu = temp.substring( 0,temp.indexOf("/"));
                                     </ul>
                                 </div>
                             </li>
-                            <li><a href="" <%=menu.equals("site")?"class='active'":"" %>>사이트</a>
+                            <li><a href="sitemgr.do?a=siteList" <%=menu.equals("site")?"class='active'":"" %>>사이트</a>
                                 <div class="sub">
                                     <ul>
                                         <li><a href="sitemgr.do?a=siteList">사이트</a>
@@ -88,14 +95,14 @@ String menu = temp.substring( 0,temp.indexOf("/"));
                                     </ul>
                                 </div>
                             </li>
-                            <li><a href="" <%=menu.equals("user")?"class='active'":"" %>>계정</a>
+                            <li><a href="usermgr.do?a=corpList" <%=menu.equals("user")?"class='active'":"" %>>계정</a>
                                 <div class="sub">
                                     <ul>
                                         <li><a href="usermgr.do?a=corpList">업체</a>
                                         </li>
                                         <li><a href="usermgr.do?a=userList">사용자</a>
                                         </li>
-                                        <li><a href="">퍼미션</a>
+                                        <li><a href="usermgr.do?a=permission">퍼미션</a>
                                         </li>
                                     </ul>
                                 </div>

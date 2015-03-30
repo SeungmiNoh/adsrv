@@ -28,13 +28,16 @@ public class UsermgrModel {
 	public Integer getUserCnt(Map<String, String> map){
 	   	return usermgrDaoMaster.getUserCnt(map);
 	}
-	public Integer addUser(Map<String, String> map){
-	   	return usermgrDaoMaster.addUser(map);
+	public Integer addUser(User user){
+	   	return usermgrDaoMaster.addUser(user);
 	}
-	public Integer modUser(Map<String, String> map){
-	   	return usermgrDaoMaster.modUser(map);
+	public Integer modUser(User user){
+	   	return usermgrDaoMaster.modUser(user);
 	}
 	
+	public List<Map<String,String>> getUserPerList(Map<String, String> map){
+	   	return usermgrDaoMaster.getUserPerList(map);
+	}
 	public List<Map<String,String>> getCorpList(Map<String, String> map){
 	   	return usermgrDaoMaster.getCorpList(map);
 	}
@@ -49,5 +52,29 @@ public class UsermgrModel {
 	}
 	public Map<String,String> getCorporation(Map<String, String> map){
 	   	return usermgrDaoMaster.getCorporation(map);
+	}
+	public List<Map<String, String>> getUserPerSchema(Map<String, String> map){
+	   	return usermgrDaoMaster.getUserPerSchema(map);
+	}
+	public List<Map<String,String>> getPerSchemaList(Map<String, String> map){
+	   	return usermgrDaoMaster.getPerSchemaList(map);
+	}
+	public List<Map<String,String>> getMenuList(Map<String, String> map){
+	   	return usermgrDaoMaster.getMenuList(map);
+	}
+	public Integer addPermission(Map<String, String> map){
+	   	return usermgrDaoMaster.addPermission(map);
+	}
+	public void addPermissionMenu(List<Map<String, String>> list){
+	   	usermgrDaoMaster.addPermissionMenu(list);
+	}
+	public void modPermission(Map<String, String> map){
+	   	usermgrDaoMaster.modPermission(map);
+	}
+	public void modPermissionMenu(Map<String, String> map){
+	   	usermgrDaoMaster.modPermissionMenu(map);
+	}
+	public void delPermissionMenu(Map<String, String> map){
+	   	usermgrDaoMaster.delPermissionMenu(map);
 	}
 }

@@ -11,6 +11,7 @@ import tv.pandora.adsrv.common.util.StringUtil;
 import tv.pandora.adsrv.dao.CpmgrDao;
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
+import tv.pandora.adsrv.domain.Creative;
 import tv.pandora.adsrv.domain.Target;
 import tv.pandora.adsrv.domain.User;
 
@@ -210,7 +211,7 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 		return sqlMapClientTemplateMaster.update("modTargetChannelID", map);
 	}
 	public void delTargetChannelID(Map<String, String> map){
-		sqlMapClientTemplateMaster.delete("modTarget", map);
+		sqlMapClientTemplateMaster.delete("delTargetChannelID", map);
 	}
 	
 	
@@ -250,5 +251,81 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 			return null;
 		}		
 	}
+	public List<Map<String,String>> getTemplateList(Map<String, String> map){
+		try {
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getTemplateList", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}		
+	}
+	public Integer getTemplateCnt(Map<String, String> map){
+		try {
+			return (Integer) sqlMapClientTemplateMaster.queryForObject("getTemplateCnt", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}		
+	}
+	public Map<String,String> getTemplate(Map<String, String> map){
+		try {
+			return (Map<String,String>) sqlMapClientTemplateMaster.queryForObject("getTemplate", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}		
+	}
 	
+	public void addTemplate(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.insert("addTemplate", map);
+		} catch (EmptyResultDataAccessException e) {			
+		}	
+	}
+	public void modTemplate(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.update("modTemplate", map);
+		} catch (EmptyResultDataAccessException e) {			
+		}	
+	}
+
+	public List<Creative> getCreativeList(Map<String, String> map){
+		try {
+			return (List<Creative>) sqlMapClientTemplateMaster.queryForList("getCreativeList", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}		
+	}
+	public Integer getCreativeCnt(Map<String, String> map){
+		try {
+			return (Integer) sqlMapClientTemplateMaster.queryForObject("getCreativeCnt", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}		
+	}
+	public Creative getCreative(Map<String, String> map){
+		try {
+			return (Creative) sqlMapClientTemplateMaster.queryForObject("getCreative", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}		
+	}
+	public Integer addCreative(Creative cr){
+		try {
+			return (Integer) sqlMapClientTemplateMaster.insert("addCreative", cr);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}	
+	}
+	
+	public void addCreativeClick(List<Map<String, String>> list){
+		HashMap<String, Object> param = new HashMap<String, Object>();
+		param.put("List", list);
+		sqlMapClientTemplateMaster.insert("addCreativeClick", param);
+	}
+	public Integer modCreative(Creative cr){
+		try {
+			return (Integer) sqlMapClientTemplateMaster.update("modCreative", cr);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}	
+	}
+
 }

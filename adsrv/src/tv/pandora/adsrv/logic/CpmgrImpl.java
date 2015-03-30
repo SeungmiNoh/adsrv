@@ -22,8 +22,12 @@ import java.util.Map;
 
 
 
+
+
+
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
+import tv.pandora.adsrv.domain.Creative;
 import tv.pandora.adsrv.domain.Target;
 import tv.pandora.adsrv.model.CpmgrModel;
 
@@ -148,5 +152,39 @@ public class CpmgrImpl implements CpmgrFacade{
 	}
 	public void delTargetChannelID(Map<String, String> map){
 		cpmgrModel.delTargetChannelID(map);
+	}
+	public List<Map<String,String>> getTemplateList(Map<String, String> map){
+		return cpmgrModel.getTemplateList(map);
+	}
+	public Integer getTemplateCnt(Map<String, String> map){
+		return cpmgrModel.getTemplateCnt(map);
+	}
+	public Map<String,String> getTemplate(Map<String, String> map){
+		return cpmgrModel.getTemplate(map);
+	}
+	public void addTemplate(Map<String,String> map){
+		cpmgrModel.addTemplate(map);
+	}
+	public void modTemplate(Map<String,String> map){
+		cpmgrModel.modTemplate(map);
+	}
+	
+	public List<Creative> getCreativeList(Map<String, String> map){
+		return cpmgrModel.getCreativeList(map);
+	}
+	public Integer getCreativeCnt(Map<String, String> map){
+		return cpmgrModel.getCreativeCnt(map);
+	}
+	public Creative getCreative(Map<String, String> map){
+		return cpmgrModel.getCreative(map);
+	}
+	public Integer addCreative(Creative cr){
+		return cpmgrModel.addCreative(cr);
+	}
+	public void addCreativeClick(List<Map<String, String>> list){
+		cpmgrModel.addCreativeClick(list);
+	}
+	public Integer modCreative(Creative cr){
+		return cpmgrModel.modCreative(cr);
 	}
 }

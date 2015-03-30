@@ -52,7 +52,8 @@ public class AdsrvMultiActionController extends MultiActionController{
 			if (object != null) {
 				map.put(name, object);
 			}
-			
+			System.out.println("------------------ 멀티액션 map = " + map);
+
 			return new ModelAndView(viewname, map);
 		}
 		
@@ -126,6 +127,10 @@ public class AdsrvMultiActionController extends MultiActionController{
 		 */
 		protected String get_check(HttpServletRequest request, String paramName) {
 			String paramValue = request.getParameter(paramName);
+			
+
+			System.out.println("------------------ 멀티액션 paramValue = " + paramValue);
+			
 
 			if(StringUtil.isEmptyOrWhitespace(paramValue)) {
 				throw new AppException (messageHandler.getErrMessage("pptree.err.ERR_PARAM_LACK", new String[] {paramName}));					

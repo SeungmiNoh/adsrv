@@ -28,6 +28,9 @@ public class UsermgrImpl implements UsermgrFacade{
 	public List<User> getUserList(Map<String, String> map) {
 		return usermgrModel.getUserList(map);
 	}
+	public List<Map<String,String>> getUserPerList(Map<String, String> map){
+		return usermgrModel.getUserPerList(map);
+	}
 	public List<Map<String,String>> getCorpList(Map<String, String> map){
 		return usermgrModel.getCorpList(map);
 	}
@@ -47,11 +50,34 @@ public class UsermgrImpl implements UsermgrFacade{
 	public Integer getUserCnt(Map<String, String> map){
 		return usermgrModel.getUserCnt(map);
 	}
-	public Integer addUser(Map<String, String> map){
-		return usermgrModel.addUser(map);
+	public Integer addUser(User user){
+		return usermgrModel.addUser(user);
 	}
-	public Integer modUser(Map<String, String> map){
-		return usermgrModel.modUser(map);
+	public Integer modUser(User user){
+		return usermgrModel.modUser(user);
 	}
-
+	public List<Map<String,String>> getUserPerSchema(Map<String, String> map){
+		return usermgrModel.getUserPerSchema(map);
+	}
+	public List<Map<String,String>> getPerSchemaList(Map<String, String> map){
+		return usermgrModel.getPerSchemaList(map);
+	}
+	public List<Map<String,String>> getMenuList(Map<String, String> map){
+		return usermgrModel.getMenuList(map);
+	}
+	public Integer addPermission(Map<String, String> map){
+		return usermgrModel.addPermission(map);
+	}
+	public void addPermissionMenu(List<Map<String, String>> list){
+		usermgrModel.addPermissionMenu(list);
+	}
+	public void modPermission(Map<String, String> map){
+		usermgrModel.modPermission(map);
+	}
+	public void modPermissionMenu(Map<String, String> map){
+		usermgrModel.modPermissionMenu(map);
+	}
+	public void delPermissionMenu(Map<String, String> map){
+		usermgrModel.delPermissionMenu(map);
+	}
 }

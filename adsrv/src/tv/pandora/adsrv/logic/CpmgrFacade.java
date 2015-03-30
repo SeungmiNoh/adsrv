@@ -5,6 +5,7 @@ import java.util.Map;
 
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
+import tv.pandora.adsrv.domain.Creative;
 import tv.pandora.adsrv.domain.Target;
 
 
@@ -47,5 +48,17 @@ public interface CpmgrFacade {
 	public Integer modTargetChannel(Map<String, String> map);
 	public Integer modTargetChannelID(Map<String, String> map);
 	public void delTargetChannelID(Map<String, String> map);
+	public List<Map<String,String>> getTemplateList(Map<String, String> map);
+	public Integer getTemplateCnt(Map<String, String> map);
+	public Map<String,String> getTemplate(Map<String, String> map);
+	public void addTemplate(Map<String,String> map);
+	public void modTemplate(Map<String,String> map);
+	
+	public List<Creative> getCreativeList(Map<String, String> map);
+	public Integer getCreativeCnt(Map<String, String> map);
+	public Creative getCreative(Map<String, String> map);
+	public Integer addCreative(Creative cr);
+	public void addCreativeClick(List<Map<String, String>> list);
+	public Integer modCreative(Creative cr);
 
 }

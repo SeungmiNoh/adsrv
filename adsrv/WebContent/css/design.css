@@ -16,6 +16,10 @@
  * {
      -webkit-text-size-adjust: none;
  }
+ 
+ .point {
+  cursor: pointer !important; 
+ }
  .btn {
      font-size: 12px;
  }
@@ -38,6 +42,10 @@
      white-space: nowrap;
  }
  /* container Start */
+ 
+ 
+ 
+ 
  
  .containerBg {
      position: absolute;
@@ -383,12 +391,12 @@
  }
  .rptTable th {
      color: #555555;
-     padding: 10px;
+     padding: 4px;
      background-color: #ebebeb;
  }
  .rptTable td {
      color: #666666;
-     padding: 5px;
+     padding: 4px;
  }
  .listTable tbody.sum tr td {
      background-color: #e5f4ff !important;
@@ -650,3 +658,15 @@
      padding: 10px;
      margin-bottom: 5px;
  }
+.txtOrange {color:#FE642E !important;}
+.txtNavy {color:#003399 !important;}
+.txtPurple {color:#9A2EFE !important;}
+.txtRed {color:#FF0000 !important;}
+.txtGreen {color:#537e27 !important;}
+.txtBlack {color:#3B0B0B !important;}
+.txtBlue {color:#4A82BA !important;}
+.txtGray {color:#898989 !important;}
+.txtBold {font-weight:bold !important;}
+.txtNormal {font-weight:normal !important;}
+.txtSmall {font-size:11px;letter-spacing:-1px !important;}
+.txtTiny {font-size:10px !important;}

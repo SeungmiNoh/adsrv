@@ -7,6 +7,7 @@ import tv.pandora.adsrv.common.handler.MessageHandler;
 import tv.pandora.adsrv.dao.CpmgrDao;
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
+import tv.pandora.adsrv.domain.Creative;
 import tv.pandora.adsrv.domain.Target;
 
 public class CpmgrModel {
@@ -119,5 +120,38 @@ public class CpmgrModel {
 	}
 	public void delTargetChannelID(Map<String, String> map){
 		cpmgrDaoMaster.delTargetChannelID(map);
+	}
+	public List<Map<String,String>> getTemplateList(Map<String, String> map){
+		return cpmgrDaoMaster.getTemplateList(map);
+	}
+	public Integer getTemplateCnt(Map<String, String> map){
+		return cpmgrDaoMaster.getTemplateCnt(map);
+	}
+	public Map<String,String> getTemplate(Map<String, String> map){
+		return cpmgrDaoMaster.getTemplate(map);
+	}
+	public void addTemplate(Map<String, String> map){
+		cpmgrDaoMaster.addTemplate(map);
+	}
+	public void modTemplate(Map<String, String> map){
+		cpmgrDaoMaster.modTemplate(map);
+	}
+	public List<Creative> getCreativeList(Map<String, String> map){
+		return cpmgrDaoMaster.getCreativeList(map);
+	}
+	public Integer getCreativeCnt(Map<String, String> map){
+		return cpmgrDaoMaster.getCreativeCnt(map);
+	}
+	public Creative getCreative(Map<String, String> map){
+		return cpmgrDaoMaster.getCreative(map);
+	}
+	public Integer addCreative(Creative cr){
+		return cpmgrDaoMaster.addCreative(cr);
+	}
+	public void addCreativeClick(List<Map<String, String>> list){
+		cpmgrDaoMaster.addCreativeClick(list);
+	}
+	public Integer modCreative(Creative cr){
+		return cpmgrDaoMaster.modCreative(cr);
 	}
 }

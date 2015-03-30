@@ -3,7 +3,8 @@
     "http://ibatis.apache.org/dtd/sql-map-2.dtd">
     <sqlMap namespace="CpmgrSQL">
     <typeAlias alias="cp" type="tv.pandora.adsrv.domain.Campaign" />
-    <typeAlias alias="target" type="tv.pandora.adsrv.domain.Target" />
+    <typeAlias alias="cr" type="tv.pandora.adsrv.domain.Creative" />
+     <typeAlias alias="target" type="tv.pandora.adsrv.domain.Target" />
     <typeAlias alias="ads" type="tv.pandora.adsrv.domain.Ads" />
 	<select id="getCpList" resultClass="cp" parameterClass="java.util.Map">
 		select a.cpid, a.cpname, a.startdate, a.enddate, 
@@ -13,17 +14,17 @@
 				a.tcid, t.username as tcname, a.budget,
 			    a.insertdate, a.updatedate, a.insertuser, a.updateuser 
 		 from campaign a
-		      left join corporation c on a.clientid = c.corpid
-		      left join corporation g on a.agencyid = g.corpid
-		      left join corporation r on a.medrepid = r.corpid
+		      left join corporation c on a.clientid = c.corpid and c.corptype = 1
+		      left join corporation g on a.agencyid = g.corpid and g.corptype = 1
+		      left join corporation r on a.medrepid = r.corpid and r.corptype = 1
 		      left join users t on a.tcid = t.userid
 	</select>
 	<select id="getCpCnt" resultClass="Integer" parameterClass="java.util.Map">
 		select count(*)
 		 from campaign a
-		      left join corporation c on a.clientid = c.corpid
-		      left join corporation g on a.agencyid = g.corpid
-		      left join corporation r on a.medrepid = r.corpid
+		      left join corporation c on a.clientid = c.corpid and c.corptype = 1
+		      left join corporation g on a.agencyid = g.corpid and g.corptype = 1
+		      left join corporation r on a.medrepid = r.corpid and r.corptype = 1
 		      left join users t on a.tcid = t.userid
 	</select>
 	  
@@ -35,9 +36,9 @@
 				a.tcid, t.username as tcname, a.budget,
 			    a.insertdate, a.updatedate, a.insertuser, a.updateuser, u.username as updateusername
 		 from campaign a
-		      left join corporation c on a.clientid = c.corpid
-		      left join corporation g on a.agencyid = g.corpid
-		      left join corporation r on a.medrepid = r.corpid
+		      left join corporation c on a.clientid = c.corpid and c.corptype = 1
+		      left join corporation g on a.agencyid = g.corpid and g.corptype = 1
+		      left join corporation r on a.medrepid = r.corpid and r.corptype = 1
 		      left join users t on a.tcid = t.userid
 		      left join users u on a.updateuser = u.userid
 		  where a.cpid = $cpid$
@@ -46,7 +47,7 @@
 		select a.corpname as label, a.corpid as value, a.corpname as id
 		 from adsrv.corporation a  
 		 where stat = 1
-		 	and corptype = '$corptype$'
+		 	and corptype = $corptype$
 		 order by corpname
 	</select>  
 	<select id="getCodeList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
@@ -87,7 +88,7 @@
 	        <isNotEmpty property="tcid">$tcid$, </isNotEmpty>
 	        0,
 	        '$insertdate$',
-	        now(),
+	        '$insertdate$',
 	        $insertuser$,
 	        $insertuser$);
 	        
@@ -109,7 +110,7 @@
 		  <isNotEmpty property="budget">budget      = '$budget$', </isNotEmpty>     
 		  <isNotEmpty property="tcid">tcid        = $tcid$, </isNotEmpty> 
 		  <isNotEmpty property="stat"> stat = $stat$,</isNotEmpty>       
-		  updatedate  = now(),         
+		  updatedate  = $updatedate$,         
 		  updateuser  = $updateuser$		     
 		where cpid = $cpid$;	
 	</update>
@@ -153,6 +154,8 @@
              enddate,
              end_hour,
              end_min,
+             stime,
+             etime,
              goaltype,
              period,
              salestype,
@@ -168,28 +171,30 @@
              updateuser,
              updatedate             
 		) values (0,
-		        '$adsname$',
-		        $cpid$,
-		        '$startdate$',
-		        '$start_hour$',
-		        '$start_min$',
-		        '$enddate$',
-		        '$end_hour$',
-		        '$end_min$',
-		        $goaltype$,
-		        $period$,
-		        $salestype$,
-		        $prtype$,
-		        '$budget$',
-		        '$book_total$',
-		        '$goal_total$',
-		        '$goal_daily$',
+		        #adsname#,
+		        #cpid#,
+		        #startdate#,
+		        #start_hour#,
+		        #start_min#,
+		        #enddate#,
+		        #end_hour#,
+		        #end_min#,
+		        UNIX_TIMESTAMP(#stime#),
+		        UNIX_TIMESTAMP(#etime#),
+		        #goaltype#,
+		        #period#,
+		        #salestype#,
+		        #prtype#,
+		        #budget#,
+		        #book_total#,
+		        #goal_total#,
+		        #goal_daily#,
 		        1,
 		        1,
-		        $insertuser$,
-		        '$insertdate$',
-		        $insertuser$,
-		        now()
+		        #insertuser#,
+		        #insertdate#,
+		        #insertuser#,
+		        #insertdate#
 		);
 	    	<selectKey resultClass="int">
 	         SELECT LAST_INSERT_ID()
@@ -221,41 +226,111 @@
 	;
 	
 	</update>
-	
-	<insert id="addCreative" parameterClass="java.util.Map">	
+	<select id="getCreativeList" resultClass="cr" parameterClass="java.util.Map">
+	 select x.*, y.`isname` as cr_statename, y.text
+	   from (
+			select a.`crid`, a.`crname`, a.`clientid`, b.`corpname` as clientname, 
+			       a.`prtype`, t.isname as prtypename, a.`crtype`, a.width, a.`height`, a.`crurl`, max(ifnull(c.`cr_state`,0)) cr_state,
+			       a.insertdate, a.insertuser, a.updatedate, a.updateuser, u.username as insertusername
+			from creative a
+			     left join ads_creative c on a.crid = c.crid
+			     left join corporation b on a.clientid = b.corpid
+			     left join code_instance t on t.code = 'prtype' and a.prtype = t.isid
+				 left join users u on a.updateuser = u.userid
+		where a.stat = 1     
+			  	<isNotEmpty property="cr_state"> and c.cr_state = $cr_state$</isNotEmpty>
+			  	<isNotEmpty property="width"> and width = $width$</isNotEmpty>
+			  	<isNotEmpty property="height"> and height = $height$</isNotEmpty>
+			  	<isNotEmpty property="sday"> and substr(a.insertdate, 1, 8) between '$sday$' and '$eday$'</isNotEmpty>
+			  	<isNotEmpty property="prtype"> and a.prtype = $prtype$ </isNotEmpty>
+			  	<isNotEmpty property="crtype"> and a.crtype = $crtype$ </isNotEmpty>
+			  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+			group by a.crid
+	 		) x
+	     	left join code_instance y on y.code = 'cr_state' and x.cr_state = y.isid         
+		 order by updatedate desc
+         <isNotEmpty property="max">
+          limit $skip$,$max$
+          </isNotEmpty>;   	          
+      </select> 
+	<select id="getCreativeCnt" resultClass="Integer" parameterClass="java.util.Map">
+		select count(distinct a.crid)
+		from creative a
+			     left join ads_creative c on a.crid = c.crid
+			     left join corporation b on a.clientid = b.corpid
+			     left join code_instance t on t.code = 'prtype' and a.prtype = t.isid
+		where a.stat = 1     
+			  	<isNotEmpty property="cr_state"> and c.cr_state = $cr_state$</isNotEmpty>
+			  	<isNotEmpty property="width"> and width = $width$</isNotEmpty>
+			  	<isNotEmpty property="height"> and height = $height$</isNotEmpty>
+			  	<isNotEmpty property="sday"> and substr(a.insertdate, 1, 8) between '$sday$' and '$eday$'</isNotEmpty>
+			  	<isNotEmpty property="prtype"> and a.prtype = $prtype$ </isNotEmpty>
+			  	<isNotEmpty property="crtype"> and a.crtype = $crtype$ </isNotEmpty>
+			  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	  </select> 
+     
+     
+	<insert id="addCreative" parameterClass="cr">	
 		insert into adsrv.creative
             (crid,
              crname,
-             agentid,
+             clientid,
              crtype,
              crurl,
              width,
              height,
              richmedia,
-             isprism,
+             prtype,
              stat,
              insertdate,
              insertuser,
-             updatedate,
+             updatedate,	
              updateuser
         )values (
         	0,
 	        '$crname$',
-	        $agentid$,
+	        $clientid$,
 	        $crtype$,
 	        '$crurl$',
 	        $width$,
 	        $height$,
 	        '$richmedia$',
-	        $isprism$,
+	        $prtype$,
 	        1,
 	        '$insertdate$',
 	        $insertuser$,
 	        now(),
 	        $insertuser$
 	      );
+	      <selectKey resultClass="int">
+	         SELECT LAST_INSERT_ID()
+	      </selectKey> 
  	</insert>
-	
+	<insert id="addCreativeClick" parameterClass="java.util.Map">
+         INSERT INTO target_channel_id (
+			tid
+			, crid
+			, ckid
+			, clickname
+			, clickurl
+			, updatedate
+			, updateuser
+			, stat
+		) 
+		<dynamic>
+			<iterate prepend="VALUES" conjunction=", " property="List">
+				( 
+					#List[].crid# 
+					, 0
+					, #List[].clickname#
+					, #List[].clickurl#
+					, now()
+					, #List[].updateuser# 	
+					, 1		
+				)
+			</iterate>
+		</dynamic>
+     </insert>
 	<update id="modCreative" parameterClass="java.util.Map">	
 		update adsrv.creative
 		set   <isNotEmpty property="crname">crname        = '$crname$', </isNotEmpty>     
@@ -429,6 +504,7 @@
       from target a
 		   inner join target_ip b on a.tid = b.tid 
 	  where a.tid = $tid$
+		and b.stat = 1
 	 order by idx
 	</select>
 	<select id="getCategoryTargetValue" resultClass="target" parameterClass="java.util.Map">
@@ -437,13 +513,20 @@
 		   inner join target_category b on a.tid = b.tid 
 	  where a.tid = $tid$
 	</select>
-	<select id="getChannelTargetValList" resultClass="target" parameterClass="java.util.Map">
-	  select a.tid, a.targetname, a.targettype, b.cid, b.`excflag`, b.`slotid`, c.channelid, c.channelname
+	<select id="getChannelTargetValue" resultClass="target" parameterClass="java.util.Map">
+	  select a.tid, a.targetname, a.targettype, b.`excflag`, b.`slotid`, s.secid, s.siteid
 	   from target a
 			inner join target_channel b on a.tid = b.tid 
-			inner join target_channel_id c on a.tid = c.tid and b.cid = c.cid
+			left join slot s on b.slotid = s.slotid 
 	  where a.tid = $tid$
-	  order by idx	
+	
+	</select>
+	<select id="getChannelTargetValList" resultClass="target" parameterClass="java.util.Map">
+		select tid, idx, channelid, channelname
+		   from target_channel_id a 			
+		  where tid = $tid$
+		    and stat = 1
+		  order by idx	
 	</select>	
 	<select id="getCountryTargetValue" resultClass="target" parameterClass="java.util.Map">	
 		select a.tid, a.targetname, a.targettype, 
@@ -504,7 +587,7 @@
 		update adsrv.target_ip
 		   set stat = 0
            where tid = $tid$
-             and cid = $cid$;
+             ;
 	</update> 
  	<delete id="delTargetIP" parameterClass="java.util.HashMap">
 		delete 
@@ -568,28 +651,22 @@
 	<insert id="addTargetChannel" parameterClass="java.util.Map">
 	    insert into adsrv.target_channel
                 (tid,
-                 cid,
                  excflag,
                  slotid)
 	    values ($tid$,
-	            0,
 	            $excflag$,
-	            $slotid$);
-     	<selectKey resultClass="int">
-         SELECT LAST_INSERT_ID()
-        </selectKey>  	
+	            $slotid$); 	
 	</insert>  
      <update id="modTargetChannel" parameterClass="java.util.Map">
 		update adsrv.target_channel
 		   set excflag = $excflag$,
 		   	   slotid = $slotid$
            where tid = $tid$
-             and cid = $cid$;
+             ;
 	</update>       
 	<insert id="addTargetChannelID" parameterClass="java.util.Map">
          INSERT INTO target_channel_id (
 			tid
-			, cid
 			, idx
 			, channelid
 			, channelname
@@ -599,7 +676,6 @@
 			<iterate prepend="VALUES" conjunction=", " property="List">
 				( 
 					#List[].tid# 
-					, #List[].cid# 
 					, 0
 					, #List[].channelid#
 					, #List[].channelname#	
@@ -612,15 +688,71 @@
 		update adsrv.target_channel_id
 		   set stat = 0
            where tid = $tid$
-             and cid = $cid$;
+          ;
 	</update> 
       <delete id="delTargetChannelID" parameterClass="java.util.HashMap">
 		delete 
 		  from target_channel_id
 		 where tid = $tid$
-		   and cid = $cid$
 		   and stat = 0;
 	  </delete>
-      
+      <insert id="addTemplate" parameterClass="java.util.HashMap">
+	      insert into adsrv.template
+	            (tmpid,
+	             tmpname,
+	             tmpcode,
+	             memo, 
+	             stat,
+	             updatedate,
+	             updateuser
+	             )
+			values (0,
+		        #tmpname#,
+		        #tmpcode#,
+		        #memo#, 
+		        1,
+		        now(),
+		        #userid#
+		 	);
+	 </insert>
+	 <update id="modTemplate" parameterClass="java.util.HashMap">
+		 update adsrv.template
+		 	set <isNotEmpty property="tmpname">tmpname = '$tmpname$', </isNotEmpty>
+		 	    <isNotEmpty property="imgflag">imgflag = $imgflag$, </isNotEmpty>
+	            <isNotEmpty property="tmpcode">tmpcode = '$tmpcode$', </isNotEmpty>
+	            <isNotEmpty property="memo">memo = '$memo$', </isNotEmpty>
+	            <isNotEmpty property="stat">stat      = $stat$, </isNotEmpty> 
+	            updatedate = now(),
+	            updateuser = $userid$
+	      where tmpid = $tmpid$
+	 </update>
+	 <select id="getTemplateList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		select a.tmpid, a.tmpname, tmpcode, imgflag, memo,
+		       a.updateuser, u.username as updateusername, a.updatedate 
+		 from template a		     
+		      left join users u on a.updateuser = u.userid
+		 where a.stat = 1     
+		  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+		 order by <isNotEmpty property="order_str"> $order_str$ ,</isNotEmpty>
+		          a.updatedate desc
+         <isNotEmpty property="max">
+          limit $skip$,$max$
+          </isNotEmpty>;
+	</select>
+	<select id="getTemplateCnt" resultClass="Integer" parameterClass="java.util.Map">
+		select count(*)
+		 from template a		     
+		      left join users u on a.updateuser = u.userid
+		 where a.stat = 1     
+		  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	</select>
+	 <select id="getTemplate" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		select a.tmpid, a.tmpname, tmpcode, imgflag, memo,
+		       a.updateuser, u.username as updateusername, a.updatedate 
+		 from template a		     
+		      left join users u on a.updateuser = u.userid
+		 where a.tmpid = $tmpid$     
+	</select>
+	
 </sqlMap>
 	 

@@ -95,17 +95,29 @@ function iconsh(obj){
 function checkIp(ip_addr)
 {
 	console.log("ip_addr=="+ip_addr);
-
-	var filter = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/;
-	
+	var filter = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/;	
 	console.log("filter.test(ip_addr)="+filter.test(ip_addr));
-
-	var result = filter.test(ip_addr);
-
-	return result;
+	return filter.test(ip_addr);
 
 }
 
+// 암호 체크
+function checkPwd(str)
+{
+	/* 조건1. 6~20 영문 대소문자
+	 * 조건2. 최소 1개의 숫자 혹은 특수 문자를 포함해야 함	
+	 */
+	var filter = /^(?=.*[a-zA-Z])((?=.*\d)|(?=.*\W)).{6,20}$/;	
+	console.log("filter.test("+str+")="+filter.test(str));
+	return filter.test(str);
+}
+//URL 체크
+function checkURL(str)
+{
+	var filter = /^(file|gopher|news|nntp|telnet|https?|ftps?|sftp):\/\/([a-z0-9-]+\.)+[a-z0-9]{2,4}.*$/;	
+	console.log("checkURL filter.test("+str+")="+filter.test(str));
+	return filter.test(str);
+}
 
 //
 

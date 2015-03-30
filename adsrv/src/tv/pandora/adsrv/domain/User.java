@@ -13,7 +13,7 @@ public class User implements Serializable {
 	private String username;
 	private String usertype;
 	private String loginid;
-	private String password;
+	private String passwd;
 	private String corpid;
 	private String corpname;
 	private String perid;
@@ -28,6 +28,16 @@ public class User implements Serializable {
 	private String insertusername;
 	private String ismain;
 	private String ismgr;
+	private String ipstr;
+	private String text;
+	private String stat;
+	
+	public String getIpstr() {
+		return ipstr;
+	}
+	public void setIpstr(String ipstr) {
+		this.ipstr = ipstr;
+	}
 	public String getUserid() {
 		return userid;
 	}
@@ -53,11 +63,11 @@ public class User implements Serializable {
 	public void setLoginid(String loginid) {
 		this.loginid = loginid;
 	}
-	public String getPassword() {
-		return password;
+	public String getPasswd() {
+		return passwd;
 	}
-	public void setPassword(String password) {
-		this.password = password;
+	public void setPasswd(String passwd) {
+		this.passwd = passwd;
 	}
 	public String getCorpid() {
 		return corpid;
@@ -142,6 +152,20 @@ public class User implements Serializable {
 	}
 	public void setIsmgr(String ismgr) {
 		this.ismgr = ismgr;
+	}
+	
+	public String getText() {
+		return text;
+	}
+	public void setText(String text) {
+		this.text = text;
+	}
+	
+	public String getStat() {
+		return stat;
+	}
+	public void setStat(String stat) {
+		this.stat = stat;
 	}
 	public static long getSerialversionuid() {
 		return serialVersionUID;

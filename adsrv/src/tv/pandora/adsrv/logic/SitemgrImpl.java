@@ -70,19 +70,38 @@ public class SitemgrImpl implements SitemgrFacade{
 	public Integer modSlot(Map<String, String> map) {
 		return sitemgrModel.modSlot(map);
 	}
-	public List<Map<String,String>> getSlotGroupList(Map<String, String> map){
-		return sitemgrModel.getSlotGroupList(map);
+	public List<Map<String,String>> getSlgroupList(Map<String, String> map){
+		return sitemgrModel.getSlgroupList(map);
 	}
-	public Integer getSlotGroupCnt(Map<String, String> map){
-		return sitemgrModel.getSlotGroupCnt(map);
+	public Integer getSlgroupCnt(Map<String, String> map){
+		return sitemgrModel.getSlgroupCnt(map);
 	}
-	public Integer addSlotGroup(Map<String, String> map){
-		return sitemgrModel.addSlotGroup(map);
+	public Integer addSlgroup(Map<String, String> map){
+		return sitemgrModel.addSlgroup(map);
 	}
-	public Integer modSlotGroup(Map<String, String> map){
-		return sitemgrModel.modSlotGroup(map);
+	public Integer modSlgroup(Map<String, String> map){
+		return sitemgrModel.modSlgroup(map);
 	}
-	public Integer addSlotGroupHasSlot(Map<String, String> map){
-		return sitemgrModel.addSlotGroupHasSlot(map);
+	public void addSlgroupSlot(List<Map<String, String>> list){
+		sitemgrModel.addSlgroupSlot(list);
 	}
+	public void modSlgroupSlot(Map<String, String> map){
+		sitemgrModel.modSlgroupSlot(map);
+	}
+	public void delSlgroupSlot(Map<String, String> map){
+		sitemgrModel.delSlgroupSlot(map);
+	}
+	public Map<String,String> getSite(Map<String, String> map){
+		return sitemgrModel.getSite(map);
+	}
+	public Map<String,String> getSection(Map<String, String> map){
+		return sitemgrModel.getSection(map);
+	}
+	public Map<String,String> getSlot(Map<String, String> map){
+		return sitemgrModel.getSlot(map);
+	}
+	public Map<String,String> getSlgroup(Map<String, String> map){
+		return sitemgrModel.getSlgroup(map);
+	}
+
 }

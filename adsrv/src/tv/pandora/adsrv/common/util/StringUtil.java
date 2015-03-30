@@ -7,8 +7,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -146,6 +148,31 @@ public class StringUtil {
   	
   	return src.replaceAll("(?i)<(\\s)*(/)?(\\s)*script([^>])*>", "");   		
   }
+  
+  public static String encodeURIComponent(String s)
+  {
+    String result = null;
+ 
+    try
+    {
+      result = URLEncoder.encode(s, "UTF-8")
+                         .replaceAll("\\+", "%20")
+                         .replaceAll("\\%21", "!")
+                         .replaceAll("\\%27", "'")
+                         .replaceAll("\\%28", "(")
+                         .replaceAll("\\%29", ")")
+                         .replaceAll("\\%7E", "~");
+    }
+ 
+    // This exception should never occur.
+    catch (UnsupportedEncodingException e)
+    {
+      result = s;
+    }
+ 
+    return result;
+  }
+  
   public static String cutStrLength (String str, Integer leng)
   {	    
 	  if(str.length()>leng)
@@ -250,7 +277,12 @@ public class StringUtil {
 		else if ( str == "null" )	return "";
 		else	return str;
   	}	
-  	public static String isNullZero(String str){
+	public static String isNotNull(String str, String prestr){
+		if ( str == null )	return "";
+		else if ( str == "null" )	return "";
+		else	return prestr+str;
+  	}	 	
+	public static String isNullZero(String str){
 		if ( str == null || str.equals("") || str.equals("null"))	return "0";
 		else	return str;
   	}	

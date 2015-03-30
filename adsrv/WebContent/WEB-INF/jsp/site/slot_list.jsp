@@ -27,8 +27,8 @@ try
     Integer max = (Integer)map.get("max");
     
     String totalCount = map.get("totalCount").toString();
-    String countPerPage = map.get("countPerPage").toString();
     String nowPage = map.get("nowPage").toString();
+
     
     JSONArray sec_data = JSONArray.fromObject(seclist);
 %>  
@@ -80,10 +80,46 @@ $(function(){
 		
 		e.preventDefault();
 		$('#myModal').modal();
+		$(".modify").css("display", "none");
+		$(".new").css("display", "");
+		$(".debug").val(""); //값 초기화	 (siteid, change)	
 		$('#sitename').focus();
 		$("input:radio[name='sitetype']:radio[value=1]").prop('checked',true);
 	});
-
+	
+	$('#frmRegist').change(function(e){	
+		$("#change").val("change");
+	});
+	
+	$("a[name=slotmod]").click(function(e){	
+		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
+		$(".debug").val(""); //값 초기화	 (slotid, beforetype, change)	
+		var slotid = $(this).attr("slotid");
+		$('#myModal').modal();
+		
+		
+		$(".modify").css("display","");
+		$(".new").css("display", "none");
+		
+		MasDwrService.getSlot(slotid,
+		   		function(data) {
+					console.log(data.error);
+					$("#slotid").val(slotid);
+					$("#siteid").val(data.siteid);
+					$("#sitename").text(data.sitename);
+					$("#secid").val(data.secid);
+					$("#secname").text(data.secname);
+					$("#sitetag").val(data.sitetag);
+					$("#sectag").val(data.sectag);
+					$("#slotname").val(data.slotname);
+					$("#slottag").val(data.slottag);
+					$("#width").val(data.width);
+					$("#height").val(data.height);
+					$("#memo").val(data.memo);
+					$("#updatedate").html(getYMDHM(data.updatedate, '-'));
+					$("#updateuser").html(data.updateusername);
+				});
+	});
 	$("#s_siteid").change(function(e){		
 		$("#s_secid").html('<option value="">섹션</option>');
 		if($("#s_siteid").val()!=0){
@@ -96,16 +132,84 @@ $(function(){
 		}		
 	});
 	$("#siteid").change(function(e){		
+		var siteid = $(this).val();
+		var sitetag = $("select[name='siteid'] option[value="+siteid+"]:selected").attr("sitetag");
+		console.log("sitetag="+sitetag);
+		$("#sitetag").val(sitetag);
+
 		$("#secid").html('<option value="">섹션</option>');
 		if($("#siteid").val()!=0){
 		
 			for(var i=0;i<arrSection.length;i++){
 				if($("#siteid").val()==arrSection[i].siteid) {
-					$("#secid").append('<option value="'+arrSection[i].secid+'">'+arrSection[i].secname+'</option>');
+					$("#secid").append('<option value="'+arrSection[i].secid+'" sectag="'+arrSection[i].sectag+'">'+arrSection[i].secname+'</option>');
 				}
 			}			
 		}		
 	});
+	
+	$('#secid').change(function(e){	
+		var secid = $("#secid").val();
+		console.log("secid="+secid);
+			var sectag = $("select[name='secid'] option[value="+secid+"]:selected").attr("sectag");
+		console.log("sectag="+sectag);
+				$("#sectag").val(sectag);
+	});	
+	
+	$('#siteid').change(function(e){	
+		var siteid = $("#siteid").val();
+		console.log("siteid="+siteid);
+			var sitetag = $("select[name='siteid'] option[value="+siteid+"]:selected").attr("sitetag");
+		console.log("sitetag="+sitetag);
+				$("#sitetag").val(sitetag);
+	});	
+	
+	
+	$("#btnUpdate").on("click", function(e){		
+		e.preventDefault();
+		if($("#change").val() != "change"){
+			alert("변경된 내용이 없습니다.");
+			return;
+		}else if($.trim($("#slotname").val()).length==0){
+			$("#slotname").css("border-color","red").focus();
+			$("#warningMsg").text("위치 이름을 입력해주세요.");
+			return;
+		} else if($.trim($("#slottag").val()).length==0){
+			$("#slottag").css("border-color","red").focus();
+			$("#warningMsg").text("태그 아이디를 입력해주세요.");
+			return;
+		} else if($.trim($("#width").val()).length==0){
+			$("#width").css("border-color","red").focus();
+			$("#warningMsg").text("사이즈를 입력해주세요.");
+			return;
+		} else if($.trim($("#height").val()).length==0){
+			$("#height").css("border-color","red").focus();
+			$("#warningMsg").text("사이즈를 입력해주세요.");
+			return;
+		}  
+		else{	
+			var cname = $('#slottag').val();			
+			var siteid = $('#siteid').val();		
+			var slotid = $('#slotid').val();		
+			console.log("siteid="+siteid);
+			console.log("slotid="+slotid);
+			MasDwrService.getSecCnt(cname, siteid, slotid,
+					
+				function(data) {
+					var cnt = parseInt(data,10);
+					if(cnt>0) {
+						$("#slottag").css("border-color","red").select();
+						$("#warningMsg").text("사이트 내에 중복된 태그 아이디가 있습니다.\r\n다른 태그 아이디를 입력해주세요.");
+						return;				
+					} else {
+						if(confirm("위치 정보를 수정 하시겠습니까?")) {
+							$("#frmRegist").submit();	
+						}					
+					}
+			});
+		}		
+	});
+	
 	$("#btnRegist").on("click", function(e){		
 		e.preventDefault();
 		if($("#siteid").val()==0){
@@ -141,14 +245,16 @@ $(function(){
 			var cname = $('#slottag').val();			
 			var siteid = $('#siteid').val();		
 			
-			MasDwrService.getSlotCnt(cname, siteid,
+			MasDwrService.getSlotCnt(cname, siteid, 0, 
 		   		function(data) {
 					if(data>0) {
 						$("#slottag").css("border-color","red").select();
 						$("#warningMsg").text("중복된 태그 아이디가 있습니다.");
 						return;				
 					} else {
-						$("#formRegist").submit();	
+						if(confirm("위치를 등록하시겠습니까?")) {
+							$("#frmRegist").submit();	
+						}					
 					}
 			});
 		}
@@ -238,12 +344,10 @@ $(function(){
                     </thead>
                     <tbody>
 <%
-
 for(int k=0; k<slotlist.size(); k++){
                                         
 	Map<String,String> slot = slotlist.get(k);
     
-	 
  %>                    
                     
                     
@@ -251,8 +355,8 @@ for(int k=0; k<slotlist.size(); k++){
                             <td><%=skip+(k+1) %></td>
                             <td><%=slot.get("sitename") %></td>
                             <td><%=slot.get("secname") %></td>
-                            <td class="textLeft"><a href="sitemgr.do?a=slotView"><%=slot.get("slotname") %></a></td>                           
-                            <td class="textLeft"><%=slot.get("sitetag") %>/<%=slot.get("sectag") %>/<%=slot.get("slottag") %></td>
+                            <td class="textLeft"><a href="#none" name="slotmod" slotid="<%=String.valueOf(slot.get("slotid"))%>"><%=slot.get("slotname") %></a></td>                           
+                            <td class="textLeft"><%=slot.get("sitetag") %>/<%=slot.get("sectag") %>@<%=slot.get("slottag") %></td>
                             <td><%=StringUtil.isNull(String.valueOf(slot.get("width"))) %> x <%=StringUtil.isNull(String.valueOf(slot.get("height"))) %></td>
                             <td><%=DateUtil.getYMD(String.valueOf(slot.get("insertdate"))) %></td>
                             <td><%=slot.get("insertusername") %></td>                            
@@ -286,12 +390,15 @@ for(int k=0; k<slotlist.size(); k++){
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title">위치 등록</h4>
-                </div>
+                   <h4 class="modal-title new">위치 등록</h4><h4 class="modal-title modify">위치 수정</h4>
+                 </div>
                 <div class="modal-body">
                     <!-- search form Start -->
-                    <form id="formRegist" name="formRegist" method="post" action="sitemgr.do?a=slotRegist">
-                        <table class="addTable">
+                   <form id="frmRegist" name="frmRegist" method="post" action="sitemgr.do?a=slotRegist">
+                   		<input type="hidden" name="a" value="slotRegist">
+                     	<input type="text" id="slotid" name="slotid" class="debug">
+                    	<input type="text" id="change" name="change" value="" class="debug">
+                       <table class="addTable" style="width:560px">
                             <colgroup>
                                 <col width="20%">
                                     <col width="">
@@ -299,70 +406,80 @@ for(int k=0; k<slotlist.size(); k++){
                             <tr>
                                 <th>사이트<span style="color:red"> * </span></th>
                                 <td>                              
-                                	<select id="siteid" name="siteid" class="form-control input-sm" style="width:360px">
+                                	<select id="siteid" name="siteid" class="new form-control input-sm" style="width:160px">
                                 	<option value="0"></option>
 	                                <%for(int i=0;i<sitelist.size();i++){ 
 	                                	Map<String,String> site = sitelist.get(i);
 	                                %>
-	                                <option value="<%=String.valueOf(site.get("siteid")) %>" <%=s_type.equals(String.valueOf(site.get("sitename")))?"selected":"" %>><%=site.get("sitename") %></option>                               
+	                                <option value="<%=String.valueOf(site.get("siteid")) %>" sitetag="<%=site.get("sitetag")%>"><%=site.get("sitename") %></option>                               
 	                                <%} %>
                                 	</select>
+                               		<span id="sitename" class="modify"></span>
 	 					         </td>
                             </tr>
                             <tr>
                                 <th>섹션<span style="color:red"> * </span></th>
                                 <td>                              
-                                	<select id="secid" name="secid" class="form-control input-sm" style="width:360px">
+                                	<select id="secid" name="secid" class="new form-control input-sm" style="width:160px">
                                 	<option value="0"></option>	                                
                                 	</select>
+                                	<span id="secname" class="modify"></span>
+                                	
 	 					         </td>
                             </tr>
                             <tr>
                                 <th>위치명<span style="color:red"> * </span></th>
                                 <td class="form-inline">
-                                     <input type="text" name="slotname" id="slotname" class="form-control input-sm" width="240px">                                    
+                                     <input type="text" name="slotname" id="slotname" class="form-control input-sm" style="width:280px">                                    
                                </td>
                             </tr>
                              <tr>
-                                <th>태그 아이디<span style="color:red"> * </span></th>
+                                <th>태그 아이디<span style="color:red"> * unique</span></th>
                                 <td class="form-inline">
+                                    <input type="text" id="sitetag" class="form-control input-sm" width="180px" readonly="readonly">&nbsp;/&nbsp;
+                                    <input type="text" id="sectag" class="form-control input-sm" width="180px" readonly="readonly">&nbsp;@&nbsp;
                                     <input type="text" name="slottag" id="slottag" class="form-control input-sm" width="240px" placeholder="">
                                 </td>
                             </tr>
                             <tr>
                                 <th>사이즈<span style="color:red"> * </span></th>
                                 <td class="form-inline">
-                                    <input type="text" name="width" id="width" class="form-control input-sm" width="80px" placeholder=""> x
-                                    <input type="text" name="height" id="height" class="form-control input-sm" width="80px" placeholder="">
+                                    <input type="text" name="width" id="width" class="form-control input-sm" style="width:80px" placeholder="넓이"> x
+                                    <input type="text" name="height" id="height" class="form-control input-sm" style="width:80px" placeholder="높이">
                                 </td>
                             </tr>                           
                             <tr>
                                  <th>설명</th>
                                 <td class="textLeft">
-                                    <textarea name="memo" class="form-control" rows="6"  maxlength="100"></textarea>
+                                    <textarea name="memo" class="form-control" rows="6"  maxlength="100" style="width:360px"></textarea>
                                 </td>
                             </tr>
                          
-                        <tr>                           
-                        <th>등록일</th>
-                            <td class="form-inline">
-                                <%=DateUtil.getYMD(DateUtil.curDate()) %>
-                            </td>
-                        </tr> 
-                        <tr>                       
-                        <th>등록자</th>
-                            <td class="form-inline">
-                                <%=userName %>
-                            </td>
-                        </tr>                        
-                        </table>
+  						<tr class="new">                           
+                      	<th>등록일자</th>
+                          <td class="form-inline"><%=DateUtil.getYMD(DateUtil.curDate()) %></td>
+                      	</tr> 
+                       <tr class="new">                       
+                       <th>등록인</th>
+                           <td class="form-inline"><%=userName %></td>
+                       </tr>  
+                          <tr class="modify">                           
+                      	<th>최종수정</th>
+                          <td class="form-inline" id="updatedate"><%=DateUtil.getYMD(DateUtil.curDate()) %></td>
+                      	</tr> 
+                       <tr class="modify">                       
+                       <th>수정인</th>
+                           <td class="form-inline" id="updateuser"><%=userName %></td>
+                       </tr>                        
+                          </table>
                     </form>
                  </div>
                 <div class="modal-footer">
                 	<span id="warningMsg" style="color:#a00"></span>
-                    <button type="button" class="btn btn-danger btn-sm" id="btnRegist">등록</button>                    
-                    <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
-                </div>
+                      <button type="button" class="new btn btn-danger btn-sm" id="btnRegist">등록</button>                    
+                    <button type="button" class="modify btn btn-danger btn-sm" id="btnUpdate">수정</button>                    
+                   <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+               </div>
             </div>
             <!-- /.modal-content -->
         </div>
@@ -380,7 +497,7 @@ for(int k=0; k<slotlist.size(); k++){
 </body>
 <%
 } catch(Exception e) {
-    e.getMessage();
+    out.println(e.getMessage());
 }
 %>
 </html>

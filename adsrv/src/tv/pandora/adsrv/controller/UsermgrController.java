@@ -1,5 +1,6 @@
 package tv.pandora.adsrv.controller;
 
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,8 @@ public class UsermgrController extends AdsrvMultiActionController
 	}
 	public ModelAndView corpRegist(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
+		String corpid = StringUtil.isNull(request.getParameter("corpid"));
+		String change = StringUtil.isNull(request.getParameter("change"));
 		String corpname = StringUtil.isNull(request.getParameter("corpname"));
 		String corptype = StringUtil.isNull(request.getParameter("corptype"));
 		
@@ -71,10 +74,18 @@ public class UsermgrController extends AdsrvMultiActionController
 	    
 		map.put("corptype", corptype);
 		map.put("corpname", corpname);
-		map.put("insertdate", DateUtil.simpleDate2());
-		map.put("insertuser", userID);
+		map.put("updatedate", DateUtil.simpleDate2());
 		
-		Integer corpid = usermgrFacade.addCorporation(map);
+		if(corpid.equals("")) {
+			map.put("insertdate", DateUtil.simpleDate2());
+			map.put("insertuser", userID);
+			usermgrFacade.addCorporation(map);
+		} else {
+			map.put("updatedate", DateUtil.simpleDate2());
+			map.put("updateuser", userID);
+			map.put("corpid", corpid);
+			usermgrFacade.modCorporation(map);
+		}
 		
 		return new ModelAndView("redirect:usermgr.do?a=corpList", null);
 	}
@@ -82,10 +93,34 @@ public class UsermgrController extends AdsrvMultiActionController
 		
 		String corpid = StringUtil.isNull(request.getParameter("corpid"));
 
+		if(corpid.equals("")){
+			
+			String referer = request.getHeader("referer");
+			System.out.println("referer="+referer);
+			
+			String whatMethod = request.getMethod();
+			System.out.println("whatMethod="+whatMethod);
+			
+			/*response.setCharacterEncoding("EUC-KR"); 
+			Writer w = response.getWriter();
+			w.write("<script>"); 
+			w.write("alert('개인경비 시트 저장 중 오류가 발생했습니다.');"); 
+			w.write("</script>"); 
+			return null;*/
+			Map<String, String> msgmap = new HashMap<String, String>();
+			msgmap.put("referer", StringUtil.isNullReplace(referer,"/"));
+			msgmap.put("msg", "잘못된 경로로 접근하셨습니다.");
+			msgmap.put("backflag", "1");
+			return new ModelAndView("common/block", "response", msgmap);
+		}
+		
+
+		
+		
 		Map<String, String> map = new HashMap<String, String>();
 	    
 		map.put("corpid", corpid);
-		Map<String, String> corp = usermgrFacade.getCorpList(map).get(0);
+		Map<String, String> corp = usermgrFacade.getCorporation(map);
 		
 		System.out.println("-------------------map = "+map);
 		List<User> userlist = usermgrFacade.getUserList(map);
@@ -97,13 +132,28 @@ public class UsermgrController extends AdsrvMultiActionController
 		
 		return new ModelAndView("user/corp_view", "response", resultMap);
 	}
+	public ModelAndView permission(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		Map<String, String> map = new HashMap<String, String>();
+				
+		List<Map<String, String>> menulist = usermgrFacade.getMenuList(map);
+		List<Map<String, String>> schemlist = usermgrFacade.getPerSchemaList(map);
+		map.put("perid", "0");
+		List<Map<String, String>> userscemlist = usermgrFacade.getUserPerSchema(map);
+				
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("menulist", menulist);
+		resultMap.put("schemlist", schemlist);
+		resultMap.put("userscemlist", userscemlist);
+		return new ModelAndView("user/user_permission", "response", resultMap);
+	}
+
 	public ModelAndView userList(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
 		String s_type = StringUtil.isNull(request.getParameter("s_type"));
 		String s_per = StringUtil.isNull(request.getParameter("s_per"));
 		String page = StringUtil.isNull(request.getParameter("p"));
 		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
-
+		String userid = StringUtil.isNull(request.getParameter("userid"));
 		if (page.equals("")) {
 			page = "1";
 		}
@@ -114,6 +164,7 @@ public class UsermgrController extends AdsrvMultiActionController
 	    
 		map.put("corptype", s_type)	;
 		map.put("perid", s_per)	;
+		map.put("userid", userid)	;
 		map.put("skip", String.valueOf(skip))	;
 		map.put("max", String.valueOf(max))	;
 		map.put("sch_text", sch_text);
@@ -123,19 +174,72 @@ public class UsermgrController extends AdsrvMultiActionController
 		
 		// 선택 옵션 목록
 		map.clear();
-		map.put("tbname", "corporation");
+		map.put("code", "corptype");
 		List<Map<String, String>> codelist = cpmgrFacade.getCodeList(map);
 		
-		
+		// 권한 목록
+		map.clear();		
+		List<Map<String, String>> perlist = usermgrFacade.getUserPerList(map);
+
 
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
 		resultMap.put("codelist", codelist);
 		resultMap.put("userlist", userlist);
+		resultMap.put("perlist", perlist);
 		resultMap.put("skip", skip);
 		resultMap.put("max", max);
 		resultMap.put("totalCount", totalCount);
 		resultMap.put("nowPage", page);		
 		return new ModelAndView("user/user_list", "response", resultMap);
+	}
+	public ModelAndView userEdit(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		
+		String userid = StringUtil.isNull(request.getParameter("userid"));
+
+		Map<String, String> map = new HashMap<String, String>();
+	    
+		map.put("userid", userid)	;
+		User user = usermgrFacade.getUserList(map).get(0);
+		
+		// 선택 옵션 목록
+		map.clear();		
+		List<Map<String, String>> perlist = usermgrFacade.getUserPerList(map);
+		
+		
+
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		resultMap.put("user", user);
+		resultMap.put("perlist", perlist);		
+		return new ModelAndView("user/user_edit", "response", resultMap);
+	}
+	public ModelAndView userRegist(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String userid = StringUtil.isNull(request.getParameter("userid"));
+	
+		
+		String userID = (String)SessionUtil.getAttribute("userID");
+	
+		User user = new User();
+		bind(request, user);
+	
+		user.setUpdatedate(DateUtil.simpleDate2());
+		user.setUpdateuser(userID);
+		
+		String url = "";
+		
+		if(userid.equals("")) {
+			user.setInsertdate(DateUtil.simpleDate2());
+			user.setInsertuser(userID);
+			usermgrFacade.addUser(user);
+			
+			url = "usermgr.do?a=corpView&corpid="+user.getCorpid();
+		} else {
+			usermgrFacade.modUser(user);
+			url = "usermgr.do?a=userList&userid="+user.getUserid();
+		}
+		
+		
+		return new ModelAndView("redirect:"+url, null);
 	}
 }

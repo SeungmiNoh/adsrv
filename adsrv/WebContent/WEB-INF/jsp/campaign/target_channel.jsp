@@ -117,7 +117,6 @@ $(function(){
 					$("#warningMsg").text("채널 아이디를 입력해주세요.");
 					return;
 				} else {
-					alert($("[name=slotid]").val());
 					if(confirm("타겟팅을 등록하시겠습니까?")){
 						$("#frmRegist").submit();					
 					}

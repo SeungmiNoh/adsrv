@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 
 import tv.pandora.adsrv.common.Constant;
 import tv.pandora.adsrv.common.util.CookieUtil;
+
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.ModelAndViewDefiningException;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -27,9 +28,15 @@ public class LoginCheckInterceptor extends HandlerInterceptorAdapter {
 	  // session검사
 	  HttpSession session = request.getSession(false);
 	  
+	  //System.out.println("request.getRequestURI() = "+request.getRequestURI());
+	  //System.out.println("request.getParameterMap() = "+request.getParameterMap());
+	  
+	  setLogHistory(request);
+	  
+	  
 	  if(request.getRequestURI().indexOf("login.do")>0) 
 	  {
-		  System.out.println("==== 로그인컨트롤러는 그냥 통과 ========");
+		  //System.out.println("==== 로그인컨트롤러는 그냥 통과 ========");
 		  return true;
 	  }	
 	  else if (session == null) 
@@ -64,7 +71,32 @@ public class LoginCheckInterceptor extends HandlerInterceptorAdapter {
  	  }
 	  return true;
 	}
-
+	
+	private void setLogHistory(HttpServletRequest request) {
+		
+		// get request parameter map
+		Map<String, String[]> requestParams = request.getParameterMap();
+ 
+		// retrieve parameter name - values pair from parameter map
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<String, String[]> entry : requestParams.entrySet()) {
+			String key = entry.getKey();         // parameter name
+			String[] value = entry.getValue();   // parameter values as array of String
+			String valueString = "";
+			
+			// in case of checkbox input, value may be array of length greater than one
+			if (value.length > 1) {
+				for (int i = 0; i < value.length; i++) {
+					valueString += value[i] + " ";
+				}
+			} else {
+				valueString = value[0];
+			}
+			System.out.println("***** " + key + " - " + valueString);
+			sb.append(key).append(" - ").append(valueString).append("; ");
+		}
+		
+	}
 
 
 }
