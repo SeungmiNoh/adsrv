@@ -17,7 +17,7 @@ public class Constant {
 	 */
 	public static final String COOKIEDOMAIN = ".mable-inc.com";
 	public static final String WEB_SERVER_URL = "http://mobile.mable-inc.com/";
-	public static final String WEB_ROOT = "";	
+	public static final String WEB_ROOT = "/adsrv";	
 	public static final String WEB_SERVER_INDEX = WEB_SERVER_URL + "/";
 		
 	public static final String LEAVE_DIR = "/adekorea/files/leave/";	
