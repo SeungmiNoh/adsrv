@@ -57,7 +57,9 @@ public class SitemgrModel {
 	public Integer modSlot(Map<String, String> map){
 	   	return sitemgrDaoMaster.modSlot(map);
 	}
-	
+	public List<Map<String,String>> getSlgroupInSlotList(Map<String, String> map){
+	   	return sitemgrDaoMaster.getSlgroupInSlotList(map);
+	}
 	public List<Map<String,String>> getSlgroupList(Map<String, String> map){
 	   	return sitemgrDaoMaster.getSlgroupList(map);
 	}
@@ -78,6 +80,9 @@ public class SitemgrModel {
 	}
 	public void delSlgroupSlot(Map<String, String> map){
 	   	sitemgrDaoMaster.delSlgroupSlot(map);
+	}
+	public void delSlgroup(Map<String, String> map){
+	   	sitemgrDaoMaster.delSlgroup(map);
 	}
 	public Map<String,String> getSite(Map<String, String> map){
 		return sitemgrDaoMaster.getSite(map);

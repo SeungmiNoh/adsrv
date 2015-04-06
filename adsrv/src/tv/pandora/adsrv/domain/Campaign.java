@@ -25,8 +25,13 @@ public class Campaign implements Serializable{
 		private String updatedate  ;
 		private String insertuser  ;
 		private String updateuser  ;
+		private String updateusername  ;
 		private String stat        ;
-		
+		private String memo;
+		private String max_adsid;
+		private String cp_state;
+		private String cp_statename;
+		private String text;
 		
 		public String getCpid() {
 			return cpid;
@@ -147,6 +152,49 @@ public class Campaign implements Serializable{
 		}
 		public void setStat(String stat) {
 			this.stat = stat;
+		}
+		public String getMemo() {
+			return memo;
+		}
+		public void setMemo(String memo) {
+			this.memo = memo;
+		}
+		
+		public String getUpdateusername() {
+			return updateusername;
+		}
+		public void setUpdateusername(String updateusername) {
+			this.updateusername = updateusername;
+		}
+		
+		public String getCp_state() {
+			return cp_state;
+		}
+		public void setCp_state(String cp_state) {
+			this.cp_state = cp_state;
+		}
+		public String getCp_statename() {
+			return cp_statename;
+		}
+		public void setCp_statename(String cp_statename) {
+			this.cp_statename = cp_statename;
+		}
+		public String getMax_adsid() {
+			return max_adsid;
+		}
+		public void setMax_adsid(String max_adsid) {
+			this.max_adsid = max_adsid;
+		}
+		
+		
+		public String getText() {
+			return text;
+		}
+		public void setText(String text) {
+			this.text = text;
+		}
+		public static long getSerialversionuid() {
+			return serialVersionUID;
 		}
 		
 		

@@ -34,11 +34,11 @@ public class CpmgrModel {
 	public List<Map<String,String>> getCodeList(Map<String, String> map){
 	  	return cpmgrDaoMaster.getCodeList(map);	  	 
 	}
-	public Integer addCampaign(Map<String, String> map){
-    	return cpmgrDaoMaster.addCampaign(map);
+	public Integer addCampaign(Campaign cp){
+    	return cpmgrDaoMaster.addCampaign(cp);
     }
-	public Integer modCampaign(Map<String, String> map){
-    	return cpmgrDaoMaster.modCampaign(map);
+	public Integer modCampaign(Campaign cp){
+    	return cpmgrDaoMaster.modCampaign(cp);
     }	
 	public Integer getCpCnt(Map<String, String> map){
     	return cpmgrDaoMaster.getCpCnt(map);
@@ -49,11 +49,14 @@ public class CpmgrModel {
 	public List<Ads> getAdsList(Map<String, String> map){
     	return cpmgrDaoMaster.getAdsList(map);
     }
-	public Integer addAds(Map<String, String> map){
-    	return cpmgrDaoMaster.addAds(map);
+	public Integer getAdsCnt(Map<String, String> map){
+		return cpmgrDaoMaster.getAdsCnt(map);
     }
-	public Integer modAds(Map<String, String> map){
-    	return cpmgrDaoMaster.modAds(map);
+	public Integer addAds(Ads ads){
+    	return cpmgrDaoMaster.addAds(ads);
+    }
+	public Integer modAds(Ads ads){
+    	return cpmgrDaoMaster.modAds(ads);
     }
 	public List<Map<String,String>> getTargetCodeList(Map<String, String> map){
     	return cpmgrDaoMaster.getTargetCodeList(map);
@@ -154,4 +157,14 @@ public class CpmgrModel {
 	public Integer modCreative(Creative cr){
 		return cpmgrDaoMaster.modCreative(cr);
 	}
+	public void addAdsTargeting(List<Map<String, String>> list){
+		cpmgrDaoMaster.addAdsTargeting(list);
+	}
+	public void addAdsCreative(List<Map<String, String>> list){
+		cpmgrDaoMaster.addAdsCreative(list);
+	}
+	public void addAdsSlot(List<Map<String, String>> list){
+		cpmgrDaoMaster.addAdsSlot(list);
+	}
+
 }

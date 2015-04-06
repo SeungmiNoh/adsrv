@@ -34,9 +34,9 @@ try
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Prism Ad Network</title>
     <!-- css start -->
-    <link rel="stylesheet" href="../css/bootstrap.css">
-    <link rel="stylesheet" href="../css/bootstrap-theme.css">
-    <link rel="stylesheet" href="../css/design.css">
+    <link rel="stylesheet" href="<%=web%>/css/bootstrap.css">
+    <link rel="stylesheet" href="<%=web%>/css/bootstrap-theme.css">
+    <link rel="stylesheet" href="<%=web%>/css/design.css">
    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -52,13 +52,13 @@ try
 
   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
   <script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
-  <link rel="stylesheet" href="/resources/demos/style.css">
- <script type="text/javascript" src="/dwr/engine.js"></script>
-<script type="text/javascript" src="/dwr/util.js"></script>
-<script type="text/javascript" src="/dwr/interface/MasDwrService.js"></script>
-  <script src="../js/bootstrap.js"></script>
-  <script src="../js/basic.js"></script>
- <script src="../js/common.js"></script>
+  
+ <script type="text/javascript" src="<%=web%>/dwr/engine.js"></script>
+<script type="text/javascript" src="<%=web%>/dwr/util.js"></script>
+<script type="text/javascript" src="<%=web%>/dwr/interface/MasDwrService.js"></script>
+  <script src="<%=web%>/js/bootstrap.js"></script>
+  <script src="<%=web%>/js/basic.js"></script>
+ <script src="<%=web%>/js/common.js"></script>
 <script type="text/javascript">
 
 
@@ -223,7 +223,7 @@ $(function(){
                 <div class="boxTitle">
                     <!-- title Start -->
                     <div class="title">사이트 목록</div>
-                    <div class="breadcrumbs"><span class="glyIcon"><img src="../img/navIcon.png" alt=""></span> 현재위치 : 사이트 > 사이트 목록</div>
+                    <div class="breadcrumbs"><span class="glyIcon"><img src="<%=web%>/img/navIcon.png" alt=""></span> 현재위치 : 사이트 > 사이트 목록</div>
                     <!-- title End -->
                 </div>
                 <!-- ads add title Start -->
@@ -425,9 +425,9 @@ for(int k=0; k<sitelist.size(); k++){
     <!-- modal End -->
 
     <!-- js start -->
-    <script src="../js/jquery-1.11.1.js"></script>
-    <script src="../js/bootstrap.js"></script>
-    <script src="../js/basic.js"></script>
+    <script src="<%=web%>/js/jquery-1.11.1.js"></script>
+    <script src="<%=web%>/js/bootstrap.js"></script>
+    <script src="<%=web%>/js/basic.js"></script>
     <!-- js end -->
 </body>
 <%

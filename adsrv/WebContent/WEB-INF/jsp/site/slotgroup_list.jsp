@@ -40,9 +40,9 @@ try
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Prism Ad Network</title>
     <!-- css start -->
-    <link rel="stylesheet" href="../css/bootstrap.css">
-    <link rel="stylesheet" href="../css/bootstrap-theme.css">
-    <link rel="stylesheet" href="../css/design.css">
+    <link rel="stylesheet" href="<%=web%>/css/bootstrap.css">
+    <link rel="stylesheet" href="<%=web%>/css/bootstrap-theme.css">
+    <link rel="stylesheet" href="<%=web%>/css/design.css">
    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -58,29 +58,34 @@ try
 
   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
   <script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
-  <link rel="stylesheet" href="/resources/demos/style.css">
- <script type="text/javascript" src="/dwr/engine.js"></script>
-<script type="text/javascript" src="/dwr/util.js"></script>
-<script type="text/javascript" src="/dwr/interface/MasDwrService.js"></script>
-  <script src="../js/bootstrap.js"></script>
-  <script src="../js/basic.js"></script>
- <script src="../js/common.js"></script>
+  
+ <script type="text/javascript" src="<%=web%>/dwr/engine.js"></script>
+<script type="text/javascript" src="<%=web%>/dwr/util.js"></script>
+<script type="text/javascript" src="<%=web%>/dwr/interface/MasDwrService.js"></script>
+  <script src="<%=web%>/js/bootstrap.js"></script>
+  <script src="<%=web%>/js/basic.js"></script>
+ <script src="<%=web%>/js/common.js"></script>
 <script type="text/javascript">
 
 var arrSection = <%=sec_data%>;
 
 function checkSlot(obj) {
+	$("#change").val("change");
+
 	var slotid = $(obj).val();
 	var slotname = $(obj).attr("slotname");
 	var sitename = $(obj).attr("sitename");
-
+	//console.log('#add'+slotid);
+	//console.log($('#add'+slotid).length);
 	if($(obj).is(':checked')) {
-		var str = '<div id="add'+slotid+'" style="border:1px solid #777;margin:1px;padding:3px;white-space:nowrap;overflow:hidden;">';
-		str += '<a href="#" name="btnSecRemove" slotid='+slotid+'><span class="glyphicon glyphicon-remove" style="width:30px"></span></a>';
-		str += sitename+'<b> > </b> '+slotname;
-		str += '<input type="hidden" name="slotid" value="'+slotid+'"/>';
-		str += '</div>';		
-		$("#addList").append( str );
+		if($('#add'+slotid).length==0){
+			var str = '<div id="add'+slotid+'" style="border-bottom:1px solid #eee;margin:1px;padding:3px;overflow:hidden;">';
+			str += '<a href="#" name="btnSecRemove" slotid='+slotid+'><span class="glyphicon glyphicon-remove" style="width:30px"></span></a>';
+			str += sitename+'<b> > </b> '+slotname;
+			str += '<input type="hidden" name="slotid" value="'+slotid+'"/>';
+			str += '</div>';		
+			$("#addList").append( str );
+		}
 	}else {
 		$("#add"+slotid).remove();
 	}
@@ -88,19 +93,7 @@ function checkSlot(obj) {
 
 
 $(function(){
-	
-	
-	$("#btnPopup").click(function(e){		
-		if($("#s_siteid").val()!=0){
-			$("#siteid").val($("#s_siteid").val());			
-			$("#secid").html($("#s_secid").html());			
-		}
-		
-		e.preventDefault();
-		$('#myModal').modal();
-		$('#sitename').focus();
-		$("input:radio[name='sitetype']:radio[value=1]").prop('checked',true);
-	});
+	$(".debug").css("display","none");
 
 	$("#s_siteid").change(function(e){		
 		$("#s_secid").html('<option value="0">섹션</option>');
@@ -113,15 +106,83 @@ $(function(){
 			}			
 		}		
 	});
-	
+	$("input:checkbox[name='ckall']").click(function(e){	
+		var ischked = $(this).is(':checked');
+		$("input:checkbox[name='ckslot']").prop("checked", ischked);	
+		for(var i=0; i<$("input:checkbox[name='ckslot']").length; i++){
+			checkSlot($("input:checkbox[name='ckslot']").eq(i));		
+		}
+	});	
+	$("#btnPopup").click(function(e){	
+		$("#searchList").html("");
+		$("#addList").html("");
+		$("#frmRegist input").val("");
+		$("#frmRegist select").val("0");
+		if($("#s_siteid").val()!=0){
+			$("#siteid").val($("#s_siteid").val());			
+			$("#secid").html($("#s_secid").html());			
+		}
+		
+		e.preventDefault();
+		$('#myModal').modal();
+		$(".modify").css("display", "none");
+		$(".new").css("display", "");
+		$(".debug").val(""); //값 초기화	 (siteid, change)	
+		$('#sitename').focus();
+		$("input:radio[name='sitetype']:radio[value=1]").prop('checked',true);
+	});
+
+	$('#frmRegist').change(function(e){	
+		$("#change").val("change");
+	});
+	$("a[name=groupmod]").click(function(e){	
+		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
+		$(".debug").val(""); //값 초기화	 (groupid, change)	
+		var groupid = $(this).attr("groupid");
+		$('#myModal').modal();
+		
+		$("#searchList").html("");
+		
+		$(".modify").css("display","");
+		$(".new").css("display", "none");
+		console.log("-------------------groupid ---"+groupid);
+		MasDwrService.getSlgroup(groupid,
+		   		function(data) {
+					console.log(data.error);
+					$("#groupid").val(groupid);
+					$("#groupname").val(data.groupname);
+					$("#width").val(data.width);
+					$("#height").val(data.height);
+					$("#memo").val(data.memo);
+					$("#updatedate").html(getYMDHM(data.updatedate, '-'));
+					$("#updateuser").html(data.updateusername);
+				});
+		console.log("------------------getSlgroupInSlotList -groupid ---"+groupid);
+		MasDwrService.getSlgroupInSlotList(groupid,
+		   		function(data) {
+					for(var k=0; k<data.length; k++){
+						
+						var slotid = data[k].slotid;
+						var sitename = data[k].sitename;
+						var slotname = data[k].slotname;
+						
+						var str = '<div id="add'+slotid+'" style="border-bottom:1px solid #eee;margin:1px;padding:3px;overflow:hidden;">';
+						str += '<a href="#" name="btnSecRemove" slotid='+slotid+'><span class="glyphicon glyphicon-remove" style="width:30px"></span></a>';
+						str += sitename+'<b> > </b> '+slotname;
+						str += '<input type="hidden" name="slotid" value="'+slotid+'"/>';
+						str += '</div>';		
+						$("#addList").append( str );						
+					}
+				});
+	});
 	
 	$("#btnSearch").click(function(e){		
 		var width = $("#width").val();
 		var height = $("#height").val();
 		var siteid = $("#siteid").val();
 		
-
-	
+		$("#searchList").html("");
+		
 		MasDwrService.getSlotList(width, height, siteid,
 	   		function(data) {
 				var htmlstr = '';
@@ -130,7 +191,16 @@ $(function(){
 				{
 					for(var k=0; k<data.length; k++) {
 						htmlstr += '<tr>';
-						htmlstr += '<td><input type="checkbox"  onclick="checkSlot(this)" id="chkBox'+data[k].slotid+'" value="'+data[k].slotid+'" sitename="'+data[k].sitename+'" slotname="'+data[k].slotname+'"/> </td>';
+						htmlstr += '<td><input type="checkbox" name="ckslot" onclick="checkSlot(this)"';
+						htmlstr += ' id="chkBox'+data[k].slotid+'"'; 
+						htmlstr += ' value="'+data[k].slotid+'"'; 
+						htmlstr += ' sitename="'+data[k].sitename+'"'; 
+						htmlstr += ' slotname="'+data[k].slotname+'"'; 
+						if($('#add'+data[k].slotid).length>0) {
+							htmlstr += ' checked';
+						}
+						htmlstr +='"/>';
+						htmlstr +='</td>';
 						htmlstr += '<td>'+data[k].sitename+'</td>';
 						htmlstr += '<td class="textLeft">'+data[k].slotname+'</td>';
 						htmlstr += '<td class="textLeft">'+data[k].width+' x '+data[k].height+'</td>';
@@ -139,11 +209,12 @@ $(function(){
 					}
 				} else {
 					htmlstr += '<tr>';
-					htmlstr += '<td colspan="4">조건에 맞는 위치가 없습니다.</td>';
+					htmlstr += '<td colspan="5">조건에 맞는 위치가 없습니다.</td>';
 					htmlstr += '</tr>';
 					
 				}
-				$("#slotTable").append(htmlstr);
+				console.log("htmlstr="+htmlstr);
+				$("#searchList").append(htmlstr);
 		});
 	});
 
@@ -151,8 +222,56 @@ $(function(){
 		var slotid = $(this).attr("slotid");		
 		$("#chkBox"+slotid).prop("checked", false);
 		$(this).parent("div").remove();
+		$("#change").val("change");
 	});
-	
+	$("#btnUpdate").on("click", function(e){		
+		e.preventDefault();
+		if($("#change").val() != "change"){
+			alert("변경된 내용이 없습니다.");
+			return;
+		}else if($.trim($("#groupname").val()).length==0){
+			
+			console.log("groupname="+$("#groupname").val());
+			$("#groupname").css("border-color","red").focus();
+			$("#warningMsg").text("위치그룹 이름을 입력해주세요.");
+			return;
+		} else if($("[name=slotid]").length==0){
+			//$("#siteid").css("border-color","red").focus();
+			$("#warningMsg").text("위치를 선택해주세요.");
+			return;
+		} else if($.trim($("#width").val()).length==0){
+			$("#width").css("border-color","red").focus();
+			$("#warningMsg").text("사이즈를 입력해주세요.");
+			return;
+		} else if($.trim($("#height").val()).length==0){
+			$("#height").css("border-color","red").focus();
+			$("#warningMsg").text("사이즈를 입력해주세요.");
+			return;
+		}  
+		else{	
+			var cname = $('#groupname').val();			
+			var cid = $('#groupid').val();		
+			console.log("------------------cname---"+cname);
+			console.log("------------------cid---"+cid);
+		
+		
+			MasDwrService.getSlgroupCnt(cname, cid,
+					
+				function(data) {
+					var cnt = parseInt(data,10);
+					console.log("------------------cnt---"+cnt);
+					if(cnt>0) {
+						$("#groupname").css("border-color","red").select();
+						$("#warningMsg").text("중복된 이름이 있습니다.");
+						return;				
+					} else {
+						if(confirm("위치그룹 정보를 수정하시겠습니까?")) {
+							$("#frmRegist").submit();	
+						}					
+					}
+			});
+		}		
+	});	
 	$("#btnRegist").on("click", function(e){		
 		e.preventDefault();
 		if($.trim($("#groupname").val()).length==0){
@@ -178,15 +297,18 @@ $(function(){
 		} */
 		else{	
 			var cname = $('#groupname').val();			
+			var cid = $('#groupid').val();			
 			
-			MasDwrService.getSlotGroupCnt(cname, 
+			MasDwrService.getSlotGroupCnt(cname, 0, 
 		   		function(data) {
 					if(data>0) {
 						$("#groupname").css("border-color","red").select();
 						$("#warningMsg").text("중복된 이름이 있습니다.");
 						return;				
 					} else {
-						$("#formRegist").submit();	
+						if(confirm("위치 그룹을 등록하시겠습니까?")) {
+							$("#frmRegist").submit();	
+						}
 					}
 			});
 		}
@@ -204,7 +326,7 @@ $(function(){
                 <div class="boxTitle">
                     <!-- title Start -->
                     <div class="title">위치그룹 목록</div>
-                    <div class="breadcrumbs"><span class="glyIcon"><img src="../img/navIcon.png" alt=""></span> 현재위치 : 사이트 > 위치그룹 > 위치그룹 목록</div>
+                    <div class="breadcrumbs"><span class="glyIcon"><img src="<%=web%>/img/navIcon.png" alt=""></span> 현재위치 : 사이트 > 위치그룹 > 위치그룹 목록</div>
                     <!-- title End -->
                 </div>
                 <!-- ads add title Start -->
@@ -292,11 +414,11 @@ for(int k=0; k<slotlist.size(); k++){
                     
                         <tr>
                             <td><%=skip+(k+1) %></td>
-                            <td><%=slot.get("groupname") %></td>
+                            <td><a href="#none" name="groupmod" groupid="<%=String.valueOf(slot.get("groupid"))%>"><%=slot.get("groupname") %></a></td>
                             <td><%=StringUtil.isNull(String.valueOf(slot.get("width"))) %> x <%=StringUtil.isNull(String.valueOf(slot.get("height"))) %></td>
                               <td><%=String.valueOf(slot.get("sitecnt")) %></td>
-                          <td><%=String.valueOf(slot.get("slotcnt")) %></td>
-                            <td><%=String.valueOf(slot.get("updatedate")) %></td>
+                          <td class="textLeft"><%--String.valueOf(slot.get("slotcnt")) --%><%=slot.get("slotstr").replaceAll("\n", "<br/>") %></td>
+                            <td><%=DateUtil.getYMD(slot.get("updatedate")) %></td>
                             <td><%=slot.get("updateusername") %></td>                            
                         </tr>
 <%} %>                        
@@ -328,20 +450,23 @@ for(int k=0; k<slotlist.size(); k++){
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title">위치그룹 등록</h4>
+                   <h4 class="modal-title new">위치그룹 등록</h4><h4 class="modal-title modify">위치그룹 수정</h4>
                 </div>
                 <div class="modal-body">
                     <!-- search form Start -->
-                    <form id="formRegist" name="formRegist" method="post" action="sitemgr.do?a=slotGroupRegist">
+                    <form id="frmRegist" name="frmRegist" method="post" action="sitemgr.do?a=slotGroupRegist">
+                   		<input type="hidden" name="a" value="slotGroupRegist">
+                     	<input type="text" id="groupid" name="groupid" class="debug">
+                    	<input type="text" id="change" name="change" value="" class="debug">
                         <table class="addTable">
                             <colgroup>
-                                <col width="20%">
+                                <col width="16%">
                                     <col width="">
                             </colgroup>
                            <tr>
-                                <th>위치그룹명<span style="color:red"> * </span></th>
+                                <th>위치그룹명<span style="color:red"> * unique</span></th>
                                 <td class="form-inline">
-                                     <input type="text" name="groupname" id="groupname" class="form-control input-sm" width="240px">                                    
+                                     <input type="text" name="groupname" id="groupname" class="form-control input-sm" style="width:240px">                                    
                                </td>
                             </tr>
                             <tr>
@@ -365,15 +490,7 @@ for(int k=0; k<slotlist.size(); k++){
                       <tr>
                             <th>조회목록</th>
                             <td class="form-inline">
-   			
-   			<!--  <div id="subsec" style="margin-top:10px;height:300px;border:1px solid #ccc;padding:8px;overflow-y:scroll;vertical-align:top">
-				<div id="accordion">
-				</div>
-			</div>
-
-			<div id="addList" style="margin-top:10px;height:150px;border:1px solid #ccc; padding:8px;overflow-y:scroll">
-			</div>-->
-								<div style="height:200px;border:1px solid #ccc;padding:8px;overflow-y:scroll;vertical-align:top">
+ 								<div style="height:200px;padding:2px;overflow-y:scroll;vertical-align:top">
                                 <!-- list Table Start --> 
                                 <table class="listTable3" >
                                     <colgroup>
@@ -384,25 +501,25 @@ for(int k=0; k<slotlist.size(); k++){
                                     </colgroup>
                                     <thead>
                                         <tr style="height:20px">
-                                            <th></th>
+                                            <th><input type="checkbox" id="ckall" name="ckall"/></th>
                                             <th>사이트</th>
                                             <th>위치명</th>                                           
                                             <th>사이즈</th>                                           
                                             <th>태그</th>                                           
                                         </tr>
                                     </thead>
-                                    <tbody id="slotTable">
+                                    <tbody id="searchList">
                                     </tbody>
                                 </table>
                               <!--list Table End -->
-                              
                              </div> 
                             </td>
                         </tr>
-                        	<th>선택 위치</th>
+                        	<th>선택 위치<span style="color:red"> * </span></th>
                             <td class="form-inline"> 
-                            	<div id="addList" style="margin-top:10px;height:150px;border:1px solid #ccc; padding:8px;overflow-y:scroll">
-			                	</div>
+  								<div id="addList" style="margin-top:2px;height:150px;padding:2px;overflow-y:scroll">
+  								</div>
+                            	
                             </td>
                             </tr>        
                         
@@ -413,24 +530,29 @@ for(int k=0; k<slotlist.size(); k++){
                                 </td>
                             </tr>
                          
-                        <tr>                           
-                        <th>등록일</th>
-                            <td class="form-inline">
-                                <%=DateUtil.getYMD(DateUtil.curDate()) %>
-                            </td>
-                        </tr> 
-                        <tr>                       
-                        <th>등록자</th>
-                            <td class="form-inline">
-                                <%=userName %>
-                            </td>
-                        </tr>                        
-                        </table>
+  						<tr class="new">                           
+                      	<th>등록일자</th>
+                          <td class="form-inline"><%=DateUtil.getYMD(DateUtil.curDate()) %></td>
+                      	</tr> 
+                       <tr class="new">                       
+                       <th>등록인</th>
+                           <td class="form-inline"><%=userName %></td>
+                       </tr>  
+                          <tr class="modify">                           
+                      	<th>최종수정</th>
+                          <td class="form-inline" id="updatedate"><%=DateUtil.getYMD(DateUtil.curDate()) %></td>
+                      	</tr> 
+                       <tr class="modify">                       
+                       <th>수정인</th>
+                           <td class="form-inline" id="updateuser"><%=userName %></td>
+                       </tr>                        
+                          </table>
                     </form>
                  </div>
                 <div class="modal-footer">
                 	<span id="warningMsg" style="color:#a00"></span>
-                    <button type="button" class="btn btn-danger btn-sm" id="btnRegist">등록</button>                    
+                    <button type="button" class="new btn btn-danger btn-sm" id="btnRegist">등록</button>                    
+                    <button type="button" class="modify btn btn-danger btn-sm" id="btnUpdate">수정</button>                    
                     <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
                 </div>
             </div>
@@ -443,9 +565,9 @@ for(int k=0; k<slotlist.size(); k++){
     <!-- modal End -->
 
     <!-- js start -->
-    <script src="../js/jquery-1.11.1.js"></script>
-    <script src="../js/bootstrap.js"></script>
-    <script src="../js/basic.js"></script>
+    <script src="<%=web%>/js/jquery-1.11.1.js"></script>
+    <script src="<%=web%>/js/bootstrap.js"></script>
+    <script src="<%=web%>/js/basic.js"></script>
     <!-- js end -->
 </body>
 <%

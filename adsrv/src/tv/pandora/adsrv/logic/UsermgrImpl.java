@@ -31,6 +31,9 @@ public class UsermgrImpl implements UsermgrFacade{
 	public List<Map<String,String>> getUserPerList(Map<String, String> map){
 		return usermgrModel.getUserPerList(map);
 	}
+	public Integer getUserPerCnt(Map<String, String> map){
+		return usermgrModel.getUserPerCnt(map);
+	}
 	public List<Map<String,String>> getCorpList(Map<String, String> map){
 		return usermgrModel.getCorpList(map);
 	}

@@ -124,6 +124,46 @@ public class DateUtil {
 		   return str;
 	}
 	   
+	public static String getCutYMD(String str) {
+		String newdate = "";
+		if(str.length()<8){
+			newdate = str;
+		} else {
+			try{
+				newdate = str.substring(0, 8);
+			}catch(Exception e){
+				 e.printStackTrace();
+			}	
+		}
+		return newdate;
+	}
+	public static String getCutHH(String str) {
+		String newdate = "";
+		if(str.length()<8){
+			newdate = str;
+		} else {
+			try{
+				newdate = str.substring(8, 10);
+			}catch(Exception e){
+				 e.printStackTrace();
+			}	
+		}
+		return newdate;
+	}	
+	public static String getCutMM(String str) {
+		String newdate = "";
+		if(str.length()<10){
+			newdate = str;
+		} else {
+			try{
+				newdate =  str.substring(10, 12);
+			}catch(Exception e){
+				 e.printStackTrace();
+			}	
+		}
+		return newdate;
+	}	  
+	
 	public static String getYMDHM(String str, String delimeter) {
 		String newdate = "";
 		if(str.length()<12){

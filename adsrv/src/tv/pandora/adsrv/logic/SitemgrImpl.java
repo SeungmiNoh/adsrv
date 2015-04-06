@@ -73,6 +73,10 @@ public class SitemgrImpl implements SitemgrFacade{
 	public List<Map<String,String>> getSlgroupList(Map<String, String> map){
 		return sitemgrModel.getSlgroupList(map);
 	}
+	public List<Map<String,String>> getSlgroupInSlotList(Map<String, String> map){
+		return sitemgrModel.getSlgroupInSlotList(map);
+	}	
+
 	public Integer getSlgroupCnt(Map<String, String> map){
 		return sitemgrModel.getSlgroupCnt(map);
 	}
@@ -90,6 +94,9 @@ public class SitemgrImpl implements SitemgrFacade{
 	}
 	public void delSlgroupSlot(Map<String, String> map){
 		sitemgrModel.delSlgroupSlot(map);
+	}
+	public void delSlgroup(Map<String, String> map){
+		sitemgrModel.delSlgroup(map);
 	}
 	public Map<String,String> getSite(Map<String, String> map){
 		return sitemgrModel.getSite(map);

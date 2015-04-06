@@ -141,6 +141,11 @@ function delComma(num)
 	}
 	return x;
 }
+function delDash(str)
+{
+	return str.replace(/-/gi, '');
+}
+
 
 function comma( form ) {
 	
@@ -519,6 +524,111 @@ function roundXL(n, digits) {
 		return true;
 	}
 })(jQuery);
+
+
+
+
+
+jQuery.fn.extend({
+	/**
+	 * 숫자만 입력 가능하도록 처리
+	 */
+	numberOnly : function() {
+		return this.each(function() {
+			try {
+				var $this = $(this);
+
+				// FF patch : 한글입력 상태에서 keydown 입력 제한이 안걸리는 문제가 있어 한글 입력 불가능하도록 설정
+				$this.css('ime-mode', 'disabled');
+
+				// 숫자,콤마,backspace,enter key만 입력 가능하도록 제한
+				$this.keydown(function(p_event) {
+					var l_before_length = $this.val().length;
+					var l_keycode = p_event.keyCode;
+					var l_str = l_keycode > 57 ? String.fromCharCode(l_keycode-48) : String.fromCharCode(l_keycode);
+					var l_pattern = /^[0-9]+$/;
+					// back-space, tab-key enter-key, delete-key, ←, ↑, →, ↓는 입력 가능하도록 함
+					if(l_keycode == 8 || l_keycode == 9 || l_keycode == 13 || l_keycode == 46 || l_keycode == 37 || l_keycode == 38 || l_keycode == 39 || l_keycode == 40) {
+						return true;
+					}
+
+					// 숫자만 입력 가능하도록 함
+					var l_after_length = $this.val().length;
+					if(!l_pattern.test(l_str)) {
+						if(l_before_length != l_after_length) {
+							$this.val($this.val().substring(0, l_after_length - 1));
+						}
+						return false;
+					} else {
+						return true;
+					}
+				});
+
+				// 포커스를 얻어을 때 처리 - number format을 위한 콤마를 모두 제거한다.
+				$this.focus(function() {
+					$this.val($this.val().replace(/,/g, ''));
+					// 포커스일때 값이 0이면 삭제
+					if($.trim($this.val()).length==1){
+						if($this.val()=="0")
+							$this.val("");
+					}
+				});
+				$this.focusout(function(){
+					// 포커스 아웃 시 빈칸이면 0을 넣어줌
+					var len = $.trim($this.val()).length;
+					if(Number($this.val())>100000000){
+						;
+					}
+					if(len==0){
+						$this.val("0");
+					} else{
+					// 3자리 콤마
+						var cut = len%3;
+						var str = $this.val().substring(0,cut);
+						while(cut < len) {
+							if(str != "") str +=",";
+							str += $this.val().substring(cut, cut+3);
+							cut += 3;
+						}
+					
+						$this.val(str);
+					}
+				});
+			} catch(e) {
+				alert("[jsutil.js's numberFormat] " + e.description);
+			}
+		});
+	},
+
+	onlyNumberDelComma : function() {
+	return this.each(function() {
+		try {
+			var $this = $(this);
+			console.log("val="+$this.val());
+			str = String($this.val()).replace(/[^\d]+/g, '');
+			if(str=='') str = 0;
+			
+			console.log("str="+str);
+			$this.val(str);
+		    //return str;
+			
+		} catch(e) {
+			alert("[jsutil.js's numberFormat] " + e.description);
+		}
+	});
+}
+
+});
+
+
+
+
+
+
+
+
+
+
 
 /*
 jQuery(function($) {

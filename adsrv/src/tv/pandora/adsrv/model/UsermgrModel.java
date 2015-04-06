@@ -38,6 +38,9 @@ public class UsermgrModel {
 	public List<Map<String,String>> getUserPerList(Map<String, String> map){
 	   	return usermgrDaoMaster.getUserPerList(map);
 	}
+	public Integer getUserPerCnt(Map<String, String> map){
+	   	return usermgrDaoMaster.getUserPerCnt(map);
+	}
 	public List<Map<String,String>> getCorpList(Map<String, String> map){
 	   	return usermgrDaoMaster.getCorpList(map);
 	}

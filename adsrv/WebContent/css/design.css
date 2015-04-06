@@ -234,7 +234,7 @@
  .boxtitle3 > .saveBtn4 {
      float: right;
      position: relative;
-     bottom: -10px;
+     bottom: -18px;
  }
  .outsaveBtn1 {
      text-align: right;
@@ -289,6 +289,10 @@
  .listTable tbody.sum tr td {
      background-color: #e5f4ff !important;
  }
+  .listTable tfoot.footbg tr td {
+     background-color: #FFEAEA !important;
+     font-weight: bold;
+ }
  .listTable2 tbody.sum tr td {
      background-color: #e5f4ff !important;
  }
@@ -337,7 +341,7 @@
      text-align: right;
  }
  .listTable3 {
-     border-top: 2px solid #d3d2d2;
+     border-top: 1px solid #d3d2d2;
      width: 100%;
      max-width: 1200px;
      display: table;
@@ -356,7 +360,7 @@
  }
  .listTable3 th {
      color: #555555;
-     padding: 10px;
+     padding: 4px !important;
      background-color: #fcf8e3 !important;
      text-align: center !important;
      border-left: 1px solid #d3d2d2;
@@ -365,7 +369,7 @@
  }
  .listTable3 td {
      color: #666666;
-     padding: 5px;
+     padding: 2px !important;
      text-align: center !important;border-left: 1px solid #d3d2d2;
      border-bottom: 1px solid #d3d2d2;
      font-size: 8pt !important;
@@ -415,7 +419,7 @@
  }
  .addTable th {
      color: #555555;
-     padding: 12px;
+     padding: 8px;
      background-color: #ebebeb;
      border-bottom: 1px solid #d3d2d2;
      border-right: 1px solid #d3d2d2;
@@ -424,7 +428,7 @@
  }
  .addTable td {
      color: #666666;
-     padding: 6px 10px 6px 12px;
+     padding: 4px 6px 4px 8px;
      text-align: left;
      border-right: 1px solid #d3d2d2;
      border-bottom: 1px solid #d3d2d2;
@@ -531,6 +535,13 @@
      padding-left: 1px;
      border-bottom: 1px solid #999999;
  }
+
+.tapBox3 > .saveBtn5 {
+     position: relative;
+     right: 0;
+     top: -33px;
+     float: right;
+ }
  .tapMenu > ul {
      padding: 0;
      margin: 0;
@@ -552,7 +563,8 @@
      text-align: center;
  }
  .tapMenu > ul > li > a:hover, .tapMenu > ul > li > a.active {
-     background-color: #d9534f;
+     /*background-color: #d9534f;*/
+     background-color:#2d6ca2;
  }
  .adsBox {
      display: block;

@@ -30,6 +30,7 @@ public interface SitemgrDao {
 	public void addSlgroupSlot(List<Map<String, String>> list);
 	public void modSlgroupSlot(Map<String, String> map);
 	public void delSlgroupSlot(Map<String, String> map);
+	public void delSlgroup(Map<String, String> map);
 	
 	public Map<String,String> getSite(Map<String, String> map);
 	public Map<String,String> getSection(Map<String, String> map);

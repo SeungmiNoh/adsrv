@@ -16,6 +16,7 @@ public interface UsermgrFacade {
 	public Integer modUser(User user);
 	
 	public List<Map<String,String>> getUserPerList(Map<String, String> map);
+	public Integer getUserPerCnt(Map<String, String> map);
 	public List<Map<String,String>> getCorpList(Map<String, String> map);
 	public Integer getCorpCnt(Map<String, String> map);
 	public Integer addCorporation(Map<String, String> map);

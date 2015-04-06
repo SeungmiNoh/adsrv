@@ -21,6 +21,8 @@ public interface SitemgrFacade {
 	public Integer modSlot(Map<String, String> map);
 	
 	public List<Map<String,String>> getSlgroupList(Map<String, String> map);
+	public List<Map<String,String>> getSlgroupInSlotList(Map<String, String> map);
+	
 	public Integer getSlgroupCnt(Map<String, String> map);
 	public Integer addSlgroup(Map<String, String> map);
 	public Integer modSlgroup(Map<String, String> map);
@@ -28,6 +30,7 @@ public interface SitemgrFacade {
 	public void addSlgroupSlot(List<Map<String, String>> list);
 	public void modSlgroupSlot(Map<String, String> map);
 	public void delSlgroupSlot(Map<String, String> map);
+	public void delSlgroup(Map<String, String> map);
 	public Map<String,String> getSite(Map<String, String> map);
 	public Map<String,String> getSection(Map<String, String> map);
 	public Map<String,String> getSlot(Map<String, String> map);

@@ -16,16 +16,7 @@ try
 	
 	Map<String, Object> map = (Map<String, Object>)request.getAttribute("response");
 
-	/*
-	List<Map<String, String>> clientlist = (List<Map<String, String>>)map.get("clientlist");     
-	List<Map<String, String>> agencylist = (List<Map<String, String>>)map.get("agencylist");     
-	List<Map<String, String>> medreplist = (List<Map<String, String>>)map.get("medreplist");     
-
-	JSONArray client_data = JSONArray.fromObject(clientlist);
-	JSONArray agency_data = JSONArray.fromObject(agencylist);
-	JSONArray medrep_data = JSONArray.fromObject(medreplist);
 	
-*/
 	Campaign cp = (Campaign)map.get("cp");
 
 	List<Map<String, String>> codelist = (List<Map<String, String>>)map.get("codelist");   
@@ -42,9 +33,9 @@ try
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Prism Ad Network</title>
     <!-- css start -->
-    <link rel="stylesheet" href="../css/bootstrap.css">
-    <link rel="stylesheet" href="../css/bootstrap-theme.css">
-    <link rel="stylesheet" href="../css/design.css">
+    <link rel="stylesheet" href="<%=web%>/css/bootstrap.css">
+    <link rel="stylesheet" href="<%=web%>/css/bootstrap-theme.css">
+    <link rel="stylesheet" href="<%=web%>/css/design.css">
    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -52,24 +43,15 @@ try
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <!-- css end -->
-    
-    
-    
-
   <link rel="stylesheet" href="//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
-
   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
   <script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
-  <link rel="stylesheet" href="/resources/demos/style.css">
-
-  <script src="../js/bootstrap.js"></script>
-  <script src="../js/basic.js"></script>
- <script src="../js/common.js"></script>
-  
-  
-  <script>
+  <script src="<%=web%>/js/bootstrap.js"></script>
+  <script src="<%=web%>/js/basic.js"></script>
+  <script src="<%=web%>/js/common.js"></script>
+  <script type="text/javascript">
   $(document).ready(function() {
-		$('.numinput').onlyNumber();
+		$('.numinput').numberOnly();
 		$("#adsname").focus();
 		defaultDate();
 		
@@ -150,7 +132,7 @@ try
  
  
   $(function() {
-		$(".debug").css("display","none");
+		//$(".debug").css("display","none");
 	  	
 		$("#btnRegist").on("click", function(e){
 			e.preventDefault();
@@ -169,7 +151,7 @@ try
 				return;
 			}else if($.trim($("#goal_total").val()).length==0){
 				$("#goal_total").css("border-color","red").focus();
-				$("#warningMsg").text($("#goalText")+"을 입력해주세요.");
+				$("#warningMsg").text($("#goalText").text()+"을 입력해주세요.");
 				return;
 			}else if($.trim($("#budget").val()).length==0){
 				$("#budget").css("border-color","red").focus();
@@ -180,11 +162,17 @@ try
 				$("#warningMsg").text("보쟝량을 입력해주세요.");
 				return;
 			}else{
-				;
+				
+				var startdate = delDash($("#start").val())+$("#start_hour").val()+$("#start_min").val();				
+				var enddate = delDash($("#end").val())+$("#end_hour").val()+$("#end_min").val();
+				$("#startdate").val(startdate);
+				$("#enddate").val(enddate);
+				$('.numinput').onlyNumberDelComma();
+				if(confirm("애즈를 등록하시겠습니까?")){
+					//$("#frmRegAds").submit();					
+				}
 			}
-			if(confirm("애즈를 등록하시겠습니까?")){
-				$("#frmRegAds").submit();					
-			}
+			
 		});
 
 		
@@ -242,7 +230,7 @@ try
                 <div class="boxTitle">
                     <!-- title Start -->
                     <div class="title">캠페인 정보</div>
-                    <div class="breadcrumbs"><span class="glyIcon"><img src="../img/navIcon.png" alt=""></span> 현재위치 : 캠페인 > 캠페인 정보</div>
+                    <div class="breadcrumbs"><span class="glyIcon"><img src="<%=web%>/img/navIcon.png" alt=""></span> 현재위치 : 캠페인 > 캠페인 정보</div>
                     <!-- title End -->
                 </div>      
                 <table class="viewTable" style="width:900px">
@@ -322,25 +310,25 @@ try
                         <col width="27%">
                         </colgroup>
                         <tr>
-                            <th>애즈명</th>
-                            <td class="form-inline" colspan="3">
+                            <th>애즈명<span style="color:red"> * </span></th>
+                            <td class="form-inl  ine" colspan="3">
                                 <input type="text" name="adsname" id="adsname" class="form-control input-sm" style="width:400px">
                             </td>
-                            <th>판매방식</th>
+                            <th>판매방식<span style="color:red"> * </span></th>
                             <td class="form-inline">
                                 <select id="salestype" name="salestype" class="form-control input-sm"  style="width:160px;">
                                 </select>
                             </td>
                         </tr>
                         <tr>
-                            <th>기간</th>
+                            <th>기간<span style="color:red"> * </span></th>
                             <td class="form-inline">
                                 <label class="radio-inline"><input type="radio" name="period" value="1" checked> Period</label>
                                 <label class="radio-inline"><input type="radio" name="period" value="0"> No Period</label>
                             </td>
-                            <th>시작일</th>
+                            <th>시작일<span style="color:red"> * </span></th>
                             <td class="form-inline">
-                                <input type="text" class="form-control input-sm" style="cursor:pointer;width:100px" id="start" name="startdate" placeholder="시작일" readonly>                                
+                                <input type="text" class="form-control input-sm" style="cursor:pointer;width:100px" id="start" placeholder="시작일" readonly>                                
                                 	<select id="start_hour" name="start_hour" class="form-control input-sm period">
                                      <%for(int i=0;i<=23;i++){ %>
                                     <option value="<%=DateUtil.getMMStr(String.valueOf(i))%>"><%=DateUtil.getMMStr(String.valueOf(i))%>시</option>
@@ -351,12 +339,13 @@ try
                                     <option value="<%=DateUtil.getMMStr(String.valueOf(i*10))%>"><%=DateUtil.getMMStr(String.valueOf(i*10))%>분</option>
                                     <%} %>                                    
                                 </select>
+                                <input type="text" id="startdate" name="startdate" class="debug" size=10/>
                             </td>
                             
                             
-                            <th>종료일</th>
+                            <th>종료일<span style="color:red"> * </span></th>
                             <td class="form-inline">
-                                 <input type="text" class="form-control input-sm" style="cursor:pointer;width:100px" id="end" name="enddate" placeholder="종료일" readonly>                                
+                                 <input type="text" class="form-control input-sm" style="cursor:pointer;width:100px" id="end" placeholder="종료일" readonly>                                
                                 	<select id="end_hour" name="end_hour" class="form-control input-sm period">
                                      <%for(int i=0;i<=24;i++){ %>
                                     <option value="<%=DateUtil.getMMStr(String.valueOf(i))%>" <%=i==24?"selected":"" %>><%=DateUtil.getMMStr(String.valueOf(i))%>시</option>
@@ -367,45 +356,46 @@ try
                                     <option value="<%=DateUtil.getMMStr(String.valueOf(i*10))%>" ><%=DateUtil.getMMStr(String.valueOf(i*10))%>분</option>
                                     <%} %>                                    
                                 </select>
+                                <input type="text" id="enddate" name="enddate" class="debug" size=10/>
                          </td>
                         </tr>
                        <tr>
                             
-                            <th>목표타입</th>
+                            <th>목표타입<span style="color:red"> * </span></th>
                             <td class="form-inline">
-                                <select id="goaltype" name="goaltype" class="form-control input-sm">
+                                <select id="goaltype" name="goaltype" class="form-control input-sm" style="width:160px;">
                                 </select>
                             </td>	
-                            <th><label id="goalText">노출 목표량</label></th>
+                            <th><label id="goalText">노출 목표량</label><span style="color:red"> * </span></th>
                             <td class="form-inline">
-                                <input type="text" name="goal_total" id="goal_total" class="form-control input-sm numinput goal" style="width:200px; text-align:right" placeholder="목표 노출량">                             
+                                <input type="text" name="goal_total" id="goal_total" class="form-control input-sm numinput goal" style="width:160px; text-align:right" placeholder="목표 노출량">                             
 							</td>
                         
                             
                             <th>일 목표 노출량</th>
                             <td class="form-inline">
-                                <input type="text" name="goal_daily" class="form-control input-sm numinput" style="width:200px; text-align:right" placeholder="일간 목표 노출량">
+                                <input type="text" name="goal_daily" class="form-control input-sm numinput" style="width:160px; text-align:right" placeholder="일간 목표 노출량">
                             </td>
    						</tr>
                          
    <tr>
                              
-                           <th>광고상품</th>
+                           <th>광고상품<span style="color:red"> * </span></th>
                             <td class="form-inline">
                                 <select id="prtype" name="prtype" class="form-control input-sm" style="width:160px;">
                                  </select>
                             </td>
-                              <th>집행금액</th>
+                              <th>집행금액<span style="color:red"> * </span></th>
                             <td class="form-inline">
                                 <input type="text" name="budget" id="budget" class="form-control input-sm numinput" style="width:160px; text-align:right">
                             </td>
-                            <th><label id="goalText">보장량</label></th>
+                            <th><label id="goalText">보장량</label><span style="color:red"> * </span></th>
                             <td class="form-inline">
-                                <input type="text" name="book_total" id="book_total" class="form-control input-sm numinput goal" style="width:200px; text-align:right" placeholder="보장량">                             
+                                <input type="text" name="book_total" id="book_total" class="form-control input-sm numinput goal" style="width:160px; text-align:right" placeholder="보장량">                             
 							</td>
                         </tr>  
                         <tr>
-                        <th>상태</th>
+                        <th>상태<span style="color:red"> * </span></th>
                             <td class="form-inline">
                                 <select id="ads_state" name="ads_state" class="form-control input-sm" disabled="disabled">
                                  </select>

@@ -25,6 +25,8 @@ import java.util.Map;
 
 
 
+
+
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
 import tv.pandora.adsrv.domain.Creative;
@@ -65,11 +67,11 @@ public class CpmgrImpl implements CpmgrFacade{
 		return cpmgrModel.getCpCnt(map);
 	}
 	
-	public Integer addCampaign(Map<String, String> map){
-		return cpmgrModel.addCampaign(map);
+	public Integer addCampaign(Campaign cp){
+		return cpmgrModel.addCampaign(cp);
 	}
-	public Integer modCampaign(Map<String, String> map){
-		return cpmgrModel.modCampaign(map);
+	public Integer modCampaign(Campaign cp){
+		return cpmgrModel.modCampaign(cp);
 	}
 	public Campaign getCampaign(Map<String, String> map){
 		return cpmgrModel.getCampaign(map);
@@ -81,11 +83,14 @@ public class CpmgrImpl implements CpmgrFacade{
 	public List<Ads> getAdsList(Map<String, String> map){
 		return cpmgrModel.getAdsList(map);
 	}
-	public Integer addAds(Map<String, String> map){
-		return cpmgrModel.addAds(map);
+	public Integer getAdsCnt(Map<String, String> map){
+		return cpmgrModel.getAdsCnt(map);
 	}
-	public Integer modAds(Map<String, String> map){
-		return cpmgrModel.modAds(map);
+	public Integer addAds(Ads ads){
+		return cpmgrModel.addAds(ads);
+	}
+	public Integer modAds(Ads ads){
+		return cpmgrModel.modAds(ads);
 	}
 	public List<Map<String,String>> getTargetCodeList(Map<String, String> map){
 		return cpmgrModel.getTargetCodeList(map);
@@ -186,5 +191,17 @@ public class CpmgrImpl implements CpmgrFacade{
 	}
 	public Integer modCreative(Creative cr){
 		return cpmgrModel.modCreative(cr);
+	}
+	@Override
+	public void addAdsTargeting(List<Map<String, String>> list) {
+		cpmgrModel.addAdsTargeting(list);
+	}
+	@Override
+	public void addAdsCreative(List<Map<String, String>> list) {
+		cpmgrModel.addAdsCreative(list);
+	}
+	@Override
+	public void addAdsSlot(List<Map<String, String>> list) {
+		cpmgrModel.addAdsSlot(list);
 	}
 }

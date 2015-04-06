@@ -14,15 +14,16 @@ public interface CpmgrFacade {
 	public List<Campaign> getCpList(Map<String, String> map);
 	public Integer getCpCnt(Map<String, String> map);
 	
-	public Integer addCampaign(Map<String, String> map);
-	public Integer modCampaign(Map<String, String> map);
+	public Integer addCampaign(Campaign cp);
+	public Integer modCampaign(Campaign cp);
 	public Campaign getCampaign(Map<String, String> map);
 	public List<Map<String,String>> getAutoCorpList(Map<String, String> map);
 	public List<Map<String,String>> getCodeList(Map<String, String> map);
 	
 	public List<Ads> getAdsList(Map<String, String> map);
-	public Integer addAds(Map<String, String> map);
-	public Integer modAds(Map<String, String> map);
+	public Integer getAdsCnt(Map<String, String> map);
+	public Integer addAds(Ads ads);
+	public Integer modAds(Ads ads);
 	public Ads getAds(Map<String, String> map);
 	public List<Map<String,String>> getTargetCodeList(Map<String, String> map);
 	public List<Map<String,String>> getTargetList(Map<String, String> map);
@@ -60,5 +61,8 @@ public interface CpmgrFacade {
 	public Integer addCreative(Creative cr);
 	public void addCreativeClick(List<Map<String, String>> list);
 	public Integer modCreative(Creative cr);
+	public void addAdsTargeting(List<Map<String, String>> list);
+	public void addAdsCreative(List<Map<String, String>> list);
+	public void addAdsSlot(List<Map<String, String>> list);
 
 }

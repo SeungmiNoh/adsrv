@@ -19,6 +19,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.springframework.web.servlet.ModelAndView;
 
+import tv.pandora.adsrv.common.util.DateUtil;
+import tv.pandora.adsrv.common.util.StringUtil;
+import tv.pandora.adsrv.domain.Campaign;
+import tv.pandora.adsrv.domain.Creative;
 import tv.pandora.adsrv.domain.User;
 import tv.pandora.adsrv.model.SitemgrModel;
 import tv.pandora.adsrv.model.UsermgrModel;
@@ -42,7 +46,12 @@ public class MasDwrService {
 	public void setCpmgrModel(CpmgrModel cpmgrModel) {
 		this.cpmgrModel = cpmgrModel;
 	}
-
+	public Campaign getCampaign(String cpid){
+		
+		Map<String, String> map = new HashMap<String, String>();	
+		map.put("cpid", cpid);				
+		return cpmgrModel.getCampaign(map);
+	}
 	public Integer getCorpCnt(String corpname){
 		Map<String, String> map = new HashMap<String, String>();	
 		map.put("corpname", corpname.trim());
@@ -71,10 +80,24 @@ public class MasDwrService {
 		if(!not_userid.equals("0")) map.put("not_userid", not_userid);
 		return usermgrModel.getUserCnt(map);
 	}
+	public Integer getUserPerCnt(String psername, String not_perid){
+		Map<String, String> map = new HashMap<String, String>();	
+		map.put("psername", psername.trim());
+		if(!not_perid.equals("0")) map.put("not_perid", not_perid);
+		return usermgrModel.getUserPerCnt(map);
+	}   
 	public User getUser(String userid){
 		Map<String, String> map = new HashMap<String, String>();	
 		map.put("userid", userid.trim());
 		return usermgrModel.getUserList(map).get(0);
+	}
+	public void delPermission(String perid, String userid){
+		Map<String, String> map = new HashMap<String, String>();	
+		map.put("perid", perid);
+		map.put("stat", "0");
+		map.put("updatedate", DateUtil.simpleDate2())	;
+		map.put("updateuser", userid)	;
+		usermgrModel.modPermission(map);
 	}
 	public Map<String,String> getSite(String siteid){
 		
@@ -118,18 +141,26 @@ public class MasDwrService {
 		if(!not_slotid.equals("0")) map.put("not_slotid", not_slotid);
 		return sitemgrModel.getSlotCnt(map);
 	}
-	public Integer getSlotGroupCnt(String groupname, String not_groupid){
+	public Integer getSlgroupCnt(String groupname, String not_groupid){
 		Map<String, String> map = new HashMap<String, String>();	
 		map.put("groupname", groupname);
-		map.put("not_groupid", not_groupid);
+		if(!not_groupid.equals("0"))  map.put("not_groupid", not_groupid);
 		
 		return sitemgrModel.getSlgroupCnt(map);
 	}
-	
-	public List<Map<String,String>> getSlgroupInSlotList(String groupid){
+	public Map<String,String> getSlgroup(String groupid){
 		Map<String, String> map = new HashMap<String, String>();	
 		map.put("groupid", groupid);		
-		List<Map<String,String>> resultmap = sitemgrModel.getSlotList(map);
+		Map<String,String> resultmap = sitemgrModel.getSlgroup(map);
+		return resultmap;
+	}
+	
+	public List<Map<String,String>> getSlgroupInSlotList(String groupid){
+System.out.println("---------------getSlgroupInSlotList");		
+		Map<String, String> map = new HashMap<String, String>();	
+		map.put("groupid", groupid);		
+		System.out.println("---------------map"+map);		
+		List<Map<String,String>> resultmap = sitemgrModel.getSlgroupInSlotList(map);
 		return resultmap;
 	}
 	public List<Map<String,String>> getSlotList(String width, String height,  String siteid){
@@ -138,6 +169,14 @@ public class MasDwrService {
 		map.put("width", width);
 		map.put("height", height);
 		List<Map<String,String>> resultmap = sitemgrModel.getSlotList(map);
+		return resultmap;
+	}
+	public List<Creative> getCrList(String start, String end,  String clientid){
+		Map<String, String> map = new HashMap<String, String>();	
+		map.put("start", StringUtil.DateStr(start));
+		map.put("end", StringUtil.DateStr(end));
+		map.put("clientid", clientid);
+		List<Creative> resultmap = cpmgrModel.getCreativeList(map);
 		return resultmap;
 	}
 	

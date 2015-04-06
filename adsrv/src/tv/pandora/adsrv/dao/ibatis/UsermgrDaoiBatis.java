@@ -3,12 +3,15 @@
  */
 package tv.pandora.adsrv.dao.ibatis;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.orm.ibatis.SqlMapClientTemplate;
+
+
 
 
 
@@ -81,6 +84,13 @@ public class UsermgrDaoiBatis implements UsermgrDao {
 			return null;
 		}
 	}
+	public Integer getUserPerCnt(Map<String, String> map){
+		try {
+			return (Integer) sqlMapClientTemplateMaster.queryForObject("getUserPerCnt", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
 
 	
 	public List<Map<String,String>> getCorpList(Map<String, String> map){
@@ -149,11 +159,10 @@ public class UsermgrDaoiBatis implements UsermgrDao {
 		}
 	}
 	public void addPermissionMenu(List<Map<String, String>> list){
-		try {
-			sqlMapClientTemplateMaster.insert("addPermissionMenu", list);
-		} catch (EmptyResultDataAccessException e) {
-			
-		}
+		
+		HashMap<String, Object> param = new HashMap<String, Object>();
+		param.put("List", list);
+		sqlMapClientTemplateMaster.insert("addPermissionMenu", param);
 	}
 	public void modPermission(Map<String, String> map){
 		try {

@@ -283,16 +283,18 @@
 		      left join users u on a.insertuser = u.userid
 		      left join users u2 on a.updateuser = u2.userid
 		 where a.stat = 1
+
 	      and a.groupid = $groupid$ 	
      </select>
 	<select id="getSlgroupList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
    select x.groupid, x.groupname, x.width, x.height, x.updatedate, x.updateuser, u.username as updateusername,
-          count(distinct x.siteid) sitecnt, count(x.slotid) slotcnt
+          count(distinct x.siteid) sitecnt, count(x.slotid) slotcnt,
+          group_concat(concat(sitename,' ',secname, ' ', slotname) SEPARATOR '\n') as slotstr
      from (select STRAIGHT_JOIN 
                   a.groupid, a.groupname, a.width, a.height, a.updatedate, a.updateuser, c.secid, c.siteid, b.slotid,
-                  sitename, secname
+                  sitename, secname, slotname
 			 from slotgroup a
-				  left join slotgroup_slot b on b.groupid = a.groupid
+				  left join slotgroup_slot b on b.groupid = a.groupid and b.stat = 1
 				  left join slot c on b.slotid = c.slotid
 				  left join section d on c.secid = d.secid
           		  left join site e on d.siteid = e.siteid
@@ -310,13 +312,14 @@
  	<select id="getSlgroupCnt" resultClass="Integer" parameterClass="java.util.Map">
 	 select count(distinct x.groupid)
        from (select a.groupid, a.groupname, a.width, a.height, a.updatedate, a.updateuser, c.siteid, b.slotid,
-                    sitename, secname
+                    sitename, secname, slotname
                from slotgroup a
            	      	left join slotgroup_slot b on a.groupid = b.groupid
            	      	left join slot c on c.slotid = b.slotid
            	      	left join section d on c.secid = d.secid
           	      	left join site e on d.siteid = e.siteid
          where a.stat = 1
+	 		<isNotEmpty property="not_groupid"> and a.groupid != $not_groupid$ </isNotEmpty>
 		 	<isNotEmpty property="groupname"> and a.groupname = '$groupname$' </isNotEmpty>
 		 	<isNotEmpty property="width"> and a.width = $width$ </isNotEmpty>
 		 	<isNotEmpty property="height"> and a.height = $height$ </isNotEmpty>
@@ -325,12 +328,13 @@
       </select>
    	  <select id="getSlgroupInSlotList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
            select b.idx, c.secid, c.siteid, b.slotid, c.width, c.height, 
-                  sitename, secname
+                  sitename, secname, slotname
 			 from slotgroup_slot b 
 				  left join slot c on b.slotid = c.slotid
 				  left join section d on c.secid = d.secid
           		  left join site e on d.siteid = e.siteid
 			 where b.groupid = $groupid$
+			   and b.stat = 1
 			 order by b.idx
       </select>
   
@@ -377,6 +381,8 @@
         where groupid = $groupid$
  	;
 	</update>
+	
+
 	<insert id="addSlgroupSlot" parameterClass="java.util.Map">
 		insert into adsrv.slotgroup_slot
 	            (groupid,
@@ -392,9 +398,8 @@
 					, #List[].slotid#
 					, 0
 					, 1
-					, now()
-					, #List[].insertuser#	
-					, 1		
+					, #List[].insertdate#	
+					, #List[].insertuser#			
 				)
 			</iterate>
 		</dynamic>	             		
@@ -409,6 +414,11 @@
 		from adsrv.slotgroup_slot
 		where groupid = #groupid#
 		  and stat = 0;
+	</delete>
+	<delete id="delSlgroup" parameterClass="java.util.Map">
+		delete 
+		from adsrv.slotgroup
+		where groupid = #groupid#
 	</delete>
 	
 </sqlMap>

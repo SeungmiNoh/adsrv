@@ -25,10 +25,28 @@ try
 	JSONArray agency_data = JSONArray.fromObject(agencylist);
 	JSONArray medrep_data = JSONArray.fromObject(medreplist);
 	
-*/
+*/ 	//Campaign cp = (Campaign)map.get("cp");
 	List<User> tclist = (List<User>)map.get("tclist");
-	
-	
+	/*
+	$("#cpname").val(data.cpname);
+	$("#cpid").val(cpid);
+	$("#clientid").val(data.clientid);
+	console.log("data.clientid="+data.clientid);
+	$("#clientname").val(data.clientname);
+	$("#client").val(data.clientname);
+	$("#agencyid").val(data.agencyid);
+	$("#agencyname").val(data.agencyname);
+	$("#agency").val(data.agencyname);
+	$("#medrepid").val(data.medrepid);
+	$("#medrepname").val(data.medrepname);
+	$("#medrep").val(data.medrepname);
+	$("#start").val(data.startdate);
+	$("#end").val(data.enddate);
+	$("#budget").val(data.budget);
+	$("#tcid").val(data.tcid);
+	$("#memo").val(data.memo);
+	$("#updatedate").html(getYMDHM(data.updatedate, '-'));
+	$("#updateuser").html(data.updateusername);*/
 	      
 %>  
 <!DOCTYPE html>
@@ -40,9 +58,9 @@ try
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Prism Ad Network</title>
     <!-- css start -->
-    <link rel="stylesheet" href="../css/bootstrap.css">
-    <link rel="stylesheet" href="../css/bootstrap-theme.css">
-    <link rel="stylesheet" href="../css/design.css">
+    <link rel="stylesheet" href="<%=web%>/css/bootstrap.css">
+    <link rel="stylesheet" href="<%=web%>/css/bootstrap-theme.css">
+    <link rel="stylesheet" href="<%=web%>/css/design.css">
    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -58,11 +76,11 @@ try
 
   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
   <script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
-  <link rel="stylesheet" href="/resources/demos/style.css">
+  
 
-  <script src="../js/bootstrap.js"></script>
-  <script src="../js/basic.js"></script>
- <script src="../js/common.js"></script>
+  <script src="<%=web%>/js/bootstrap.js"></script>
+  <script src="<%=web%>/js/basic.js"></script>
+ <script src="<%=web%>/js/common.js"></script>
   
   
   <script>
@@ -274,7 +292,7 @@ try
                 <div class="boxTitle">
                     <!-- title Start -->
                     <div class="title">캠페인 등록</div>
-                    <div class="breadcrumbs"><span class="glyIcon"><img src="../img/navIcon.png" alt=""></span> 현재위치 : 캠페인 > 캠페인 등록</div>
+                    <div class="breadcrumbs"><span class="glyIcon"><img src="<%=web%>/img/navIcon.png" alt=""></span> 현재위치 : 캠페인 > 캠페인 등록</div>
                     <!-- title End -->
                 </div>
 
@@ -351,7 +369,7 @@ try
                         <tr>
                             <th>담당자<span style="color:red"> * </span></th>
                             <td>
-                                <select name="tcid"  class="form-control input-sm" style="widt:190px">
+                                <select name="tcid"  class="form-control input-sm" style="width:120px">
                                 <%for(int k=0; k<tclist.size(); k++){
 					    User master = tclist.get(k);%>
 					    <option value="<%=master.getUserid()%>" <%=userID.equals(master.getUserid())?"selected":"" %>><%=master.getUsername()%></option>

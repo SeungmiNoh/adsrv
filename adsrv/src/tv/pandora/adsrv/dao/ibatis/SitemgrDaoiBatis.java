@@ -1,5 +1,6 @@
 package tv.pandora.adsrv.dao.ibatis;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -113,7 +114,7 @@ public class SitemgrDaoiBatis implements SitemgrDao {
 	}
 	public List<Map<String,String>> getSlgroupInSlotList(Map<String, String> map){
 		try {
-			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getSlgroupList", map);
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getSlgroupInSlotList", map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
@@ -139,13 +140,15 @@ public class SitemgrDaoiBatis implements SitemgrDao {
 			return null;
 		}
 	}
-	public void addSlgroupSlot(List<Map<String, String>> list){
-		try {
-			sqlMapClientTemplateMaster.insert("addSlgroupSlot", list);
-		} catch (EmptyResultDataAccessException e) {
-			
-		}
+
+	
+	public void addSlgroupSlot(List<Map<String, String>> list) {
+		HashMap<String, Object> param = new HashMap<String, Object>();
+		param.put("List", list);
+		sqlMapClientTemplateMaster.insert("addSlgroupSlot", param);
 	}
+	
+	
 	public void modSlgroupSlot(Map<String, String> map){
 		try {
 			sqlMapClientTemplateMaster.update("modSlgroupSlot", map);
@@ -156,6 +159,13 @@ public class SitemgrDaoiBatis implements SitemgrDao {
 	public void delSlgroupSlot(Map<String, String> map){
 		try {
 			sqlMapClientTemplateMaster.delete("delSlgroupSlot", map);
+		} catch (EmptyResultDataAccessException e) {
+			
+		}
+	}
+	public void delSlgroup(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.delete("delSlgroup", map);
 		} catch (EmptyResultDataAccessException e) {
 			
 		}

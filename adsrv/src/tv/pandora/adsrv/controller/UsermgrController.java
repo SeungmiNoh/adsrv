@@ -1,6 +1,7 @@
 package tv.pandora.adsrv.controller;
 
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -241,5 +242,70 @@ public class UsermgrController extends AdsrvMultiActionController
 		
 		
 		return new ModelAndView("redirect:"+url, null);
+	}
+	public ModelAndView userPerSave(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String perid = StringUtil.isNull(request.getParameter("perid"));
+		String pername = StringUtil.isNull(request.getParameter("pername"));
+		String[] menu = request.getParameterValues("menu");
+		String[] menu_val = new String[menu.length];
+		String userID = (String)SessionUtil.getAttribute("userID");
+			
+
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("perid", perid)	;
+		map.put("pername", pername)	;
+		map.put("updatedate", DateUtil.simpleDate2())	;
+		map.put("updateuser", userID)	;
+		
+		Integer iperid = 0;
+		
+	    if(!perid.equals("0")){
+			usermgrFacade.modPermission(map);
+			usermgrFacade.modPermissionMenu(map);
+	    	
+	    } else {
+	    	iperid = usermgrFacade.addPermission(map);
+	    }
+	
+		/********************** 권한별 메뉴 저장 ***************************/
+		try{
+
+			ArrayList<Map<String,String>> list = new ArrayList<Map<String,String>>();
+			
+			for(int i=0;i<menu.length;i++){
+				Map<String, String> ipmap = new HashMap<String, String>();
+				
+				menu_val[i] = StringUtil.isNullZero(request.getParameter("menuval"+menu[i]));
+				if(!menu_val[i].equals("0")){
+					if(!perid.equals("0")){
+						ipmap.put("perid", perid);
+					} else {
+						ipmap.put("perid", String.valueOf(iperid));
+					}
+					ipmap.put("menu_id", menu[i]);
+					ipmap.put("menu_val", menu_val[i]);
+					System.out.println(i+") Map : " + ipmap);
+					list.add(ipmap);									
+				}
+			}
+			usermgrFacade.addPermissionMenu(list);
+
+		} catch(Exception e) {		
+			
+			System.out.println(e.getMessage());			
+			response.setCharacterEncoding("EUC-KR"); 
+			Writer w = response.getWriter();
+			w.write("<script>"); 
+			w.write("alert('저장 중 오류가 발생했습니다.');"); 
+			w.write("history.back();"); 
+			w.write("</script>"); 
+			return null; 
+		}
+		if(!perid.equals("0")) {		
+			usermgrFacade.delPermissionMenu(map); // 상태 0 슬롯 삭제
+		}
+		
+		
+		return new ModelAndView("redirect:usermgr.do?a=permission", null);
 	}
 }

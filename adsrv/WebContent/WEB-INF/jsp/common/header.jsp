@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@page import="tv.pandora.adsrv.common.util.StringUtil"%>
-<%@page import="tv.pandora.adsrv.common.util.DateUtil"%>    
+<%@page import="tv.pandora.adsrv.common.util.DateUtil"%>
+<%@page import="tv.pandora.adsrv.common.Constant"%>    
 <%@page import="tv.pandora.adsrv.common.session.SessionUtil"%>
 <%@page import="tv.pandora.adsrv.common.session.SessionManager"%>
 <%@page import="tv.pandora.adsrv.common.util.CookieUtil"%>
@@ -23,7 +24,7 @@ console.log("menu=<%=menu%>");
 </script>
                <section class="topMenu">
                 <header>
-                    <h1><img src="../img/logo.gif" alt=""></h1>
+                    <h1><img src="<%=Constant.WEB_ROOT%>/img/logo.gif" alt=""></h1>
                     <!-- top menu Start -->
                     <nav>
                         <ul>

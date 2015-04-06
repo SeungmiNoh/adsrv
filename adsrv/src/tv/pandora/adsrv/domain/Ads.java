@@ -9,6 +9,7 @@ public class Ads implements Serializable{
 	
 		private String cpid        ;
 		private String cpname      ;
+		private String clientname      ;
 		private String adsid        ;
 		private String adsname      ;
 		private String startdate   ;
@@ -37,6 +38,9 @@ public class Ads implements Serializable{
 		private String start_min;
 		private String end_hour;
 		private String end_min;
+		private String realenddate;
+		private String memo;
+		private String text;
 		
 		public String getCpid() {
 			return cpid;
@@ -224,6 +228,33 @@ public class Ads implements Serializable{
 		}
 		public void setUpdateusername(String updateusername) {
 			this.updateusername = updateusername;
+		}
+		
+		public String getRealenddate() {
+			return realenddate;
+		}
+		public void setRealenddate(String realenddate) {
+			this.realenddate = realenddate;
+		}
+		public String getMemo() {
+			return memo;
+		}
+		public void setMemo(String memo) {
+			this.memo = memo;
+		}
+		
+		public String getClientname() {
+			return clientname;
+		}
+		public void setClientname(String clientname) {
+			this.clientname = clientname;
+		}
+		
+		public String getText() {
+			return text;
+		}
+		public void setText(String text) {
+			this.text = text;
 		}
 		public static long getSerialversionuid() {
 			return serialVersionUID;

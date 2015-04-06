@@ -4,45 +4,153 @@
     <sqlMap namespace="CpmgrSQL">
     <typeAlias alias="cp" type="tv.pandora.adsrv.domain.Campaign" />
     <typeAlias alias="cr" type="tv.pandora.adsrv.domain.Creative" />
-     <typeAlias alias="target" type="tv.pandora.adsrv.domain.Target" />
+    <typeAlias alias="target" type="tv.pandora.adsrv.domain.Target" />
     <typeAlias alias="ads" type="tv.pandora.adsrv.domain.Ads" />
-	<select id="getCpList" resultClass="cp" parameterClass="java.util.Map">
-		select a.cpid, a.cpname, a.startdate, a.enddate, 
-				a.clientid, c.corpname as clientname,
-				a.agencyid, g.corpname as agencyname,
-				a.medrepid, r.corpname as medrepname,
-				a.tcid, t.username as tcname, a.budget,
-			    a.insertdate, a.updatedate, a.insertuser, a.updateuser 
-		 from campaign a
-		      left join corporation c on a.clientid = c.corpid and c.corptype = 1
-		      left join corporation g on a.agencyid = g.corpid and g.corptype = 1
-		      left join corporation r on a.medrepid = r.corpid and r.corptype = 1
-		      left join users t on a.tcid = t.userid
-	</select>
-	<select id="getCpCnt" resultClass="Integer" parameterClass="java.util.Map">
-		select count(*)
-		 from campaign a
-		      left join corporation c on a.clientid = c.corpid and c.corptype = 1
-		      left join corporation g on a.agencyid = g.corpid and g.corptype = 1
-		      left join corporation r on a.medrepid = r.corpid and r.corptype = 1
-		      left join users t on a.tcid = t.userid
-	</select>
-	  
-	<select id="getCampaign" resultClass="cp" parameterClass="java.util.Map">
-		select a.cpid, a.cpname, a.startdate, a.enddate, 
-				a.clientid, c.corpname as clientname,
-				a.agencyid, g.corpname as agencyname,
-				a.medrepid, r.corpname as medrepname,
-				a.tcid, t.username as tcname, a.budget,
-			    a.insertdate, a.updatedate, a.insertuser, a.updateuser, u.username as updateusername
-		 from campaign a
-		      left join corporation c on a.clientid = c.corpid and c.corptype = 1
-		      left join corporation g on a.agencyid = g.corpid and g.corptype = 1
-		      left join corporation r on a.medrepid = r.corpid and r.corptype = 1
+	
+	
+	 <sql id="ADS.STATE">
+		select cpid, sum(if(ads_state=1 and substr(enddate, 1,8)>curdate()+0,1,0)) readycnt,
+               sum(if(ads_state=2,1,0)) bookcnt,
+               sum(if(ads_state=3,1,0)) runcnt,
+               sum(if(ads_state=5,1,0)) completecnt,
+               sum(if(ads_state=0,1,0)) pausecnt,
+               sum(if(ads_state=-1,1,0)) stopcnt,
+               <![CDATA[sum(if(ads_state=-2 or (ads_state=1 and substr(enddate, 1,8)<=curdate()+0),1,0) )]]> cancelcnt,
+               sum(1) totcnt,
+               max(adsid) max_adsid
+           from ads
+           <dynamic prepend="where">		 	  
+			<isNotEmpty property="cpid" prepend="and"> cpid = #cpid#</isNotEmpty>
+		   </dynamic>
+          group by cpid	
+   	</sql>  
+	<sql id="CP.STATE">
+              case
+              when ifnull(runcnt       ,0) > 0 then 3
+              when ifnull(bookcnt      ,0) > 0 then 2
+              when ifnull(readycnt     ,0) > 0 then 1
+              when ifnull(completecnt  ,0) > 0 then 5
+              when ifnull(pausecnt     ,0) > 0 then 0
+              when ifnull(stopcnt      ,0) > 0 then -1
+              when ifnull(cancelcnt    ,0) > 0 then -2
+              when ifnull(totcnt       ,0) = 0 then -3
+              else 0
+              end cp_state
+   </sql>	 
+ 	<select id="getCpList" resultClass="cp" parameterClass="java.util.Map">
+select x.*, y.isname as cp_statename, y.text
+ from (select a.cpid, a.cpname, a.startdate, a.enddate, 
+              case
+              when ifnull(runcnt       ,0) > 0 then 3
+              when ifnull(bookcnt      ,0) > 0 then 2
+              when ifnull(readycnt     ,0) > 0 then 1
+              when ifnull(completecnt  ,0) > 0 then 5
+              when ifnull(pausecnt     ,0) > 0 then 0
+              when ifnull(stopcnt      ,0) > 0 then -1
+              when ifnull(cancelcnt    ,0) > 0 then -2
+              when ifnull(totcnt       ,0) = 0 then -3
+              else 0
+              end cp_state,
+              a.clientid, c.corpname as clientname,
+              a.agencyid, g.corpname as agencyname,
+              a.medrepid, r.corpname as medrepname, a.tcid, t.username as tcname, a.budget,
+              a.insertdate, a.updatedate, a.insertuser, a.updateuser, u.username as updateusername	       
+         from campaign a
+              left join 
+              (
+              	<include refid="ADS.STATE" />
+			  )  b on a.cpid = b.cpid
+              left join corporation c on a.clientid = c.corpid and c.corptype = 1
+		      left join corporation g on a.agencyid = g.corpid and g.corptype = 2
+		      left join corporation r on a.medrepid = r.corpid and r.corptype = 3
 		      left join users t on a.tcid = t.userid
 		      left join users u on a.updateuser = u.userid
-		  where a.cpid = $cpid$
-	</select> 
+        where a.stat = 1
+	          <isNotEmpty property="start" prepend="and"> a.startdate >= $start$</isNotEmpty>
+	          <isNotEmpty property="end" prepend="and"> <![CDATA[  a.enddate <= $end$]]></isNotEmpty>
+         group by a.cpid
+      ) x
+      left join code_instance y on y.code = 'ads_state' and x.cp_state = y.isid
+	<dynamic prepend="where">		 	  
+		<isNotEmpty property="cp_state" prepend="and"> cp_state = $cp_state$</isNotEmpty>
+		<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	</dynamic>	
+	order by x.cpid
+    <isNotEmpty property="max">
+      limit $skip$,$max$
+    </isNotEmpty>     
+    </select>
+	<select id="getCpCnt" resultClass="Integer" parameterClass="java.util.Map">		
+	 select count(*)
+		 from (select a.cpid, a.cpname, a.startdate, a.enddate, 
+		              case
+		              when ifnull(runcnt       ,0) > 0 then 3
+		              when ifnull(bookcnt      ,0) > 0 then 2
+		              when ifnull(readycnt     ,0) > 0 then 1
+		              when ifnull(completecnt  ,0) > 0 then 5
+		              when ifnull(pausecnt     ,0) > 0 then 0
+		              when ifnull(stopcnt      ,0) > 0 then -1
+		              when ifnull(cancelcnt    ,0) > 0 then -2
+		              when ifnull(totcnt       ,0) = 0 then -3
+		              else 0
+		              end cp_state,
+		              a.clientid, c.corpname as clientname,
+		              a.agencyid, g.corpname as agencyname,
+		              a.medrepid, r.corpname as medrepname, a.tcid, a.budget,
+		              a.insertdate, a.updatedate, a.insertuser, a.updateuser, u.username as updateusername	       
+		         from campaign a
+		              left join 
+		              (
+		              <include refid="ADS.STATE" />
+		              )  b on a.cpid = b.cpid
+		              left join corporation c on a.clientid = c.corpid and c.corptype = 1
+				      left join corporation g on a.agencyid = g.corpid and g.corptype = 2
+				      left join corporation r on a.medrepid = r.corpid and r.corptype = 3
+				      left join users t on a.tcid = t.userid
+				      left join users u on a.updateuser = u.userid
+		        where a.stat = 1
+			          <isNotEmpty property="start" prepend="and"> a.startdate >= $start$</isNotEmpty>
+			          <isNotEmpty property="end" prepend="and"> <![CDATA[  a.enddate <= $end$]]></isNotEmpty>
+		      ) x
+		  <dynamic prepend="where">		 	  
+				<isNotEmpty property="cp_state" prepend="and"> cp_state = $cp_state$</isNotEmpty>
+				<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+			</dynamic>	
+	</select>
+	<select id="getCampaign" resultClass="cp" parameterClass="java.util.Map">
+	select x.*, y.isname as cp_statename, y.text
+	 from (select a.cpid, a.cpname, a.startdate, a.enddate, 
+             case
+              when ifnull(runcnt       ,0) > 0 then 3
+              when ifnull(bookcnt      ,0) > 0 then 2
+              when ifnull(readycnt     ,0) > 0 then 1
+              when ifnull(completecnt  ,0) > 0 then 5
+              when ifnull(pausecnt     ,0) > 0 then 0
+              when ifnull(stopcnt      ,0) > 0 then -1
+              when ifnull(cancelcnt    ,0) > 0 then -2
+              when ifnull(totcnt       ,0) = 0 then -3
+              else 0
+              end cp_state,
+              ifnull(max_adsid,0) as max_adsid,
+              a.clientid, c.corpname as clientname,
+              a.agencyid, g.corpname as agencyname,
+              a.medrepid, r.corpname as medrepname, a.tcid, t.username as tcname, a.budget,
+              a.insertdate, a.updatedate, a.insertuser, a.updateuser, u.username as updateusername	       
+         from campaign a
+              left join 
+              (
+				<include refid="ADS.STATE" />             
+
+              )  b on a.cpid = b.cpid
+              left join corporation c on a.clientid = c.corpid and c.corptype = 1
+		      left join corporation g on a.agencyid = g.corpid and g.corptype = 2
+		      left join corporation r on a.medrepid = r.corpid and r.corptype = 3
+		      left join users t on a.tcid = t.userid
+		      left join users u on a.updateuser = u.userid
+        where a.cpid = #cpid#
+      ) x
+      left join code_instance y on y.code = 'ads_state' and x.cp_state = y.isid
+   </select>
  	<select id="getAutoCorpList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
 		select a.corpname as label, a.corpid as value, a.corpname as id
 		 from adsrv.corporation a  
@@ -59,7 +167,7 @@
 		 order by code, a.idx
 	</select>  
       
-	<insert id="addCampaign" parameterClass="java.util.Map">	
+	<insert id="addCampaign" parameterClass="cp">	
 	insert into adsrv.campaign
             (cpid,
              cpname,
@@ -86,7 +194,7 @@
 	        <isNotEmpty property="aeid">$aeid$, </isNotEmpty>
 	        '$budget$',
 	        <isNotEmpty property="tcid">$tcid$, </isNotEmpty>
-	        0,
+	        1,
 	        '$insertdate$',
 	        '$insertdate$',
 	        $insertuser$,
@@ -97,7 +205,7 @@
 	        </selectKey>        
 	        
 	</insert>
-	<update id="modCampaign" parameterClass="java.util.Map">
+	<update id="modCampaign" parameterClass="cp">
 		update adsrv.campaign
 		set
 		  <isNotEmpty property="cpname">cpname      = '$cpname$', </isNotEmpty>    
@@ -114,25 +222,84 @@
 		  updateuser  = $updateuser$		     
 		where cpid = $cpid$;	
 	</update>
-	<select id="getAdsList" resultClass="ads" parameterClass="java.util.Map">
+	<select id="getCpAdsList" resultClass="ads" parameterClass="java.util.Map">
 	select adsid, a.adsname, 
 	       a.startdate, a.start_hour, a.start_min, a.enddate, a.end_hour, a.end_min, 
 	       a.goaltype, a.period, a.salestype, a.prtype, 
-		   a.budget, a.book_total, a.goal_total, a.goal_daily, a.ads_state, st.isname as ads_statename,  
+		   a.budget, a.book_total, a.goal_total, a.goal_daily, 
+		   a.ads_state, st.isname as ads_statename, st.text,
 	       a.insertuser, a.insertdate, a.updateuser, u.username as updateusername, a.updatedate       
       from adsrv.ads a
 		   left join users u on a.updateuser = u.userid
 		   left join code_instance st on st.code = 'ads_state' and a.ads_state = st.isid
-     where a.cpid = $cpid$
-          <isNotEmpty property="stat" prepend="and"> a.stat = $stat$</isNotEmpty>
-	</select>
-	
+     where a.stat = $stat$
+       and a.cpid = $cpid$
+ 	</select>
+	<select id="getAdsList" resultClass="ads" parameterClass="java.util.Map">
+	select a.*, st.isname as ads_statename, st.text, u.username as updateusername
+	   from (select adsid, a.adsname, b.cpname, 				
+		   			b.clientid, c.corpname as clientname,
+					b.agencyid, g.corpname as agencyname,
+					b.medrepid, r.corpname as medrepname,
+			       a.startdate, a.start_hour, a.start_min, a.enddate, a.end_hour, a.end_min, 
+			       a.goaltype, a.period, a.salestype, a.prtype, 
+				   a.budget, a.book_total, a.goal_total, a.goal_daily, 
+				   a.ads_state, 
+			       a.insertuser, a.insertdate, a.updateuser, a.updatedate       
+		      from adsrv.ads a
+		           left join adsrv.campaign b on a.cpid = b.cpid
+				   left join corporation c on b.clientid = c.corpid and c.corptype = 1
+			       left join corporation g on b.agencyid = g.corpid and g.corptype = 2
+			       left join corporation r on b.medrepid = r.corpid and r.corptype = 3
+		     where a.stat = 1
+	              <isNotEmpty property="ads_state" prepend="and"> ads_state = $ads_state$</isNotEmpty>
+		          <isNotEmpty property="start" prepend="and"> a.startdate >= $start$</isNotEmpty>
+		          <isNotEmpty property="end" prepend="and"> <![CDATA[  a.enddate <= $end$]]></isNotEmpty>
+			) a
+			left join users u on a.updateuser = u.userid
+			left join code_instance st on st.code = 'ads_state' and a.ads_state = st.isid
+		<dynamic prepend="where">
+		 		  <isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>	
+		</dynamic>
+        <isNotEmpty property="max">
+          limit $skip$,$max$
+        </isNotEmpty>;  	
+    </select>
+	<select id="getAdsCnt" resultClass="Integer" parameterClass="java.util.Map">
+	select count(*)
+	   from (select adsid, a.adsname, b.cpname, 				
+		   			b.clientid, c.corpname as clientname,
+					b.agencyid, g.corpname as agencyname,
+					b.medrepid, r.corpname as medrepname,
+			       a.startdate, a.start_hour, a.start_min, a.enddate, a.end_hour, a.end_min, 
+			       a.goaltype, a.period, a.salestype, a.prtype, 
+				   a.budget, a.book_total, a.goal_total, a.goal_daily, a.ads_state, 
+			       a.insertuser, a.insertdate, a.updateuser, a.updatedate       
+		      from adsrv.ads a
+		           left join adsrv.campaign b on a.cpid = b.cpid
+				   left join corporation c on b.clientid = c.corpid and c.corptype = 1
+			       left join corporation g on b.agencyid = g.corpid and g.corptype = 2
+			       left join corporation r on b.medrepid = r.corpid and r.corptype = 3
+		     where a.stat = 1
+	              <isNotEmpty property="ads_state" prepend="and"> ads_state = $ads_state$</isNotEmpty>
+		          <isNotEmpty property="start" prepend="and"> a.startdate >= $start$</isNotEmpty>
+		          <isNotEmpty property="end" prepend="and"> <![CDATA[  a.enddate <= $end$]]></isNotEmpty>
+			) a
+			left join users u on a.updateuser = u.userid
+			left join code_instance st on st.code = 'ads_state' and a.ads_state = st.isid
+		<dynamic prepend="where">
+		 		  <isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>	
+		</dynamic>
+        <isNotEmpty property="max">
+          limit $skip$,$max$
+        </isNotEmpty>;  	
+	</select>	
 	<select id="getAds" resultClass="ads" parameterClass="java.util.Map">
 		select cpid, adsid, a.adsname, a.startdate, a.start_hour, a.start_min, a.enddate, a.end_hour, a.end_min, a.period,
 			a.goaltype, g.isname as goaltypename,
 			a.salestype, s.isname as salestypename,
 			a.prtype, p.isname as prtypename,
-			a.ads_state, st.isname as ads_statename,
+			a.ads_state, st.isname as ads_statename, st.text,
 				   a.budget, a.book_total, a.goal_total, a.goal_daily, 
 			       a.insertuser, a.insertdate, a.updateuser, u.username as updateusername, a.updatedate       
 		      from adsrv.ads a
@@ -143,7 +310,7 @@
 				   left join code_instance st on st.code = 'ads_state' and a.ads_state = st.isid
 		     where a.adsid = $adsid$
  	</select>
-	<insert id="addAds" parameterClass="java.util.Map">
+	<insert id="addAds" parameterClass="ads">
 	insert into adsrv.ads
             (adsid,
              adsname,
@@ -154,6 +321,7 @@
              enddate,
              end_hour,
              end_min,
+             realenddate,
              stime,
              etime,
              goaltype,
@@ -179,8 +347,9 @@
 		        #enddate#,
 		        #end_hour#,
 		        #end_min#,
-		        UNIX_TIMESTAMP(#stime#),
-		        UNIX_TIMESTAMP(#etime#),
+		        #realenddate#,
+		        UNIX_TIMESTAMP(STR_TO_DATE(#startdate#, '%Y%m%d %H%i')),
+		       	UNIX_TIMESTAMP(STR_TO_DATE(#realenddate#, '%Y%m%d %H%i')),
 		        #goaltype#,
 		        #period#,
 		        #salestype#,
@@ -201,7 +370,7 @@
 	        </selectKey>        
 	
 	</insert>
-	<update id="modAds" parameterClass="java.util.Map">
+	<update id="modAds" parameterClass="ads">
 	update adsrv.ads
 	set   <isNotEmpty property="adsname">adsname      = '$adsname$', </isNotEmpty>  
 	      <isNotEmpty property="startdate">startdate     = '$startdate$', </isNotEmpty> 
@@ -268,8 +437,19 @@
 			  	<isNotEmpty property="crtype"> and a.crtype = $crtype$ </isNotEmpty>
 			  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
 	  </select> 
-     
-     
+	<select id="getCpCreativeList" resultClass="cr" parameterClass="java.util.Map">
+     select a.`adsid`, c.adsname, a.`crid`, b.crname, b.width, b.height, 
+		       a.startdate, a.start_hour, a.start_min,
+		       a.enddate, a.end_hour, a.end_min,
+		       a.cr_state, st.isname as cr_statename
+	      from ads_creative a
+	  		   left join creative b on a.crid = b.crid
+			   left join ads c on a.adsid = c.adsid
+		       left join code_instance st on st.code = 'cr_state' and a.cr_state = st.isid
+ 		 where c.cpid = $cpid$
+		   <isNotEmpty property="adsid"> and a.adsid = $adsid$ </isNotEmpty>
+			;
+    </select>
 	<insert id="addCreative" parameterClass="cr">	
 		insert into adsrv.creative
             (crid,
@@ -439,10 +619,44 @@
 		 where a.stat = 1     
 		  	<isNotEmpty property="targettype"> and a.targettype = $targettype$ </isNotEmpty>
 		  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
-		 order by a.updatedate desc
+		 order by <isNotEmpty property="order_str"> $order_str$ ,</isNotEmpty>
+		 a.updatedate desc
          <isNotEmpty property="max">
           limit $skip$,$max$
           </isNotEmpty>;
+	</select>
+	<select id="getAdsTargetList" resultClass="java.util.HashMap" parameterClass="java.util.Map">	
+		select a.`adsid`, c.adsname, b.targettype, i.isname as targettypename, b.tid, b.targetname, a.updatedate, a.updateuser, u.username as updateusername
+		 from ads_targeting a 
+		      left join target b on a.targetid = b.tid
+		      left join ads c on a.adsid = c.adsid
+		      left join code_instance i on i.code = 'targettype' and i.isid =b.targettype
+		      left join users u on a.updateuser = u.userid
+		where b.stat = 1
+			 <isNotEmpty property="cpid"> and c.cpid = $cpid$</isNotEmpty>
+			 <isNotEmpty property="adsid"> and a.adsid = $adsid$</isNotEmpty>
+		<!--  
+		select x.*, y.tid, y.targetname, y.updatedate, u.username as updateusername 
+		  from (select i.isid as targettype, i.isname as targettypename, i.idx
+		          from code_instance i	
+		         where i.code = 'targettype'
+		 		) x
+		 		left join 
+				(select b.`targettype`, b.`tid`, b.`targetname`, a.updatedate, a.updateuser
+				    from ads_targeting a 
+				         inner join target b on a.targetid = b.tid
+				   where a.adsid = $adsid$
+				 ) y on x.targettype = y.targettype		 
+		         left join users u on y.updateuser = u.userid
+		   order by x.idx	  -->
+	</select>
+	<select id="getAdsTargetSelectList" resultClass="java.util.HashMap" parameterClass="java.util.Map">	
+	select a.targettype, i.isname as targettypename, a.tid, a.targetname, b.targetid
+		 from target a
+		      left join ads_targeting b on b.adsid = $adsid$ and a.tid = b.targetid
+		      left join code_instance i on i.code = 'targettype' and a.targettype = i.isid
+		 where a.stat = 1
+		 order by i.idx, a.updatedate desc 
 	</select>
 	<select id="getTargetCnt" resultClass="Integer" parameterClass="java.util.Map">
 		select count(*)
@@ -453,6 +667,84 @@
 		  	<isNotEmpty property="targettype"> and a.targettype = $targettype$ </isNotEmpty>
 		  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
 	</select>
+	
+	
+	<insert id="addAdsTargeting" parameterClass="java.util.Map">
+         INSERT INTO ads_targeting (
+			adsid, targettype, targetid, updatedate, updateuser
+		) 
+		<dynamic>
+			<iterate prepend="VALUES" conjunction=", " property="List">
+				( 
+					#List[].adsid#,
+					#List[].targettype#,
+					#List[].tid#,
+					#List[].updatedate#,
+					#List[].updateuser#
+				)
+			</iterate>
+		</dynamic>
+      </insert>
+		
+	
+	<insert id="addAdsCreative" parameterClass="java.util.HashMap">
+		INSERT INTO ads_creative (
+			adsid,  
+	        crid,
+	        stime,
+	        etime,
+	        startdate,         
+	        enddate,
+	        realenddate,
+	        weight,
+	        cr_state,
+	        insertuser,
+	        updatedate,
+	        updateuser,
+	        insertdate,
+	        stat
+		) 
+		<dynamic>
+			<iterate prepend="VALUES" conjunction=", " property="List">
+				( 
+					#List[].adsid#,
+					#List[].crid#,
+					UNIX_TIMESTAMP(STR_TO_DATE(#List[].startdate#, '%Y%m%d %H%i')),
+			       	UNIX_TIMESTAMP(STR_TO_DATE(#List[].realenddate#, '%Y%m%d %H%i')),
+					#List[].startdate#,
+					#List[].enddate#,
+					#List[].realenddate#,
+					#List[].weight#,
+					#List[].cr_state#,
+					#List[].insertuser#,
+					#List[].updatedate#,
+					#List[].updateuser#,
+					#List[].insertdate#,
+					#List[].stat#
+				)
+			</iterate>
+		</dynamic>
+	</insert>
+
+	<insert id="addAdsSlot" parameterClass="java.util.HashMap">
+	INSERT INTO ads_slot (
+		adsid, targettype, targetid, updatedate, updateuser
+	) SELECT * FROM ( 
+	<iterate conjunction=" union all ">
+		select 
+			#list[].adsid# AS A,
+			#list[].targettype# AS G,
+			#list[].tid# AS tid,
+			#list[].updatedate# AS updatedate,
+			#list[].updateuser# AS updateuser
+	</iterate>
+	) AS T
+	ON DUPLICATE KEY UPDATE 
+	targetid = T.tid, 		
+	updatedate = T.updatedate, 		
+	updateuser = T.updateuser
+	; 
+	</insert>	
 	<insert id="addTarget" parameterClass="java.util.Map">
 		insert into adsrv.target
             (tid,

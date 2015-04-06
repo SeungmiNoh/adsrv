@@ -22,6 +22,7 @@ import tv.pandora.adsrv.common.util.StringUtil;
 
 
 
+
 import org.springframework.web.servlet.ModelAndView;
 
 public class SitemgrController extends AdsrvMultiActionController
@@ -332,36 +333,47 @@ public class SitemgrController extends AdsrvMultiActionController
 			map.put("updatedate", DateUtil.simpleDate2());
 			map.put("updateuser", userID);
 			sitemgrFacade.modSlgroup(map);
-			//sitemgrFacade.modSlotGroupHasSlot(map); // 상태 0으로 변경
+			sitemgrFacade.modSlgroupSlot(map); // 상태 0으로 변경
 		}				
 		
 		/********************** 그룹내 슬롯 저장 ***************************/
-		Map<String, String> amap = new HashMap<String, String>();
 		try{
 			String slotid[] = request.getParameterValues("slotid");
-		
+System.out.println("slotid.length----------------------------"+slotid.length);
 			ArrayList<Map<String,String>> list = new ArrayList<Map<String,String>>();
-
-			for(int i=0; i<slotid.length; i++) {
-				amap.clear();
-	            amap.put("groupid", groupid.toString());               
-	            amap.put("slotid", slotid[i]);               
-    			amap.put("insertdate", DateUtil.simpleDate2());
-    			amap.put("insertuser", userID);		
-    			list.add(amap);
-			}
+			
+			for(int i=0; i<slotid.length;i++)
+			{
+				Map<String, String> ipmap = new HashMap<String, String>();
+				
+				ipmap.put("groupid", groupid.toString());
+				ipmap.put("slotid", slotid[i].trim());
+				ipmap.put("insertdate", DateUtil.simpleDate2());
+				ipmap.put("insertuser", userID);		
+				 					
+				System.out.println(i+") Map : " + ipmap);
+				list.add(ipmap);									
+			}			
 			sitemgrFacade.addSlgroupSlot(list);
 
 		} catch(Exception e) {		
-			
+			Map<String, String> dmap = new HashMap<String, String>();
+			dmap.put("groupid", groupid.toString());
+			sitemgrFacade.delSlgroup(dmap);
+
 			System.out.println(e.getMessage());			
 			response.setCharacterEncoding("EUC-KR"); 
 			Writer w = response.getWriter();
 			w.write("<script>"); 
 			w.write("alert('저장 중 오류가 발생했습니다.');"); 
+			w.write("history.back();"); 
 			w.write("</script>"); 
 			return null; 
 		}
+		if(!groupid.equals("")) {		
+			sitemgrFacade.delSlgroupSlot(map); // 상태 0 슬롯 삭제
+		}
+		
 		
 		return new ModelAndView("redirect:sitemgr.do?a=slotGroupList", null);
 	}

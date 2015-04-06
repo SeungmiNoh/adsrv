@@ -11,6 +11,7 @@
 <%@page import="tv.pandora.adsrv.common.util.StringUtil"%>
 <%@page import="tv.pandora.adsrv.common.util.DateUtil"%>    
 <%@page import="tv.pandora.adsrv.domain.Campaign"%>    
+<%@page import="tv.pandora.adsrv.domain.User"%>    
 <% 
 try
 {
@@ -20,6 +21,7 @@ try
 	Map<String,Object> map = (Map)request.getAttribute("response");
 
 	List<Campaign> cplist = (List<Campaign>)map.get("cplist");   
+	List<User> tclist = (List<User>)map.get("tclist");
 	
     String totalCount = map.get("totalCount").toString();
     String nowPage = map.get("nowPage").toString();
@@ -54,11 +56,13 @@ try
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
 <script src="//code.jquery.com/jquery-1.10.2.js"></script>
 <script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
-<link rel="stylesheet" href="/resources/demos/style.css">
+ <script type="text/javascript" src="<%=web%>/dwr/engine.js"></script>
+<script type="text/javascript" src="<%=web%>/dwr/util.js"></script>
+<script type="text/javascript" src="<%=web%>/dwr/interface/MasDwrService.js"></script>
 <script src="<%=web%>/js/bootstrap.js"></script>
 <script src="<%=web%>/js/basic.js"></script>
 <script src="<%=web%>/js/common.js"></script>
-<script type="text/javascript">
+<!--  script type="text/javascript">
 
   $(document).ready(function() {
 	  
@@ -73,7 +77,119 @@ try
 	 
 	 $("[name=sch_text]").val("<%=sch_text%>");
   });
- </script>
+ </script-->
+ 
+ <script type="text/javascript">
+
+
+$(function(){
+	//$(".debug").css("display","none");
+
+	
+	$.datepicker.regional['ko'] = {
+			closeText: '닫기',
+			prevText: '이전달',
+			nextText: '다음달',
+			currentText: '오늘',
+			monthNames: ['1월','2월','3월','4월','5월','6월', '7월','8월','9월','10월','11월','12월'],
+			monthNamesShort: ['1월','2월','3월','4월','5월','6월', '7월','8월','9월','10월','11월','12월'],
+			dayNames: ['일','월','화','수','목','금','토'],
+			dayNamesShort: ['일','월','화','수','목','금','토'],
+			dayNamesMin: ['일','월','화','수','목','금','토'],
+			weekHeader: 'Wk',
+			dateFormat: 'yy-mm-dd',
+			firstDay: 0,
+			isRTL: false,
+			duration:200,
+			showAnim:'show',
+			showMonthAfterYear: true,
+			yearSuffix: '년'};
+		$.datepicker.setDefaults($.datepicker.regional['ko']);
+	
+		$("#start").datepicker({
+			dateFormat: 'yy-mm-dd',
+			changeMonth:true,
+			changeYear:true,
+			onClose: function(selectDate){
+					$("#end").datepicker("option","minDate",selectDate);					
+					//$(this).trigger("change");
+			}
+	});
+	$("#end").datepicker({
+			dateFormat: 'yy-mm-dd',
+			changeMonth:true,
+			changeYear:true,
+			onClose: function(selectDate){
+					$("#start").datepicker("option","maxDate",selectDate);
+					//$(this).trigger("change");
+					
+			}
+	});
+
+	
+	
+	$("#btnPopup").click(function(e){
+		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
+		e.preventDefault();
+		$('#myModal').modal();
+		$(".modify").css("display", "none");
+		$(".new").css("display", "");
+		$(".debug").val(""); //값 초기화	 (siteid, change)	
+		$('#cpname').focus();
+		$("input:radio[name='sitetype']:radio[value=1]").prop('checked',true);
+		
+	
+	});
+	
+	$('#frmRegist').change(function(e){	
+		$("#change").val("change");
+	});
+
+	$("span[name=cpmod]").click(function(e){
+		var cpid = $(this).attr("cpid");
+		location.href = "cpmgr.do?a=cpEditForm&cpid="+cpid;
+	});
+	
+	$("#btnRegCp").on("click", function(e){
+		$("#frmRegCp input, #frmRegCp select").css("border-color", "#ccc");
+		$("#warningMsg").text("");
+		e.preventDefault();
+		
+		if($.trim($("#cpname").val()).length==0){
+			$("#cpname").css("border-color","red").focus();
+			$("#warningMsg").text("캠페인 명을 입력해주세요.");
+			return false;
+		}else if($("#clientid").val()==0){
+			$("#client").css("border-color","red").focus();
+			$("#warningMsg").text("광고주를 선택해주세요.");
+			return false;
+		}else if($.trim($("#budget").val()).length==0){
+			$("#budget").css("border-color","red").focus();
+			$("#warningMsg").text("집행 금액을 입력해주세요.");
+			return false;
+		}else if($.trim($("#start").val()).length!=10){
+			$("#start").css("border-color","red").focus();
+			$("#warningMsg").text("시작일을 선택해주세요.");
+			return false;
+		}else if($.trim($("#end").val()).length!=10){
+			$("#end").css("border-color","red").focus();
+			$("#warningMsg").text("종료일을 선택해주세요.");
+			return false;
+		}else if($.trim($("#memo").val()).length>50){
+			$("#memo").css("border-color","red").focus();
+			$("#warningMsg").text("설명은 50자 이내로 입력해주세요.");
+			return false;
+		}else{
+			$("#cpname").css("border-color","green");
+		}
+		if(confirm("캠페인을 등록하시겠습니까?")){
+			
+			$("#frmRegCp").submit();					
+			
+		}
+	});
+});
+</script>
 </head>
 
 <body>
@@ -84,7 +200,7 @@ try
                 <div class="boxTitle">
                     <!-- title Start -->
                     <div class="title">캠페인 목록</div>
-                    <div class="breadcrumbs"><span class="glyIcon"><img src="../img/navIcon.png" alt=""></span> 현재위치 : 캠페인 > 캠페인 목록</div>
+                    <div class="breadcrumbs"><span class="glyIcon"><img src="<%=web%>/img/navIcon.png" alt=""></span> 현재위치 : 캠페인 > 캠페인 목록</div>
                     <!-- title End -->
                 </div>
                 <!-- search group Start -->
@@ -138,7 +254,7 @@ try
                 <!-- saveBtn Start -->
                 <div class="outsaveBtn1">
                     <a class="btn btn-danger" href="cpmgr.do?a=cpAddForm" role="button">캠페인등록</a>
-                </div>
+                  </div>
                 <!-- saveBtn End -->
                 <br>
                 <!-- list Table Start -->
@@ -192,7 +308,11 @@ for(int k=0; k<cplist.size(); k++){
                     
                         <tr>
                             <td><%=skip+(k+1) %></td>
-                            <td class="textLeft"><span width="100px"><%if(k%3==0){ %><span class="label label-info">T</span><%} %> <%if(k%2==0){ %><span class="label label-warning">P</span> <%} %><a href="cpmgr.do?a=cpAdsList&cpid=<%=cp.getCpid()%>"></span><%=cp.getCpname() %></a></td>
+                            <td class="textLeft">
+                            <span name="cpmod" cpid="<%=cp.getCpid()%>" class="label label-<%=k%3==0?"info":"default"%>">T</span> 
+                            <span name="cpmod" cpid="<%=cp.getCpid()%>" style="margin-right:6px" class="label label-<%=k%3==0?"warning":"default"%>">P</span> 
+                            <a href="cpmgr.do?a=cpAdsList&cpid=<%=cp.getCpid()%>" class="<%=cp.getText()%>"><%=cp.getCpname() %></a>
+                            </td>
                             <td><%=cp.getClientname() %></td>
                             <td><%=StringUtil.isNull(cp.getMedrepname()) %></td>
                             <td><%=DateUtil.getYMD(cp.getStartdate(),".") %></td>
@@ -205,7 +325,7 @@ for(int k=0; k<cplist.size(); k++){
                             <td class="textRight">0.24%</td>
                             <td><%=DateUtil.getYMD(cp.getInsertdate(),".") %></td>
                             <td><%=cp.getTcname()%></td>
-                            <td>진행</td>
+                            <td><span class="<%=cp.getText()%>"><%=cp.getCp_statename() %></span></td>
                         </tr>
 <%} %>                        
                         

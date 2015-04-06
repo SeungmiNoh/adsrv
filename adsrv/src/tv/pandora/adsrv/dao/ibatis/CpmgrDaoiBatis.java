@@ -42,17 +42,17 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 			return null;
 		}		
 	}
-	public Integer addCampaign(Map<String, String> map){
+	public Integer addCampaign(Campaign cp){
 		try {
-			return (Integer) sqlMapClientTemplateMaster.insert("addCampaign", map);
+			return (Integer) sqlMapClientTemplateMaster.insert("addCampaign", cp);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}	
 	}
 	@Override
-	public Integer modCampaign(Map<String, String> map) {
+	public Integer modCampaign(Campaign cp) {
 		try {
-			return (Integer) sqlMapClientTemplateMaster.update("modCampaign", map);
+			return (Integer) sqlMapClientTemplateMaster.update("modCampaign", cp);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}	
@@ -76,7 +76,18 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 	@Override
 	public List<Ads> getAdsList(Map<String, String> map) {
 		try {
-			return (List<Ads>) sqlMapClientTemplateMaster.queryForList("getAdsList", map);
+			String sql = "getAdsList";
+			if(!StringUtil.isNull(String.valueOf(map.get("cpid"))).equals("")){
+				sql = "getCpAdsList";
+			}
+			return (List<Ads>) sqlMapClientTemplateMaster.queryForList(sql, map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+	public Integer getAdsCnt(Map<String, String> map) {
+		try {
+			return (Integer) sqlMapClientTemplateMaster.queryForObject("getAdsCnt", map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
@@ -89,17 +100,17 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 		}	
 	}
 	@Override
-	public Integer addAds(Map<String, String> map) {
+	public Integer addAds(Ads ads) {
 		try {
-			return (Integer) sqlMapClientTemplateMaster.update("addAds", map);
+			return (Integer) sqlMapClientTemplateMaster.insert("addAds", ads);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}	
 	}
 	@Override
-	public Integer modAds(Map<String, String> map) {
+	public Integer modAds(Ads ads) {
 		try {
-			return (Integer) sqlMapClientTemplateMaster.update("addAds", map);
+			return (Integer) sqlMapClientTemplateMaster.update("addAds", ads);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}	
@@ -114,7 +125,13 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 	}
 	public List<Map<String,String>> getTargetList(Map<String, String> map){
 		try {
-			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getTargetList", map);
+			String sql = "getTargetList";
+			if(StringUtil.isNull(String.valueOf(map.get("mode"))).equals("E")){
+				sql = "getAdsTargetSelectList";
+			}else if(!StringUtil.isNull(String.valueOf(map.get("adsid"))).equals("") || !StringUtil.isNull(String.valueOf(map.get("cpid"))).equals("")){
+				sql = "getAdsTargetList";
+			}
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList(sql, map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}		
@@ -288,7 +305,11 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 
 	public List<Creative> getCreativeList(Map<String, String> map){
 		try {
-			return (List<Creative>) sqlMapClientTemplateMaster.queryForList("getCreativeList", map);
+			String sql = "getCreativeList";
+			if(!StringUtil.isNull(String.valueOf(map.get("cpid"))).equals("") || !StringUtil.isNull(String.valueOf(map.get("adsid"))).equals("")){
+				sql = "getCpCreativeList";
+			}
+			return (List<Creative>) sqlMapClientTemplateMaster.queryForList(sql, map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}		
@@ -326,6 +347,21 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}	
+	}
+	public void addAdsTargeting(List<Map<String, String>> list){
+		HashMap<String, Object> param = new HashMap<String, Object>();
+		param.put("List", list);
+		sqlMapClientTemplateMaster.insert("addAdsTargeting", param);
+	}
+	public void addAdsCreative(List<Map<String, String>> list){
+		HashMap<String, Object> param = new HashMap<String, Object>();
+		param.put("List", list);
+		sqlMapClientTemplateMaster.insert("addAdsCreative", param);
+	}
+	public void addAdsSlot(List<Map<String, String>> list){
+		HashMap<String, Object> param = new HashMap<String, Object>();
+		param.put("List", list);
+		sqlMapClientTemplateMaster.insert("addAdsSlot", param);
 	}
 
 }

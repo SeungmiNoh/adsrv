@@ -26,7 +26,7 @@
 			  <isNotEmpty property="corpid"> and a.corpid = $corpid$ </isNotEmpty> 
 			  <isNotEmpty property="corptype"> and c.corptype = $corptype$ </isNotEmpty> 
 			  <isNotEmpty property="perid"> and a.perid = $perid$ </isNotEmpty> 
-			  <isNotEmpty property="ismgr"> and a.ismgr = $ismgr$ </isNotEmpty> 
+			  <isNotEmpty property="ismgr"> and p.usertype = 'M' </isNotEmpty> 
 		      <isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
 	   order by <isNotEmpty property="order_str"> $order_str$ ,</isNotEmpty>
 		          a.userid desc
@@ -55,17 +55,26 @@
 		  from permission
 	     where stat = 1
 	</select>
+	<select id="getUserPerCnt" resultClass="Integer" parameterClass="java.util.Map">
+		select count(*)
+		  from permission a
+	     where stat = 1
+	       and pername = #pername#
+	         <isNotEmpty property="not_perid"> and a.perid != $not_perid$ </isNotEmpty> 
+			
+	</select>
 	<select id="getMenuList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
 		select menu_id, menu_name, writeflag, subflag
 		  from web_menu
 	     order by idx
 	</select>
 	<select id="getPerSchemaList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
-	 select x.*, <![CDATA[(ifnull(y.menu_val,0) & svalue)  ]]> as ischoice
+	 select x.*, ifnull(y.menu_val,0) as menu_val, <![CDATA[(ifnull(y.menu_val,0) & svalue)  ]]> as ischoice
 		from (select b.perid, b.pername, a.menu_id, a.menu_name, a.menu_schema, isname, a.idx, c.isid as svalue, c.idx as idx2
 				from permission b, web_menu a
 					 left join code_instance c on c.code = 'menu_schema' and <![CDATA[(a.menu_schema & c.isid)]]> > 0   
-			 ) x
+			 where b.stat = 1
+ 			 ) x
  			 left join permission_menu y on x.menu_id = y.menu_id and x.perid =  y.perid
  		order by x.perid, x.idx, idx2
  	</select>
@@ -89,7 +98,7 @@
 	values (0,
 	        '$pername$',
 	        <isNotEmpty property="usertype">'$usertype$',</isNotEmpty>
-	        $stat$,
+	        1,
 	        $updatedate$,
 	        $updateuser$);
 	  	<selectKey resultClass="int">
@@ -116,19 +125,20 @@
     </insert>
     <update id="modPermission" parameterClass="java.util.Map">
     	update permission
-    	   set pername = '$pername$',
+    	   set <isNotEmpty property="pername">pername = '$pername$',</isNotEmpty>
+    	       <isNotEmpty property="stat">stat = $stat$,</isNotEmpty>
     	       updatedate = $updatedate$,
     	       updateuser = $updateuser$
     	 where perid = $perid$
      </update>     
      <update id="modPermissionMenu" parameterClass="java.util.Map">
-    	update permission
+    	update permission_menu
     	   set stat = 0
     	 where perid = $perid$
      </update>       
      <delete id="delPermissionMenu" parameterClass="java.util.Map">
     	delete 
-    	  from permission
+    	  from permission_menu
     	 where perid = $perid$
     	   and stat = 0
      </delete>
