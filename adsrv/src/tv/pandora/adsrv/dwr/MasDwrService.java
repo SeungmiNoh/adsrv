@@ -179,6 +179,36 @@ System.out.println("---------------getSlgroupInSlotList");
 		List<Creative> resultmap = cpmgrModel.getCreativeList(map);
 		return resultmap;
 	}
+	 
+	public Integer addAdsSlot(String adsid, String slotid, String userid){
+		try
+		{
+			Map<String, String> map = new HashMap<String, String>();	
+			map.put("adsid", adsid);
+			map.put("slotid", slotid);
+			map.put("insertdate", DateUtil.simpleDate2());
+			map.put("insertuser", userid);
+			cpmgrModel.addAdsSlot(map);
+			return 1;
+		} catch(Exception e) {
+			return 0;
+		}
+	}
+	public Integer addAdsSlotByGroup(String adsid, String groupid, String userid){
+		try
+		{
+			Map<String, String> map = new HashMap<String, String>();	
+			map.put("adsid", adsid);
+			map.put("groupid", groupid);
+			map.put("insertdate", DateUtil.simpleDate2());
+			map.put("insertuser", userid);
+			cpmgrModel.addAdsSlotByGroup(map);
+			return 1;
+		} catch(Exception e) {
+			return 0;
+		}
+	}
+	
 	
 	public Map<String,String> getTemplate(String tmpid){
 		

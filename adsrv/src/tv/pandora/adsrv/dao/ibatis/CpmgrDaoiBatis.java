@@ -358,10 +358,19 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 		param.put("List", list);
 		sqlMapClientTemplateMaster.insert("addAdsCreative", param);
 	}
-	public void addAdsSlot(List<Map<String, String>> list){
-		HashMap<String, Object> param = new HashMap<String, Object>();
-		param.put("List", list);
-		sqlMapClientTemplateMaster.insert("addAdsSlot", param);
+	public void addAdsSlot(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.insert("addAdsSlot", map);
+		} catch (EmptyResultDataAccessException e) {
+			;
+		}	
+	}
+	public void addAdsSlotByGroup(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.insert("addAdsSlotByGroup", map);
+		} catch (EmptyResultDataAccessException e) {
+			;
+		}	
 	}
 
 }

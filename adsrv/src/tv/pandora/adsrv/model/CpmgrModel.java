@@ -163,8 +163,11 @@ public class CpmgrModel {
 	public void addAdsCreative(List<Map<String, String>> list){
 		cpmgrDaoMaster.addAdsCreative(list);
 	}
-	public void addAdsSlot(List<Map<String, String>> list){
-		cpmgrDaoMaster.addAdsSlot(list);
+	public void addAdsSlot(Map<String, String> map){
+		cpmgrDaoMaster.addAdsSlot(map);
+	}
+	public void addAdsSlotByGroup(Map<String, String> map){
+		cpmgrDaoMaster.addAdsSlotByGroup(map);
 	}
 
 }

@@ -16,7 +16,9 @@
  * {
      -webkit-text-size-adjust: none;
  }
- 
+ .numinput{
+ 	    text-align: right;
+ }
  .point {
   cursor: pointer !important; 
  }

@@ -227,6 +227,44 @@ public class CpmgrController extends AdsrvMultiActionController
 		
 		return new ModelAndView("redirect:cpmgr.do?a=adsInfo&adsid="+adsid, null);
 	}
+	public ModelAndView adsCreativeSave(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String adsid = request.getParameter("adsid");
+		String ads_startdate = request.getParameter("ads_startdate");
+		String ads_enddate = request.getParameter("ads_enddate");
+		String ads_realenddate = request.getParameter("ads_realenddate");
+		
+		String userID = (String)SessionUtil.getAttribute("userID");
+		
+		Map<String, String> amap = new HashMap<String, String>();		
+			
+		String[] crid = request.getParameterValues("crid");
+		String[] targettype = request.getParameterValues("targettype");
+
+		
+		ArrayList<Map<String,String>> list = new ArrayList<Map<String,String>>();
+		
+		for(int i=0; i<crid.length;i++){
+			if(!StringUtil.isNullZero(crid[i].trim()).equals("0")) {
+				
+		         Map<String, String> ipmap = new HashMap<String, String>();
+
+		         ipmap.put("adsid", adsid);
+		         ipmap.put("startdate", ads_startdate);
+		         ipmap.put("enddate", ads_enddate);
+		         ipmap.put("realenddate", ads_realenddate);
+			     ipmap.put("crid", crid[i]);
+		         ipmap.put("insertdate", DateUtil.simpleDate2());
+		         ipmap.put("insertuser", userID);
+				
+				System.out.println(i+") Map : " + ipmap);
+				list.add(ipmap);					
+			}
+		}
+		System.out.println(" List : " + list);
+		cpmgrFacade.addAdsCreative(list);
+		
+		return new ModelAndView("redirect:cpmgr.do?a=adsCreative&adsid="+adsid, null);
+	}
 	public ModelAndView cpAdsList(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
 		String cpid = StringUtil.isNull(request.getParameter("cpid"));
@@ -302,6 +340,9 @@ public class CpmgrController extends AdsrvMultiActionController
 		map.put("cpid", ads.getCpid());		
 		map.put("adsid", adsid);		
 		List<Creative> crlist = cpmgrFacade.getCreativeList(map);
+		// 위치목록
+		List<Map<String, String>> adsslotlist = sitemgrFacade.getSlotList(map);
+		
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("cp", cp);
@@ -309,6 +350,7 @@ public class CpmgrController extends AdsrvMultiActionController
 		resultMap.put("adslist", adslist);
 		resultMap.put("tglist", tglist);
 		resultMap.put("crlist", crlist);
+		resultMap.put("adsslotlist", adsslotlist);
 
 		return new ModelAndView("campaign/ads_info", "response", resultMap);
 	}
@@ -387,6 +429,56 @@ public class CpmgrController extends AdsrvMultiActionController
 
 
 		return new ModelAndView("campaign/ads_creative", "response", resultMap);
+	}
+	public ModelAndView adsSlot(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		
+		String adsid = StringUtil.isNull(request.getParameter("adsid"));
+		
+		Map<String, String> map = new HashMap<String, String>();	
+		
+		
+
+		// 애즈 정보
+		map.put("adsid", adsid);		
+		Ads ads = cpmgrFacade.getAds(map);	
+		// 캠페인 정보
+		map.put("cpid", ads.getCpid());		
+		Campaign cp = cpmgrFacade.getCampaign(map);	
+		// 위치목록
+		List<Map<String, String>> adsslotlist = sitemgrFacade.getSlotList(map);
+		
+		// 애즈 목록
+		map.clear();
+		map.put("stat", "1");				
+		map.put("cpid", ads.getCpid());		
+		List<Ads> adslist = cpmgrFacade.getAdsList(map);
+
+		
+		//
+		List<Map<String, String>> grouplist = sitemgrFacade.getSlgroupList(map);
+
+		map.clear();
+		map.put("order_str", "sitename");
+		List<Map<String, String>> sitelist = sitemgrFacade.getSiteList(map);
+		
+		map.clear();
+		map.put("order_str", "secname");
+		List<Map<String, String>> seclist = sitemgrFacade.getSectionList(map);
+		map.clear();
+		map.put("order_str", "slotname");
+		List<Map<String, String>> slotlist = sitemgrFacade.getSlotList(map);
+		
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("cp", cp);
+		resultMap.put("ads", ads);
+		resultMap.put("adslist", adslist);
+		resultMap.put("grouplist", grouplist);
+		resultMap.put("sitelist", sitelist);
+		resultMap.put("seclist", seclist);
+		resultMap.put("slotlist", slotlist);
+		resultMap.put("adsslotlist", adsslotlist);
+		return new ModelAndView("campaign/ads_slot", "response", resultMap);
 	}
 	public ModelAndView auto_corp(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		System.out.println("----------------------------------auto_corp---------------------------");

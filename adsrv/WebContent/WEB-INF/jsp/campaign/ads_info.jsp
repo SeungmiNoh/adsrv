@@ -25,6 +25,7 @@ try
 	List<Ads> adslist = (List<Ads>)map.get("adslist"); 
 	List<Map<String,String>> tglist = (List<Map<String,String>>)map.get("tglist");
 	List<Creative> crlist = (List<Creative>)map.get("tglist");
+	List<Map<String,String>> adsslotlist = (List<Map<String,String>>)map.get("adsslotlist");
 %>  
 <!DOCTYPE html>
 <html lang="en">
@@ -394,16 +395,16 @@ for(int k=0; k<crlist.size(); k++){
                 </div>
                 <!-- title End -->
                 <!-- creative Table Start -->
-                <table class="listTable">
+                 <table class="listTable">
                     <colgroup>
-                        <col width="5%">
-                            <col width="">
-                                <col width="10%">
-                                    <col width="">
-                                        <col width="10%">
-                                            <col width="10%">
-                                                <col width="10%">
-                                                    <col width="">
+                    <col width="2%">
+                    <col width="">
+                    <col width="10%">
+                    <col width="">
+                    <col width="10%">
+                    <col width="10%">
+                    <col width="10%">
+                    <col width="">
                     </colgroup>
                     <thead>
                         <tr>
@@ -417,19 +418,41 @@ for(int k=0; k<crlist.size(); k++){
                             <th>등록일</th>
                         </tr>
                     </thead>
+
                     <tbody>
+ <%
+
+ for(int k=0; k<adsslotlist.size(); k++){
+     
+		Map<String,String> slot = adsslotlist.get(k);
+  %>                    
+ 						<tr id="adsSlot<%=String.valueOf(slot.get("slotid"))%>">
+                            <td>
+                                
+                            </td>
+                            <td class="textLeft"><%=slot.get("sitetag") %>/<%=slot.get("sectag") %>@<%=slot.get("slottag") %></td>
+                            <td><%=StringUtil.isNull(String.valueOf(slot.get("width"))) %> x <%=StringUtil.isNull(String.valueOf(slot.get("height"))) %></td>
+                            <td class="textLeft">
+                                <%=slot.get("sitename") %> / <%=slot.get("secname") %> / <%=slot.get("sitename") %>
+                            </td>
+                            <td>
+                                <%=String.valueOf(slot.get("slot_state")).equals("1")?"진행":"중지"%>
+                            </td>
+                            <td class="form-inline">
+                                <button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-stop"></span></button>
+                            </td>
+                            <td><%=slot.get("insertusername") %></td>
+                            <td><%=DateUtil.getYMD(String.valueOf(slot.get("insertdate"))) %></td>
+                      </tr>
+<%} if(adsslotlist.size()==0){
+%>
+
                         <tr>
-                            <td>x</td>
-                            <td>/site/section/page/location</td>
-                            <td>100 X 100</td>
-                            <td>사이트/섹션/페이지/메인</td>
-                            <td>진행</td>
-                            <td></td>
-                            <td>User1</td>
-                            <td>2015.01.01 00:00</td>
-                        </tr>
-                    </tbody>
-                </table>
+                            <td colspan="8"> 위치가 등록되지 않았습니다.</td>                            
+                        </tr> 
+                        <%} %> 
+                        </tbody>
+                       </table>
                 <!-- targeting Table End -->
             </section>
 

@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.orm.ibatis.SqlMapClientTemplate;
 
+import tv.pandora.adsrv.common.util.StringUtil;
 import tv.pandora.adsrv.dao.SitemgrDao;
 
 public class SitemgrDaoiBatis implements SitemgrDao {
@@ -17,7 +18,7 @@ public class SitemgrDaoiBatis implements SitemgrDao {
 	}
 
 	
-	public List<Map<String,String>> getSiteList(Map<String, String> map){
+	public List<Map<String,String>> getSiteList(Map<String, String> map){		
 		try {
 			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getSiteList", map);
 		} catch (EmptyResultDataAccessException e) {
@@ -32,8 +33,12 @@ public class SitemgrDaoiBatis implements SitemgrDao {
 		}
 	}
 	public List<Map<String,String>> getSlotList(Map<String, String> map){
+		String sql = "getSlotList";
+		if(!StringUtil.isNull(map.get("adsid")).equals("")) {
+			sql = "getAdsSlotList";
+		}		
 		try {
-			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getSlotList", map);
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList(sql, map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}

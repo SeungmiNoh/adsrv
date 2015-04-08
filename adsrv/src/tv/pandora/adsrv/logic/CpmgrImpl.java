@@ -200,8 +200,5 @@ public class CpmgrImpl implements CpmgrFacade{
 	public void addAdsCreative(List<Map<String, String>> list) {
 		cpmgrModel.addAdsCreative(list);
 	}
-	@Override
-	public void addAdsSlot(List<Map<String, String>> list) {
-		cpmgrModel.addAdsSlot(list);
-	}
+
 }

@@ -63,6 +63,6 @@ public interface CpmgrFacade {
 	public Integer modCreative(Creative cr);
 	public void addAdsTargeting(List<Map<String, String>> list);
 	public void addAdsCreative(List<Map<String, String>> list);
-	public void addAdsSlot(List<Map<String, String>> list);
+	
 
 }
