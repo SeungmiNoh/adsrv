@@ -75,5 +75,7 @@ public interface CpmgrDao {
 	public void addAdsCreative(List<Map<String, String>> list);
 	public void addAdsSlot(Map<String, String> map);
 	public void addAdsSlotByGroup(Map<String, String> map);
+	public void modAdsSlot(Map<String, String> map);
+
 }
   

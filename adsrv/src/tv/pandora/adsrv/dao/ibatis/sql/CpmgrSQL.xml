@@ -443,7 +443,7 @@ select x.*, y.isname as cp_statename, y.text
      select a.`adsid`, c.adsname, a.`crid`, b.crname, b.width, b.height, 
 		       b.prtype, t.isname as prtypename, a.startdate, a.start_hour, a.start_min,
 		       a.enddate, a.end_hour, a.end_min, a.weight, a.updatedate, a.updateuser, u.username as updateusername,
-		       a.cr_state, st.isname as cr_statename
+		       a.cr_state, st.isname as cr_statename, st.text
 	      from ads_creative a
 	  		   left join creative b on a.crid = b.crid
 			   left join ads c on a.adsid = c.adsid
@@ -607,7 +607,7 @@ select x.*, y.isname as cp_statename, y.text
           </isNotEmpty>;
 	</select>
 	<select id="getAdsTargetList" resultClass="java.util.HashMap" parameterClass="java.util.Map">	
-		select a.`adsid`, c.adsname, b.targettype, i.isname as targettypename, b.tid, b.targetname, a.updatedate, a.updateuser, u.username as updateusername
+		<!-- select a.`adsid`, c.adsname, b.targettype, i.isname as targettypename, b.tid, b.targetname, a.updatedate, a.updateuser, u.username as updateusername
 		 from ads_targeting a 
 		      left join target b on a.targetid = b.tid
 		      left join ads c on a.adsid = c.adsid
@@ -616,20 +616,25 @@ select x.*, y.isname as cp_statename, y.text
 		where b.stat = 1
 			 <isNotEmpty property="cpid"> and c.cpid = $cpid$</isNotEmpty>
 			 <isNotEmpty property="adsid"> and a.adsid = $adsid$</isNotEmpty>
-		<!--  
-		select x.*, y.tid, y.targetname, y.updatedate, u.username as updateusername 
+		 --> 
+		select x.*, y.adsid, y.adsname, y.tid, y.targetname, y.updatedate, u.username as updateusername 
 		  from (select i.isid as targettype, i.isname as targettypename, i.idx
 		          from code_instance i	
 		         where i.code = 'targettype'
 		 		) x
 		 		left join 
-				(select b.`targettype`, b.`tid`, b.`targetname`, a.updatedate, a.updateuser
+				(select c.adsid, c.adsname, b.`targettype`, b.`tid`, b.`targetname`, a.updatedate, a.updateuser
 				    from ads_targeting a 
+				         left join ads c on a.`adsid` = c.`adsid`
 				         inner join target b on a.targetid = b.tid
-				   where a.adsid = $adsid$
+				   <dynamic prepend="where">
+				   		<isNotEmpty property="cpid"  prepend="and">  c.cpid = $cpid$</isNotEmpty>
+			 			<isNotEmpty property="adsid"  prepend="and">  a.adsid = $adsid$</isNotEmpty>
+				   </dynamic>
 				 ) y on x.targettype = y.targettype		 
 		         left join users u on y.updateuser = u.userid
-		   order by x.idx	  -->
+		         <isEmpty property="adsid"> where y.adsid is not null </isEmpty>
+		   order by x.idx	 
 	</select>
 	<select id="getAdsTargetSelectList" resultClass="java.util.HashMap" parameterClass="java.util.Map">	
 	select a.targettype, i.isname as targettypename, a.tid, a.targetname, b.targetid
@@ -662,11 +667,15 @@ select x.*, y.isname as cp_statename, y.text
 					#List[].tid#,
 					#List[].updatedate#,
 					#List[].updateuser#
-				)
+				) 
 			</iterate>
 		</dynamic>
+		ON DUPLICATE KEY UPDATE
+    		targetid = VALUES(targetid),
+    		updatedate = VALUES(updatedate),
+    		updateuser = VALUES(updateuser)
       </insert>
-		
+	
 	
 	<insert id="addAdsCreative" parameterClass="java.util.HashMap">
 		INSERT INTO ads_creative (
@@ -708,28 +717,40 @@ select x.*, y.isname as cp_statename, y.text
 			</iterate>
 		</dynamic>
 	</insert>
-
+	<update id="modAdsSlot" parameterClass="java.util.HashMap">
+		update adsrv.ads_slot
+		  set <isNotEmpty property="slot_state"> slot_state = $slot_state$, </isNotEmpty>
+		      <isNotEmpty property="stat"> stat = $stat$, </isNotEmpty>
+		      updatedate = $updatedate$,
+		      updateuser = $updateuser$
+		where adsid = $adsid$
+		  <isNotEmpty property="slot_str">and slotid in ($slot_str$) </isNotEmpty>
+		  <isNotEmpty property="slotid">and slotid = $slotid$ </isNotEmpty>
+	</update>
 	<insert id="addAdsSlot" parameterClass="java.util.HashMap">
-	insert into adsrv.ads_slot
-    (	adsid,
-	    slotid,seq, 
-	    slot_state, 
-	    insertdate, 
-	    insertuser, 
-	    updatedate, 
-	    updateuser, 
-	    stat
-    ) 
-    values 
-    ( $adsid$,
-      $slotid$,
-      0,
-      1,
-      $insertdate$,
-      $insertuser$,
-      $insertdate$,
-      $insertuser$,
-      1);
+	insert into ads_slot 
+	(
+	adsid,
+		    slotid,
+		    seq, 
+		    slot_state, 
+		    insertdate, 
+		    insertuser, 
+		    updatedate, 
+		    updateuser, 
+		    stat
+	)
+	 values 
+	( $adsid$,
+	      $slotid$,
+	      0,
+	      1,
+	      $insertdate$,
+	      $insertuser$,
+	      $insertdate$,
+	      $insertuser$,
+	      1)
+ 	on duplicate key update stat = 1;
 	</insert>
 	<insert id="addAdsSlotByGroup" parameterClass="java.util.HashMap">
 	insert into adsrv.ads_slot
@@ -754,7 +775,8 @@ select x.*, y.isname as cp_statename, y.text
      from slotgroup_slot
      where groupid = $groupid$
        and stat = 1
-       and slotid not in (select slotid from ads_slot a where a.adsid = $adsid$)
+       and slotid not in (select slotid from ads_slot a where a.adsid = $adsid$ and a.stat = 1)
+	on duplicate key update stat = 1;
 	</insert>	
 	<insert id="addTarget" parameterClass="java.util.Map">
 		insert into adsrv.target

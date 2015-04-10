@@ -134,7 +134,6 @@ try
 			}
 		});
 
-		
 		$.datepicker.regional['ko'] = {
 				closeText: '닫기',
 				prevText: '이전달',
@@ -150,6 +149,9 @@ try
 				firstDay: 0,
 				isRTL: false,
 				duration:200,
+				showOn: "button",
+				buttonImage: "<%=web%>/img/calendar-icon-red.gif",
+				buttonImageOnly: true,
 				showAnim:'show',
 				showMonthAfterYear: true,
 				yearSuffix: '년'};
@@ -161,7 +163,6 @@ try
 				changeYear:true,
 				onClose: function(selectDate){
 						$("#end").datepicker("option","minDate",selectDate);					
-						//$(this).trigger("change");
 				}
 		});
 		$("#end").datepicker({
@@ -170,7 +171,6 @@ try
 				changeYear:true,
 				onClose: function(selectDate){
 						$("#start").datepicker("option","maxDate",selectDate);
-						//$(this).trigger("change");
 						
 				}
 		});
@@ -347,7 +347,7 @@ try
                             <td>
                                 <div class="form-inline">
                                     
-                                    <input type="text" class="form-control input-sm" style="cursor:pointer;width:190px" id="start" name="startdate" placeholder="캠페인 시작일" readonly>
+                                    <input type="text" class="form-control input-sm datepicker" style="cursor:pointer;width:190px" id="start" name="startdate" placeholder="캠페인 시작일" >
                                     <!-- datePicker Btn Start
                                     <a class="btn btn-success btn-sm" href="#" role="button"><span class="glyphicon glyphicon-calendar"></span></a>
                                      datePicker Btn End -->
@@ -358,7 +358,7 @@ try
                             <th>종료일<span style="color:red"> * </span></th>
                             <td>
                                 <div class="form-inline">
-                                   <input type="text" class="form-control input-sm" style="cursor:pointer;width:190px" id="end" name="enddate" placeholder="캠페인 종료일" readonly>
+                                   <input type="text" class="form-control input-sm datepicker" style="cursor:pointer;width:190px" id="end" name="enddate" placeholder="캠페인 종료일" >
                                      <!-- datePicker Btn Start 
                                     <a class="btn btn-success btn-sm" href="#" role="button"><span class="glyphicon glyphicon-calendar"></span></a>
                                      datePicker Btn End -->

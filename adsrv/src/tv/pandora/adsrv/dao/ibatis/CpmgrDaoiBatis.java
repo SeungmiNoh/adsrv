@@ -372,5 +372,12 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 			;
 		}	
 	}
+	public void modAdsSlot(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.insert("modAdsSlot", map);
+		} catch (EmptyResultDataAccessException e) {
+			;
+		}	
+	}
 
 }

@@ -194,6 +194,66 @@ System.out.println("---------------getSlgroupInSlotList");
 			return 0;
 		}
 	}
+	public Integer modAdsSlot(String adsid, String slotid, String slot_state, String userid){
+		try
+		{
+			Map<String, String> map = new HashMap<String, String>();	
+			map.put("adsid", adsid);
+			map.put("slotid", slotid);
+			map.put("slot_state", slot_state);
+			map.put("updatedate", DateUtil.simpleDate2());
+			map.put("updateuser", userid);
+			cpmgrModel.modAdsSlot(map);
+			return 1;
+		} catch(Exception e) {
+			return 0;
+		}
+	}
+	public Integer modAdsSlotStr(String adsid, String slot_str, String slot_state, String userid){
+		try
+		{
+			Map<String, String> map = new HashMap<String, String>();	
+			map.put("adsid", adsid);
+			map.put("slot_str", slot_str);
+			map.put("slot_state", slot_state);
+			map.put("updatedate", DateUtil.simpleDate2());
+			map.put("updateuser", userid);
+			cpmgrModel.modAdsSlot(map);
+			return 1;
+		} catch(Exception e) {
+			return 0;
+		}
+	}
+	
+	
+	public Integer delAdsSlot(String adsid, String slotid, String userid){
+		try
+		{
+			Map<String, String> map = new HashMap<String, String>();	
+			map.put("adsid", adsid);
+			map.put("slotid", slotid);
+			map.put("stat", "0");
+			map.put("updatedate", DateUtil.simpleDate2());
+			map.put("updateuser", userid);
+			cpmgrModel.modAdsSlot(map);
+			return 1;
+		} catch(Exception e) {
+			return 0;
+		}
+	}
+	
+	public Map<String, String> getAdsSlot(String adsid, String slotid){
+		try
+		{
+			Map<String, String> map = new HashMap<String, String>();	
+			map.put("adsid", adsid);
+			map.put("slotid", slotid);			
+			Map<String, String> slot = sitemgrModel.getSlotList(map).get(0);
+			return slot;
+		} catch(Exception e) {
+			return null;
+		}
+	}
 	public Integer addAdsSlotByGroup(String adsid, String groupid, String userid){
 		try
 		{

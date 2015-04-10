@@ -34,7 +34,7 @@ public class SitemgrDaoiBatis implements SitemgrDao {
 	}
 	public List<Map<String,String>> getSlotList(Map<String, String> map){
 		String sql = "getSlotList";
-		if(!StringUtil.isNull(map.get("adsid")).equals("")) {
+		if(!StringUtil.isNull(map.get("adsid")).equals("") || !StringUtil.isNull(map.get("cpid")).equals("")) {
 			sql = "getAdsSlotList";
 		}		
 		try {

@@ -154,17 +154,24 @@
  	
  	<select id="getAdsSlotList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
 	select a.sitename, a.siteid, a.sitename, sitetag, 
-		       a.sitetype, 
+				<isNotEmpty property="cpid"> adsname, 
+				</isNotEmpty>
+		       a.sitetype, d.slot_state,
 		       b.secid, b.secname, b.sectag, 
 		       c.slotid, c.slotname, c.slottag, c.width, c.height,
 		       d.insertdate, d.insertuser, u.username as insertusername		       
 		 from ads_slot d
 		      left join slot c on d.slotid = c.slotid 
+		      <isNotEmpty property="cpid"> left join ads e on d.adsid = e.adsid </isNotEmpty>
 		      left join section b on b.secid = c.secid
 		      left join site a on a.siteid = b.siteid
 		      left join users u on d.insertuser = u.userid
-		 where d.adsid = $adsid$
+		 where d.stat = 1
+		   <isNotEmpty property="cpid"> and e.cpid = $cpid$ </isNotEmpty>
+		   <isNotEmpty property="adsid"> and d.adsid = $adsid$ </isNotEmpty>
+		   <isNotEmpty property="slotid"> and d.slotid = $slotid$ </isNotEmpty>
  	</select>
+
 	<insert id="addSite" parameterClass="java.util.Map">	
 	insert into adsrv.site (
 	    siteid,

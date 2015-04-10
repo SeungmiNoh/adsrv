@@ -169,5 +169,7 @@ public class CpmgrModel {
 	public void addAdsSlotByGroup(Map<String, String> map){
 		cpmgrDaoMaster.addAdsSlotByGroup(map);
 	}
-
+	public void modAdsSlot(Map<String, String> map){
+		cpmgrDaoMaster.modAdsSlot(map);
+	}
 }

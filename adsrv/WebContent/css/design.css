@@ -209,7 +209,7 @@
      margin-bottom: 20px;
  }
  .boxtitle2 > .title3 {
-     font-size: 15px !important;
+     font-size: 12px !important;
      line-height: 20px;
      float: left;
      color: #555555;
@@ -273,20 +273,19 @@
      border-bottom: 1px solid #d3d2d2;
      text-align: center;
      /* 폰트사이즈 수정 */
-     
-     font-size: 9pt;
+     font-size: 8pt;
  }
  .listTable th:first-child, .listTable td:first-child {
      border-left: none;
  }
  .listTable th {
      color: #555555;
-     padding: 10px;
+     padding: 6px;
      background-color: #ebebeb;
  }
  .listTable td {
      color: #666666;
-     padding: 5px;
+     padding: 4px;
  }
  .listTable tbody.sum tr td {
      background-color: #e5f4ff !important;
@@ -417,11 +416,11 @@
  }
  .addTable th, .viewTable th {
      text-align: center;
-     font-size: 12px;
+     font-size: 8pt;
  }
  .addTable th {
      color: #555555;
-     padding: 8px;
+     padding: 6px;
      background-color: #ebebeb;
      border-bottom: 1px solid #d3d2d2;
      border-right: 1px solid #d3d2d2;
@@ -430,11 +429,11 @@
  }
  .addTable td {
      color: #666666;
-     padding: 4px 6px 4px 8px;
+     padding: 2px 4px 2px 6px;
      text-align: left;
      border-right: 1px solid #d3d2d2;
      border-bottom: 1px solid #d3d2d2;
-     font-size: 12px;
+     font-size: 8px;
  }
  .viewTable th {
      color: #555555;
@@ -443,6 +442,7 @@
      border-bottom: 1px solid #d3d2d2;
      vertical-align: top;
      text-align: left;
+     font-size: 8pt;
  }
  .viewTable td {
      color: #666666;
@@ -450,7 +450,7 @@
      text-align: left;
      border-right: 1px solid #d3d2d2;
      border-bottom: 1px solid #d3d2d2;
-     font-size: 12px;
+     font-size: 8pt;
  }
  .opacityTable {
      width: 100%;
@@ -569,17 +569,13 @@
      background-color:#2d6ca2;
  }
  .adsBox {
-     display: block;
-     text-align: left;
-     position: relative;
-     bottom: 5px;
-     z-index: 999;
+ background-color: #454545;
+     padding-bottom: 5;
+     margin: 3;
  }
  .adsBox select {
-     vertical-align: middle;
-     position: absolute;
-     left: 80px;
-     top: 0;
+     vertical-align: bottom;
+     
  }
  .fileLink a {
      display: inherit;

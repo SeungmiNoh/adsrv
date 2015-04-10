@@ -1,6 +1,7 @@
 package tv.pandora.adsrv.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -281,13 +282,15 @@ public class CpmgrController extends AdsrvMultiActionController
 		List<Creative> crlist = cpmgrFacade.getCreativeList(map);
 		List<Map<String, String>> targetlist = cpmgrFacade.getTargetList(map);
 		
-		
+		// 위치목록
+		List<Map<String, String>> adsslotlist = sitemgrFacade.getSlotList(map);
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("cp", cp);
 		resultMap.put("adslist", adslist);
 		resultMap.put("crlist", crlist);
 		resultMap.put("targetlist", targetlist);
+		resultMap.put("adsslotlist", adsslotlist);
 
 		return new ModelAndView("campaign/cp_ads_list", "response", resultMap);
 	}
@@ -333,7 +336,9 @@ public class CpmgrController extends AdsrvMultiActionController
 		Campaign cp = cpmgrFacade.getCampaign(map);	
 		// 타겟팅 정보
 		List<Map<String,String>> tglist = cpmgrFacade.getTargetList(map);
-		// 애즈 목록
+		// 타겟구분(메뉴) 목록
+		map.put("tbname", "target");
+		List<Map<String, String>> codelist = cpmgrFacade.getCodeList(map);		// 애즈 목록
 		map.put("stat", "1");				
 		List<Ads> adslist = cpmgrFacade.getAdsList(map);
 		// 광고물 목록
@@ -348,11 +353,93 @@ public class CpmgrController extends AdsrvMultiActionController
 		resultMap.put("cp", cp);
 		resultMap.put("ads", ads);
 		resultMap.put("adslist", adslist);
+		resultMap.put("codelist", codelist);
 		resultMap.put("tglist", tglist);
 		resultMap.put("crlist", crlist);
 		resultMap.put("adsslotlist", adsslotlist);
 
 		return new ModelAndView("campaign/ads_info", "response", resultMap);
+	}
+public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		
+		String adsid = StringUtil.isNull(request.getParameter("adsid"));
+		
+		Map<String, String> map = new HashMap<String, String>();	
+		
+		
+
+		// 애즈 정보
+		map.put("adsid", adsid);		
+		Ads ads = cpmgrFacade.getAds(map);	
+		// 캠페인 정보
+		map.put("cpid", ads.getCpid());		
+		Campaign cp = cpmgrFacade.getCampaign(map);	
+		// 타겟팅 정보
+		map.clear();
+		map.put("adsid", adsid);		
+		map.put("mode", "E");
+		List<Map<String, String>> tglist = cpmgrFacade.getTargetList(map);		
+		// 타겟구분(메뉴) 목록
+		map.put("tbname", "target");
+		List<Map<String, String>> codelist = cpmgrFacade.getCodeList(map);
+
+		// 광고물 목록
+		map.put("cpid", ads.getCpid());		
+		map.put("adsid", adsid);		
+		List<Creative> crlist = cpmgrFacade.getCreativeList(map);
+		// 위치목록
+		List<Map<String, String>> adsslotlist = sitemgrFacade.getSlotList(map);
+		// 애즈 목록
+		map.clear();
+		map.put("stat", "1");				
+		map.put("cpid", ads.getCpid());		
+		List<Ads> adslist = cpmgrFacade.getAdsList(map);
+	
+		
+		
+		//위치목록 추가리스트
+		List<Map<String, String>> grouplist = sitemgrFacade.getSlgroupList(map);
+
+		map.clear();
+		map.put("order_str", "sitename");
+		List<Map<String, String>> sitelist = sitemgrFacade.getSiteList(map);
+		
+		map.clear();
+		map.put("order_str", "secname");
+		List<Map<String, String>> seclist = sitemgrFacade.getSectionList(map);
+		map.clear();
+		map.put("order_str", "slotname");
+		List<Map<String, String>> slotlist = sitemgrFacade.getSlotList(map);
+		
+		
+		
+		//애즈 선택 옵션 목록
+		map.put("tbname", "ads");
+		List<Map<String, String>> ads_code = cpmgrFacade.getCodeList(map);	
+
+		// 광고물 상태 목록
+		map.clear();
+		map.put("code", "cr_state");
+		List<Map<String, String>> crstat_code = cpmgrFacade.getCodeList(map);		
+	
+		
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("cp", cp);
+		resultMap.put("ads", ads);
+		resultMap.put("adslist", adslist);
+		resultMap.put("codelist", codelist);
+		resultMap.put("tglist", tglist);
+		resultMap.put("crlist", crlist);
+		resultMap.put("adsslotlist", adsslotlist);
+		resultMap.put("grouplist", grouplist);
+		resultMap.put("sitelist", sitelist);
+		resultMap.put("seclist", seclist);
+		resultMap.put("slotlist", slotlist);
+		resultMap.put("ads_code", ads_code);
+		resultMap.put("crstat_code", crstat_code);
+
+		return new ModelAndView("campaign/ads_edit", "response", resultMap);
 	}
 	public ModelAndView adsTarget(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
@@ -1121,7 +1208,68 @@ public class CpmgrController extends AdsrvMultiActionController
 		resultMap.put("tmplist", tmplist);
 
 		return new ModelAndView("campaign/creative_addform", "response", resultMap);
-	}/*
+	}
+	
+	
+	public ModelAndView upload(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		System.out.println("----------------------------------auto_corp---------------------------");
+		String corptype = StringUtil.isNull(request.getParameter("corptype"));
+		System.out.println("corptype="+corptype);
+		Map<String, String> map = new HashMap<String, String>();
+		
+		map.put("corptype", corptype);
+		map.put("stat", "1");
+		 List<Map<String, String>> corplist = cpmgrFacade.getAutoCorpList(map);	
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("corplist", corplist);
+		
+		return new ModelAndView("common/auto_corp", "response", resultMap);		
+	}
+	
+	
+	
+	
+	
+	
+	/*
+	public ModelAndView uploadFile(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+	    List<MultipartFile> files = uploadForm.getFiles();
+
+	    List<String> fileNames = new ArrayList<String>();
+
+	    if( null != files && files.size() > 0 )
+	    {
+	        for( MultipartFile multipartFile : files )
+	        {
+	            if( multipartFile.getSize() > 0 )
+	            {
+
+	            }
+	            InputStream inputStream = null;
+	            inputStream = multipartFile.getInputStream();
+	            if( multipartFile.getSize() > 10000 )
+	            {
+	                System.out.println( "File Size exceeded:::" + multipartFile.getSize() );
+
+	            }
+	            String fileName = multipartFile.getOriginalFilename();
+	            fileNames.add( fileName );
+	            System.out.println( fileName );
+	            //Handle file content - multipartFile.getInputStream()
+	            File dest = new File( "C:/Aslam/files/" + fileName );
+	            multipartFile.transferTo( dest );
+	        }
+	    }
+	    System.out.println( "save.html is called" );
+	    map.addAttribute( "files",
+	                      fileNames );
+
+	    return new ModelAndView("file_upload_success", "response", resultMap);
+	}
+	
+
 	public ModelAndView fileUpload(HttpServletRequest request, HttpServletResponse response) throws Exception {			
 	{
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;

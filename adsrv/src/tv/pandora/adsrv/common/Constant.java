@@ -20,13 +20,14 @@ public class Constant {
 	public static final String WEB_ROOT = "/adsrv";	
 	public static final String WEB_SERVER_INDEX = WEB_SERVER_URL + "/";
 		
-	public static final String LEAVE_DIR = "/adekorea/files/leave/";	
-	public static final String LEAVE_URL = "http://img.adecorp.co.kr/board/leave/";
+	public static final String IMG_SERVER = "img.pandora.tv";
+	public static final String IMG_FTP_PATH = "/home/prismadv/prism_ad/";	// 이어서 /201503
+	public static final String IMG_FTP_USER = "prismadv";	
+	public static final String IMG_FTP_PASSWORD = "vmflwmarhkdrh&7&";	// 프리즘광고&7&
+	public static final String IMG_WEB_URL = "http://cdn.pandora.tv/_adv_img/prism_ad"; // 이어서 /201503
+	
 	
 	public static final String TEMP_DIR = "/leave/";
-	
-	
-	
 	
 	
 	

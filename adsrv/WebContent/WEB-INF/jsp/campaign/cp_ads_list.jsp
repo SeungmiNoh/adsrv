@@ -21,6 +21,8 @@ try
 	List<Ads> adslist = (List<Ads>)map.get("adslist"); 
 	List<Creative> crlist = (List<Creative>)map.get("crlist"); 
 	List<Map<String, String>> targetlist = (List<Map<String, String>>)map.get("targetlist"); 
+	List<Map<String, String>> adsslotlist = (List<Map<String, String>>)map.get("adsslotlist"); 	
+	
 %>  
 <!DOCTYPE html>
 <html lang="en">
@@ -115,7 +117,7 @@ try
                 <!-- ads add Table Start -->
 
                 
-                
+                <%--
                 <!-- ads add title Start -->
                 <div class="boxtitle2">
                      <!-- title Start -->
@@ -137,7 +139,7 @@ try
                             </ul>
                         </nav>
                     </div>
-                </div>
+                </div> --%>
                 <!--                        <a class="btn btn-danger" href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>" role="button">애즈등록</a>
   -->
                 <!-- ads add title End -->
@@ -145,7 +147,25 @@ try
                 
                 
                 
-                
+                                   <div class="boxtitle2">
+                     <!-- title Start -->
+                    <div class="title3">애즈</div>
+                    <!-- title End -->
+                    
+                    <div class="tapBox">
+                    
+                        <nav class="tapMenu">
+                            <ul>                           
+                                <li><a href="#none" class="active">애즈 목록<span class="glyphicon glyphicon-menu-right"></span></a>
+                               </li>
+                                <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsInfo&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>">애즈 정보 <span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>
+                                <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsEdit&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>">애즈 수정 <span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>                               
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
                 
                 
                 
@@ -204,7 +224,7 @@ for(int k=0; k<adslist.size(); k++){
                             <td class="textRight">101%</td>
                             <td class="textRight">33,333</td>
                             <td class="textRight">0.24%</td>
-                            <td><span class="<%=ads.getText()%>"><%=ads.getAds_statename() %></span></td>
+                            <td><a href="cpmgr.do?a=adsEdit&adsid=<%=ads.getAdsid()%>" class="<%=ads.getText()%>"><span class="<%=ads.getText()%>"><%=ads.getAds_statename() %></span></a></td>
                         </tr>
  <%} %>                     
  				</tbody>
@@ -213,31 +233,26 @@ for(int k=0; k<adslist.size(); k++){
                 <!-- ads list End -->
                 <!-- target list Start -->
                 <div class="boxtitle2">                    
-                    <!-- saveBtn Start -->
-                      <div class="saveBtn2">
-                        <a class="btn btn-danger" href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>" role="button">애즈등록</a>
-                    </div>
-                    <!-- saveBtn End -->
-                    <!-- 2th title Start -->
-                    <h2 class="title3">타겟팅 목록</h2>
+                     <!-- 2th title Start -->
+                    <h2 class="title3">타겟팅</h2>
                     <!-- 2th title End -->
                 </div>
                 <!-- list Table Start -->
                 <table class="listTable" style="width:1200px">
  				<colgroup>
 				<col width="40">
+				<col width="240"><!-- 애즈명 -->
 				<col width="120"><!-- 타겟팅구분 -->
 				<col width="240"><!-- 타겟팅명 -->
-				<col width="240"><!-- 애즈명 -->
 				<col width="100"><!-- 등록일 -->
 				<col width="100"><!-- 등록인 -->
 					</colgroup>                   
 	                    <thead>
                         <tr>
                             <th>No</th>
+                            <th>애즈명</th>
                             <th>타겟팅구분</th>
                             <th>타겟팅명</th>
-                            <th>애즈명</th>
                             <th>등록일</th>
                             <th>등록인</th>
                         </tr>
@@ -252,9 +267,9 @@ for(int k=0; k<targetlist.size(); k++){
 	 
  %>                        	<tr>
                             <td><%=k+1 %></td>
+                            <td><%=target.get("adsname")%></td>
                             <td class="textLeft"><%=target.get("targettypename") %></td>
                             <td class="textLeft"><a href="cpmgr.do?a=targetView&tid=<%=String.valueOf(target.get("tid"))%>"><%=target.get("targetname") %></a></td>
-                            <td><%=target.get("adsname")%></td>
                             <td><%=DateUtil.getYMDHM(String.valueOf(target.get("updatedate")),"-")%></td>
                             <td><%=target.get("updateusername")%></td>
                         	</tr>
@@ -264,13 +279,8 @@ for(int k=0; k<targetlist.size(); k++){
                 <!-- list Table End -->
                 <!-- creative list End -->                 <!-- creative list Start -->
                 <div class="boxtitle2">                    
-                    <!-- saveBtn Start -->
-                    <div class="saveBtn2">
-                        <a class="btn btn-danger" href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>" role="button">애즈등록</a>
-                    </div>
-                    <!-- saveBtn End -->
                     <!-- 2th title Start -->
-                    <h2 class="title3">광고물 목록</h2>
+                    <h2 class="title3">광고물</h2>
                     <!-- 2th title End -->
                 </div>
                 <!-- list Table Start -->
@@ -287,8 +297,8 @@ for(int k=0; k<targetlist.size(); k++){
 	                    <thead>
                         <tr>
                             <th>No</th>
-                            <th>광고물명</th>
                             <th>애즈명</th>
+                            <th>광고물명</th>
                             <th>사이즈</th>
                             <th>시작일</th>
                             <th>종료일</th>
@@ -305,8 +315,8 @@ for(int k=0; k<crlist.size(); k++){
 	 
  %>                        <tr>
                             <td><%=k+1 %></td>
+                            <td class="textLeft"><%=cr.getAdsname() %></td>
                             <td class="textLeft"><a href="cpmgr.do?a=adsInfo&adsid=<%=cr.getCrid()%>"><%=cr.getCrname() %></a></td>
-                            <td class="textLeft"><a href="cpmgr.do?a=adsInfo&adsid=<%=cr.getAdsid()%>"><%=cr.getAdsname() %></a></td>
                             <td><%=cr.getWidth()%> x <%=cr.getHeight() %></td>
                             <td><%=DateUtil.getYMDHM(cr.getStartdate(),"-") %></td>
                             <td><%=DateUtil.getYMDHM(cr.getEnddate(),"-") %></td>
@@ -317,7 +327,65 @@ for(int k=0; k<crlist.size(); k++){
                 </table>
                 <!-- list Table End -->
                 <!-- creative list End -->           
-                </section>
+ <!-- title Start -->
+                 <div class="boxtitle2">                    
+                    <!-- 2th title Start -->
+                    <h2 class="title3">광고 위치</h2>
+                    <!-- 2th title End -->
+                </div>                <!-- title End -->
+                <!-- creative Table Start -->
+                 <table class="listTable">
+                    <colgroup>
+                    <col width="2%">
+                    <col width="">
+                    <col width="">
+                    <col width="10%">
+                    <col width="">
+                    <col width="10%">
+                    <col width="10%">
+                    <col width="">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>애즈</th>
+                            <th>위치</th>
+                            <th>사이즈</th>
+                            <th>위치 정보</th>
+                            <th>상태</th>
+                            <th>등록자</th>
+                            <th>등록일</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+ <%
+
+ for(int k=0; k<adsslotlist.size(); k++){
+     
+		Map<String,String> slot = adsslotlist.get(k);
+  %>                    
+ 						<tr id="adsSlot<%=String.valueOf(slot.get("slotid"))%>">
+                            <td>
+                                
+                            </td>
+                             <td><%=slot.get("adsname") %></td>
+                            <td class="textLeft"><%=slot.get("sitetag") %>/<%=slot.get("sectag") %>@<%=slot.get("slottag") %></td>
+                            <td><%=StringUtil.isNull(String.valueOf(slot.get("width"))) %> x <%=StringUtil.isNull(String.valueOf(slot.get("height"))) %></td>
+                            <td class="textLeft"><%=slot.get("sitename") %> / <%=slot.get("secname") %> / <%=slot.get("slotname") %></td>
+                            <td><%=String.valueOf(slot.get("slot_state")).equals("1")?"진행":"중지"%></td>
+                            <td><%=slot.get("insertusername") %></td>
+                            <td><%=DateUtil.getYMD(String.valueOf(slot.get("insertdate"))) %></td>
+                      </tr>
+<%} if(adsslotlist.size()==0){
+%>
+
+                        <tr>
+                            <td colspan="8"> 위치가 등록되지 않았습니다.</td>                            
+                        </tr> 
+                        <%} %> 
+                        </tbody>
+                       </table>               </section>
 
 
 

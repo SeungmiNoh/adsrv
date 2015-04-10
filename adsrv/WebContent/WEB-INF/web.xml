@@ -86,8 +86,15 @@
  
  
  
- 
- 
+     <servlet>
+        <servlet-name>FileUploadServlet</servlet-name>
+        <servlet-class>com.exam.FileUploadServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+            <servlet-name>FileUploadServlet</servlet-name>
+            <url-pattern>/upload</url-pattern>
+    </servlet-mapping>
+
  
  
  
