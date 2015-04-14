@@ -27,14 +27,7 @@ public class UsermgrController extends AdsrvMultiActionController
 		String s_type = StringUtil.isNull(request.getParameter("s_type"));
 		String page = StringUtil.isNull(request.getParameter("p"));
 		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
-		
-		System.out.println("1  sch_text=="+sch_text);
-		
-		
 		sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
-		
-		System.out.println("2  sch_text=="+sch_text);
-
 		
 		if (page.equals("")) {
 			page = "1";
@@ -153,7 +146,9 @@ public class UsermgrController extends AdsrvMultiActionController
 		String s_type = StringUtil.isNull(request.getParameter("s_type"));
 		String s_per = StringUtil.isNull(request.getParameter("s_per"));
 		String page = StringUtil.isNull(request.getParameter("p"));
+		String sch_column = StringUtil.isNull(request.getParameter("sch_column"));
 		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+		sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
 		String userid = StringUtil.isNull(request.getParameter("userid"));
 		if (page.equals("")) {
 			page = "1";
@@ -169,7 +164,7 @@ public class UsermgrController extends AdsrvMultiActionController
 		map.put("skip", String.valueOf(skip))	;
 		map.put("max", String.valueOf(max))	;
 		map.put("sch_text", sch_text);
-		map.put("sch_column", "corpname");
+		map.put("sch_column", sch_column);
 		Integer totalCount = usermgrFacade.getUserCnt(map);
 		List<User> userlist = usermgrFacade.getUserList(map);
 		

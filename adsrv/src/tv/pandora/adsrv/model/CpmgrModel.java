@@ -142,6 +142,13 @@ public class CpmgrModel {
 	public List<Creative> getCreativeList(Map<String, String> map){
 		return cpmgrDaoMaster.getCreativeList(map);
 	}
+	public List<Map<String,String>> getCrClickList(Map<String, String> map){
+		return cpmgrDaoMaster.getCrClickList(map);
+	}
+	public List<Map<String,String>> getCrFileList(Map<String, String> map){
+		return cpmgrDaoMaster.getCrFileList(map);
+	}
+
 	public Integer getCreativeCnt(Map<String, String> map){
 		return cpmgrDaoMaster.getCreativeCnt(map);
 	}
@@ -153,6 +160,9 @@ public class CpmgrModel {
 	}
 	public void addCreativeClick(List<Map<String, String>> list){
 		cpmgrDaoMaster.addCreativeClick(list);
+	}
+	public void addCreativeFile(List<Map<String, String>> list){
+		cpmgrDaoMaster.addCreativeFile(list);
 	}
 	public Integer modCreative(Creative cr){
 		return cpmgrDaoMaster.modCreative(cr);
@@ -171,5 +181,17 @@ public class CpmgrModel {
 	}
 	public void modAdsSlot(Map<String, String> map){
 		cpmgrDaoMaster.modAdsSlot(map);
+	}
+	public Integer delFile(Map<String, String> map){
+		return cpmgrDaoMaster.delFile(map);
+	}
+	public Integer delClick(Map<String, String> map){
+		return cpmgrDaoMaster.delClick(map);
+	}
+	public Integer copyCreative(Map<String, String> map){
+		return cpmgrDaoMaster.copyCreative(map);
+	}
+	public void copyCreativeClick(Map<String, String> map){
+		cpmgrDaoMaster.copyCreativeClick(map);
 	}
 }

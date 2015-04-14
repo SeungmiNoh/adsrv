@@ -17,8 +17,11 @@
                sum(if(ads_state=-1,1,0)) stopcnt,
                <![CDATA[sum(if(ads_state=-2 or (ads_state=1 and substr(enddate, 1,8)<=curdate()+0),1,0) )]]> cancelcnt,
                sum(1) totcnt,
-               max(adsid) max_adsid
-           from ads
+               max(a.adsid) max_adsid,
+               count(t.targetid) target_cnt,
+               sum(if(a.prtype=2,1,0)) prism_cnt
+           from ads a	
+                left join ads_targeting t on a.adsid = t.adsid          	           
            <dynamic prepend="where">		 	  
 			<isNotEmpty property="cpid" prepend="and"> cpid = #cpid#</isNotEmpty>
 		   </dynamic>
@@ -54,7 +57,8 @@ select x.*, y.isname as cp_statename, y.text
               a.clientid, c.corpname as clientname,
               a.agencyid, g.corpname as agencyname,
               a.medrepid, r.corpname as medrepname, a.tcid, t.username as tcname, a.budget,
-              a.insertdate, a.updatedate, a.insertuser, a.updateuser, u.username as updateusername	       
+              a.insertdate, a.updatedate, a.insertuser, a.updateuser, u.username as updateusername,
+              if(target_cnt>0,'Y','N') istarget, if(prism_cnt>0,'Y','N') isprism	       
          from campaign a
               left join 
               (
@@ -66,16 +70,16 @@ select x.*, y.isname as cp_statename, y.text
 		      left join users t on a.tcid = t.userid
 		      left join users u on a.updateuser = u.userid
         where a.stat = 1
-	          <isNotEmpty property="start" prepend="and"> a.startdate >= $start$</isNotEmpty>
-	          <isNotEmpty property="end" prepend="and"> <![CDATA[  a.enddate <= $end$]]></isNotEmpty>
-         group by a.cpid
+	          <isNotEmpty property="sday" prepend="and">  substr(a.startdate,1,8) >= $sday$</isNotEmpty>
+	          <isNotEmpty property="eday" prepend="and"> <![CDATA[  substr(a.enddate,1,8) <= $eday$]]></isNotEmpty>
+        group by a.cpid
       ) x
       left join code_instance y on y.code = 'ads_state' and x.cp_state = y.isid
 	<dynamic prepend="where">		 	  
 		<isNotEmpty property="cp_state" prepend="and"> cp_state = $cp_state$</isNotEmpty>
 		<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
 	</dynamic>	
-	order by x.cpid
+	order by x.cpid desc
     <isNotEmpty property="max">
       limit $skip$,$max$
     </isNotEmpty>     
@@ -109,9 +113,9 @@ select x.*, y.isname as cp_statename, y.text
 				      left join users t on a.tcid = t.userid
 				      left join users u on a.updateuser = u.userid
 		        where a.stat = 1
-			          <isNotEmpty property="start" prepend="and"> a.startdate >= $start$</isNotEmpty>
-			          <isNotEmpty property="end" prepend="and"> <![CDATA[  a.enddate <= $end$]]></isNotEmpty>
-		      ) x
+	          <isNotEmpty property="sday" prepend="and">  substr(a.startdate,1,8) >= $sday$</isNotEmpty>
+	          <isNotEmpty property="eday" prepend="and"> <![CDATA[  substr(a.enddate,1,8) <= $eday$]]></isNotEmpty>
+ 		      ) x
 		  <dynamic prepend="where">		 	  
 				<isNotEmpty property="cp_state" prepend="and"> cp_state = $cp_state$</isNotEmpty>
 				<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
@@ -236,25 +240,33 @@ select x.*, y.isname as cp_statename, y.text
        and a.cpid = $cpid$
  	</select>
 	<select id="getAdsList" resultClass="ads" parameterClass="java.util.Map">
-	select a.*, st.isname as ads_statename, st.text, u.username as updateusername
-	   from (select adsid, a.adsname, b.cpname, 				
+	select a.*, st.isname as ads_statename, st.text, u.username as updateusername,
+	       if(target_cnt>0,'Y','N') istarget, if(prtype=2,'Y','N') isprism
+	   from (select a.adsid, a.adsname, b.cpname, 				
 		   			b.clientid, c.corpname as clientname,
+			       <isNotEmpty property="sch_text">
 					b.agencyid, g.corpname as agencyname,
 					b.medrepid, r.corpname as medrepname,
+					</isNotEmpty>
 			       a.startdate, a.start_hour, a.start_min, a.enddate, a.end_hour, a.end_min, 
 			       a.goaltype, a.period, a.salestype, a.prtype, 
 				   a.budget, a.book_total, a.goal_total, a.goal_daily, 
 				   a.ads_state, 
-			       a.insertuser, a.insertdate, a.updateuser, a.updatedate       
+			       a.insertuser, a.insertdate, a.updateuser, a.updatedate,
+			       count(t.targetid) target_cnt			             
 		      from adsrv.ads a
+		      	   left join ads_targeting t on a.adsid = t.adsid
 		           left join adsrv.campaign b on a.cpid = b.cpid
 				   left join corporation c on b.clientid = c.corpid and c.corptype = 1
+			       <isNotEmpty property="sch_text">
 			       left join corporation g on b.agencyid = g.corpid and g.corptype = 2
 			       left join corporation r on b.medrepid = r.corpid and r.corptype = 3
+			       </isNotEmpty>
 		     where a.stat = 1
 	              <isNotEmpty property="ads_state" prepend="and"> ads_state = $ads_state$</isNotEmpty>
-		          <isNotEmpty property="start" prepend="and"> a.startdate >= $start$</isNotEmpty>
-		          <isNotEmpty property="end" prepend="and"> <![CDATA[  a.enddate <= $end$]]></isNotEmpty>
+		          <isNotEmpty property="sday" prepend="and">  substr(a.startdate,1,8) >= $sday$</isNotEmpty>
+		          <isNotEmpty property="eday" prepend="and"> <![CDATA[  substr(a.enddate,1,8) <= $eday$]]></isNotEmpty>
+		          group by a.adsid
 			) a
 			left join users u on a.updateuser = u.userid
 			left join code_instance st on st.code = 'ads_state' and a.ads_state = st.isid
@@ -282,8 +294,8 @@ select x.*, y.isname as cp_statename, y.text
 			       left join corporation r on b.medrepid = r.corpid and r.corptype = 3
 		     where a.stat = 1
 	              <isNotEmpty property="ads_state" prepend="and"> ads_state = $ads_state$</isNotEmpty>
-		          <isNotEmpty property="start" prepend="and"> a.startdate >= $start$</isNotEmpty>
-		          <isNotEmpty property="end" prepend="and"> <![CDATA[  a.enddate <= $end$]]></isNotEmpty>
+		          <isNotEmpty property="sday" prepend="and">  substr(a.startdate,1,8) >= $sday$</isNotEmpty>
+		          <isNotEmpty property="eday" prepend="and"> <![CDATA[  substr(a.enddate,1,8) <= $eday$]]></isNotEmpty>
 			) a
 			left join users u on a.updateuser = u.userid
 			left join code_instance st on st.code = 'ads_state' and a.ads_state = st.isid
@@ -409,35 +421,49 @@ select x.*, y.isname as cp_statename, y.text
 			     left join code_instance t on t.code = 'prtype' and a.prtype = t.isid
 				 left join users u on a.updateuser = u.userid
 		where a.stat = 1     
+			  	<isNotEmpty property="clientid"> and a.clientid = $clientid$</isNotEmpty>
 			  	<isNotEmpty property="cr_state"> and c.cr_state = $cr_state$</isNotEmpty>
 			  	<isNotEmpty property="width"> and width = $width$</isNotEmpty>
 			  	<isNotEmpty property="height"> and height = $height$</isNotEmpty>
 			  	<isNotEmpty property="sday"> and substr(a.insertdate, 1, 8) between '$sday$' and '$eday$'</isNotEmpty>
 			  	<isNotEmpty property="prtype"> and a.prtype = $prtype$ </isNotEmpty>
 			  	<isNotEmpty property="crtype"> and a.crtype = $crtype$ </isNotEmpty>
-			  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
 			group by a.crid
 	 		) x
-	     	left join code_instance y on y.code = 'cr_state' and x.cr_state = y.isid         
+	     	left join code_instance y on y.code = 'cr_state' and x.cr_state = y.isid 
+	     	<dynamic prepend="where">
+			<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	     	</dynamic>        
 		 order by updatedate desc
          <isNotEmpty property="max">
           limit $skip$,$max$
           </isNotEmpty>;   	          
       </select> 
 	<select id="getCreativeCnt" resultClass="Integer" parameterClass="java.util.Map">
-		select count(distinct a.crid)
-		from creative a
+	 select count(*)
+	   from (
+			select a.`crid`, a.`crname`, a.`clientid`, b.`corpname` as clientname, 
+			       a.`prtype`, t.isname as prtypename, a.`crtype`, a.width, a.`height`, a.`crurl`, max(ifnull(c.`cr_state`,0)) cr_state,
+			       a.insertdate, a.insertuser, a.updatedate, a.updateuser, u.username as insertusername
+			from creative a
 			     left join ads_creative c on a.crid = c.crid
 			     left join corporation b on a.clientid = b.corpid
 			     left join code_instance t on t.code = 'prtype' and a.prtype = t.isid
+				 left join users u on a.updateuser = u.userid
 		where a.stat = 1     
+			  	<isNotEmpty property="crientid"> and a."crientid" = $"crientid"$</isNotEmpty>
 			  	<isNotEmpty property="cr_state"> and c.cr_state = $cr_state$</isNotEmpty>
 			  	<isNotEmpty property="width"> and width = $width$</isNotEmpty>
 			  	<isNotEmpty property="height"> and height = $height$</isNotEmpty>
 			  	<isNotEmpty property="sday"> and substr(a.insertdate, 1, 8) between '$sday$' and '$eday$'</isNotEmpty>
 			  	<isNotEmpty property="prtype"> and a.prtype = $prtype$ </isNotEmpty>
 			  	<isNotEmpty property="crtype"> and a.crtype = $crtype$ </isNotEmpty>
-			  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+			group by a.crid
+	 		) x
+	     	left join code_instance y on y.code = 'cr_state' and x.cr_state = y.isid 
+	     	<dynamic prepend="where">
+			<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	     	</dynamic>        
 	  </select> 
 	<select id="getCpCreativeList" resultClass="cr" parameterClass="java.util.Map">
      select a.`adsid`, c.adsname, a.`crid`, b.crname, b.width, b.height, 
@@ -454,15 +480,43 @@ select x.*, y.isname as cp_statename, y.text
 		   <isNotEmpty property="adsid"> and a.adsid = $adsid$ </isNotEmpty>
 			;
     </select>
+	<select id="getCreative" resultClass="cr" parameterClass="java.util.Map">
+			select a.`crid`, a.`crname`, a.`clientid`, b.`corpname` as clientname, 
+			       a.`prtype`, t.isname as prtypename, a.`crtype`, a.width, a.`height`, a.`crurl`, a.tmpid,
+			       a.insertdate, a.insertuser, a.updatedate, a.updateuser, u.username as updateusername
+			from creative a
+			     left join corporation b on a.clientid = b.corpid
+			     left join code_instance t on t.code = 'prtype' and a.prtype = t.isid
+				 left join users u on a.updateuser = u.userid
+		where a.stat = 1     
+	      and a.crid = $crid$
+     </select>     
+    <select id="getCrClickList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+    select ckid, clickname, clickurl, 
+           a.updatedate, a.updateuser, u.username as updateusername
+      from creative_click a
+            left join users u on a.updateuser = u.userid
+      where crid = $crid$
+        and a.stat = 1
+    </select>
+    <select id="getCrFileList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+    select fileidx, filename, imgurl, filesize, contenttype, 
+           a.updatedate, a.updateuser, u.username as updateusername
+      from creative_file a
+            left join users u on a.updateuser = u.userid
+      where crid = $crid$
+        and a.stat = 1
+     </select>
 	<insert id="addCreative" parameterClass="cr">	
 		insert into adsrv.creative
             (crid,
              crname,
              clientid,
-             crtype,
-             crurl,
+             <isNotEmpty property="crtype">crtype,</isNotEmpty>
+             <isNotEmpty property="crurl">crurl,</isNotEmpty>
              width,
              height,
+             tmpid,
              richmedia,
              prtype,
              stat,
@@ -474,10 +528,11 @@ select x.*, y.isname as cp_statename, y.text
         	0,
 	        '$crname$',
 	        $clientid$,
-	        $crtype$,
-	        '$crurl$',
+	        <isNotEmpty property="crtype">$crtype$,</isNotEmpty>
+	        <isNotEmpty property="crurl">'$crurl$',</isNotEmpty>
 	        $width$,
 	        $height$,
+	        $tmpid$,
 	        '$richmedia$',
 	        $prtype$,
 	        1,
@@ -490,10 +545,54 @@ select x.*, y.isname as cp_statename, y.text
 	         SELECT LAST_INSERT_ID()
 	      </selectKey> 
  	</insert>
+ 	<insert id="copyCreative" parameterClass="java.util.Map">
+		insert into adsrv.creative
+		select 0 crid,
+			  concat(crname, '_COPY') crname,
+			  clientid,
+			  crtype,
+			  crurl,
+			  width,
+			  height,
+			  tmpid,
+			  richmedia,
+			  prtype,
+			  stat,
+			  $insertdate$,
+			  $insertuser$,
+			  $insertdate$,
+			  $insertuser$
+		from adsrv.creative
+		where crid = $crid$;
+	      <selectKey resultClass="int">
+	         SELECT LAST_INSERT_ID()
+	      </selectKey> 
+	</insert>
+ 	<insert id="copyCreativeClick" parameterClass="java.util.Map">
+		insert into adsrv.creative_click(
+			crid
+			, ckid
+			, clickname
+			, clickurl
+			, updatedate
+			, updateuser
+			, stat
+		)
+		select $copyid$,
+			  0,
+			  clickname,
+			  clickurl,
+			  $insertdate$,
+			  $insertuser$,
+			  1
+		from adsrv.creative_click
+		where crid = $crid$
+		  and stat = 1;	       
+	</insert>
+ 	
 	<insert id="addCreativeClick" parameterClass="java.util.Map">
-         INSERT INTO target_channel_id (
-			tid
-			, crid
+         INSERT INTO creative_click (
+			crid
 			, ckid
 			, clickname
 			, clickurl
@@ -515,19 +614,59 @@ select x.*, y.isname as cp_statename, y.text
 			</iterate>
 		</dynamic>
      </insert>
-	<update id="modCreative" parameterClass="java.util.Map">	
+ 	<insert id="addCreativeFile" parameterClass="java.util.Map">
+         INSERT INTO creative_file (
+			 crid,
+             fileidx,
+             filename,
+             imgurl,
+             filesize,
+             contenttype,
+             updatedate,
+             updateuser,
+             stat
+		) 
+		<dynamic>
+			<iterate prepend="VALUES" conjunction=", " property="List">
+				( 
+					#List[].crid# 
+					, 0
+					, #List[].filename#
+					, #List[].imgurl#	
+					, #List[].filesize#	
+					, #List[].contenttype#	
+					, #List[].updatedate#	
+					, #List[].updateuser#	
+					, 1		
+				)
+			</iterate>
+		</dynamic>
+      </insert>	
+      <update id="delFile" parameterClass="java.util.Map">
+      	update creative_file
+      	  set stat = 0
+      	where crid = $crid$
+      	  and fileidx = $fileidx$
+      </update>
+      <update id="delClick" parameterClass="java.util.Map">
+      	update creative_click
+      	  set stat = 0
+      	where crid = $crid$
+      	  and ckid = $ckid$
+      </update>
+      <update id="modCreative" parameterClass="cr">	
 		update adsrv.creative
 		set   <isNotEmpty property="crname">crname        = '$crname$', </isNotEmpty>     
-		      <isNotEmpty property="agentid">agentid       = $agentid$, </isNotEmpty>      
-		      <isNotEmpty property="crtype">crtype        = $crtype$, </isNotEmpty>       
+		      <isNotEmpty property="clientid">clientid       = $clientid$, </isNotEmpty>      
+		      <isNotEmpty property="prtype">prtype        = $prtype$, </isNotEmpty>       
 		      <isNotEmpty property="crurl">crurl         = '$crurl$', </isNotEmpty>      
 		      <isNotEmpty property="width">width         = $width$, </isNotEmpty>        
 		      <isNotEmpty property="height">height        = $height$, </isNotEmpty>       
+		      <isNotEmpty property="tmpid">tmpid         = $tmpid$, </isNotEmpty>  
 		      <isNotEmpty property="richmedia">richmedia     = '$richmedia$', </isNotEmpty>  
-		      <isNotEmpty property="isprism">isprism       = $isprism$, </isNotEmpty>      
-		      <isNotEmpty property="stat">stat          = $stat$, </isNotEmpty>
+		       <isNotEmpty property="stat">stat          = $stat$, </isNotEmpty>
 		      updateuser    = $updateuser$,  
-		      updatedate    = now()          
+		      updatedate    = $updatedate$          
 		where crid = $crid$;
 	</update>
 	
@@ -599,7 +738,7 @@ select x.*, y.isname as cp_statename, y.text
 		      left join code_instance i on i.code = 'targettype' and i.isid = a.targettype
 		 where a.stat = 1     
 		  	<isNotEmpty property="targettype"> and a.targettype = $targettype$ </isNotEmpty>
-		  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+		  	<isNotEmpty property="sch_text" prepend="and"> targetname like '%$sch_text$%' </isNotEmpty>
 		 order by <isNotEmpty property="order_str"> $order_str$ ,</isNotEmpty>
 		 a.updatedate desc
          <isNotEmpty property="max">
@@ -651,7 +790,7 @@ select x.*, y.isname as cp_statename, y.text
 		      left join code_instance i on i.code = 'targettype' and i.isid = a.targettype
 		 where a.stat = 1     
 		  	<isNotEmpty property="targettype"> and a.targettype = $targettype$ </isNotEmpty>
-		  	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+		  	<isNotEmpty property="sch_text" prepend="and"> targetname like '%$sch_text$%' </isNotEmpty>
 	</select>
 	
 	
@@ -1009,7 +1148,8 @@ select x.*, y.isname as cp_statename, y.text
 			</iterate>
 		</dynamic>
       </insert>
-    <update id="modTargetChannelID" parameterClass="java.util.Map">
+   
+ 	 <update id="modTargetChannelID" parameterClass="java.util.Map">
 		update adsrv.target_channel_id
 		   set stat = 0
            where tid = $tid$
@@ -1052,7 +1192,7 @@ select x.*, y.isname as cp_statename, y.text
 	      where tmpid = $tmpid$
 	 </update>
 	 <select id="getTemplateList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
-		select a.tmpid, a.tmpname, tmpcode, imgflag, memo,
+		select a.tmpid, a.tmpname, imgflag, memo,
 		       a.updateuser, u.username as updateusername, a.updatedate 
 		 from template a		     
 		      left join users u on a.updateuser = u.userid

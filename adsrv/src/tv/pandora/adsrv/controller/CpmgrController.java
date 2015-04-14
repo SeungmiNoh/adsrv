@@ -27,6 +27,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.google.gson.Gson;
+
 public class CpmgrController extends AdsrvMultiActionController
 {
 	
@@ -35,27 +37,12 @@ public class CpmgrController extends AdsrvMultiActionController
 		Map<String, String> map = new HashMap<String, String>();	
 		map.put("ismgr", "1");
 		List<User> tclist = usermgrFacade.getUserList(map);
-		/*
-		
-		map.put("corptype", "M");
-		map.put("stat", "1");
-		List<Map<String, String>> clientlist = cpmgrFacade.getAutoCorpList(map);	
-		map.clear();
-		map.put("corptype", "A");
-		map.put("stat", "1");
-		List<Map<String, String>> agencylist = cpmgrFacade.getAutoCorpList(map);	
-		map.clear();
-		map.put("corptype", "R");
-		map.put("stat", "1");
-		List<Map<String, String>> medreplist = cpmgrFacade.getAutoCorpList(map);
-		*/	
+	
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		//resultMap.put("clientlist", clientlist);
-		//resultMap.put("agencylist", agencylist);
-		//resultMap.put("medreplist", medreplist);
 		resultMap.put("tclist", tclist);
-		return new ModelAndView("campaign/cp_addform", "response", resultMap);
+		
+		return new ModelAndView("campaign/cp_info", "response", resultMap);
 	}
 	public ModelAndView cpEditForm(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
@@ -73,6 +60,7 @@ public class CpmgrController extends AdsrvMultiActionController
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("cpinfo", cpinfo);
 		resultMap.put("tclist", tclist);
+		resultMap.put("mode", "E");
 		
 		return new ModelAndView("campaign/cp_info", "response", resultMap);
 	}
@@ -153,13 +141,6 @@ public class CpmgrController extends AdsrvMultiActionController
 		String userID = (String)SessionUtil.getAttribute("userID");
 		Ads ads = new Ads();
 		bind(request, ads);
-		//ads.setStartdate(StringUtil.DateStr(ads.getStartdate()));
-		//ads.setEnddate(StringUtil.DateStr(ads.getEnddate()));
-		//ads.setMemo(StringUtil.htmlEncode(ads.getMemo()));
-		//ads.setBudget(StringUtil.delcomma(ads.getBudget()));
-		//ads.setBook_total(StringUtil.delcomma(ads.getBook_total()));
-		//ads.setGoal_total(StringUtil.delcomma(ads.getGoal_total()));
-		//ads.setGoal_daily(StringUtil.delcomma(ads.getGoal_daily()));
 		ads.setUpdatedate(DateUtil.simpleDate2());
 		ads.setUpdateuser(userID);
 		ads.setInsertdate(DateUtil.simpleDate2());
@@ -167,7 +148,8 @@ public class CpmgrController extends AdsrvMultiActionController
 		
 		String realenddate = ads.getEnddate();
 		
-		System.out.println("getCutHH="+DateUtil.getCutHH(ads.getEnddate()));
+		System.out.println("prtype============"+ads.getPrtype());
+	
 				
 		if(DateUtil.getCutHH(ads.getEnddate()).equals("24")){
 			realenddate = "";
@@ -194,7 +176,148 @@ public class CpmgrController extends AdsrvMultiActionController
 		
 		return new ModelAndView("redirect:cpmgr.do?a=adsInfo&adsid="+adsid, null);
 	}	
+	public ModelAndView crInfo(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String crid = StringUtil.isNull(request.getParameter("crid"));
+
+		Map<String, String> map = new HashMap<String, String>();	
+		map.put("crid", crid);
+		Creative cr = cpmgrFacade.getCreative(map);
+		List<Map<String,String>> clicklist = cpmgrFacade.getCrClickList(map);
+		List<Map<String,String>> filelist = cpmgrFacade.getCrFileList(map);
+		
+		
+		//광고상품 목록
+		map.clear();
+		map.put("code", "prtype");
+		List<Map<String, String>> codelist = cpmgrFacade.getCodeList(map);	
+
+		map.clear();
+		map.put("order_str", "tmpname")	;
+		List<Map<String, String>> tmplist = cpmgrFacade.getTemplateList(map);
+		
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		resultMap.put("cr", cr);
+		resultMap.put("clicklist", clicklist);
+		resultMap.put("filelist", filelist);
+		resultMap.put("codelist", codelist);
+		resultMap.put("tmplist", tmplist);
+		resultMap.put("mode", "E");
+
+		return new ModelAndView("campaign/cr_edit", "response", resultMap);
+	}	
+
+	public ModelAndView crCopy(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String crid = StringUtil.isNull(request.getParameter("crid"));
+		String userID = (String)SessionUtil.getAttribute("userID");
+			
+		 Map<String, String> map = new HashMap<String, String>();
+			
+         map.put("crid", crid);
+         map.put("insertdate", DateUtil.simpleDate2());
+         map.put("insertuser", userID);
+		Integer icopyid = cpmgrFacade.copyCreative(map);
+		
+		if(icopyid != null) {
+			map.clear();
+			map.put("crid", crid);
+			map.put("copyid", String.valueOf(icopyid));
+			map.put("insertdate", DateUtil.simpleDate2());
+			map.put("insertuser", userID);
+			cpmgrFacade.copyCreativeClick(map);
+		}
+		
+		return new ModelAndView("redirect:cpmgr.do?a=crInfo&crid="+String.valueOf(icopyid), null);
+	}
+	public ModelAndView crRegist(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		
+		String crid = StringUtil.isNull(request.getParameter("crid"));
+		String userID = (String)SessionUtil.getAttribute("userID");
+		
+		Creative cr = new Creative();
+		bind(request, cr);
+		cr.setUpdatedate(DateUtil.simpleDate2());
+		cr.setUpdateuser(userID);
+		cr.setInsertdate(DateUtil.simpleDate2());
+		cr.setInsertuser(userID);
+		
+			
+		
+		if(crid.equals("")){
+			Integer icrid = cpmgrFacade.addCreative(cr);	
+			crid = String.valueOf(icrid);
+		} else {
+			cpmgrFacade.modCreative(cr);		
+		}
+			
 	
+		if(request.getParameterValues("filename") != null)
+		{
+			String[] filename = request.getParameterValues("filename");
+			String[] imgurl = request.getParameterValues("imgurl");
+			String[] filesize = request.getParameterValues("filesize");
+			String[] contenttype = request.getParameterValues("contenttype");
+	
+
+			ArrayList<Map<String,String>> list = new ArrayList<Map<String,String>>();
+		
+			for(int i=0; i<filename.length;i++){
+				if(!StringUtil.isNullZero(filename[i].trim()).equals("0")) {
+					
+			         Map<String, String> ipmap = new HashMap<String, String>();
+	
+			         ipmap.put("crid", crid);
+			         ipmap.put("filename", filename[i]);
+			         ipmap.put("imgurl", imgurl[i]);
+			         ipmap.put("filesize", filesize[i]);
+			         ipmap.put("contenttype", contenttype[i]);
+			         ipmap.put("updatedate", DateUtil.simpleDate2());
+			         ipmap.put("updateuser", userID);
+					
+					System.out.println(i+") Map : " + ipmap);
+					list.add(ipmap);					
+				}
+			}
+			System.out.println(" List : " + list);
+			cpmgrFacade.addCreativeFile(list);
+		}
+		
+		if(request.getParameterValues("clickname") != null)
+		{
+		
+			String[] clickname = request.getParameterValues("clickname");
+			System.out.println("clickname.legnth="+clickname.length);
+			String[] clickurl = request.getParameterValues("clickurl");
+			
+        
+        
+			ArrayList<Map<String,String>> list2 = new ArrayList<Map<String,String>>();
+
+			
+			for(int i=0; i<clickname.length;i++){
+				if(!StringUtil.isNullZero(clickurl[i].trim()).equals("")) {
+					
+			         Map<String, String> ipmap = new HashMap<String, String>();
+	
+			         ipmap.put("crid", crid);
+			         ipmap.put("clickname", clickname[i]);
+			         ipmap.put("clickurl", clickurl[i]);
+			         ipmap.put("updatedate", DateUtil.simpleDate2());
+			         ipmap.put("updateuser", userID);
+					
+					System.out.println(i+") Map : " + ipmap);
+					list2.add(ipmap);					
+				}
+			}
+			System.out.println(" List : " + list2);
+			cpmgrFacade.addCreativeClick(list2);
+		}
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("crid", crid);
+		
+		return new ModelAndView("redirect:cpmgr.do?a=crInfo&crid="+crid, resultMap);
+	}
 	public ModelAndView adsTargetSave(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		String adsid = request.getParameter("adsid");
 		
@@ -264,7 +387,7 @@ public class CpmgrController extends AdsrvMultiActionController
 		System.out.println(" List : " + list);
 		cpmgrFacade.addAdsCreative(list);
 		
-		return new ModelAndView("redirect:cpmgr.do?a=adsCreative&adsid="+adsid, null);
+		return new ModelAndView("redirect:cpmgr.do?a=adsEdit&adsid="+adsid, null);
 	}
 	public ModelAndView cpAdsList(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
@@ -294,6 +417,7 @@ public class CpmgrController extends AdsrvMultiActionController
 
 		return new ModelAndView("campaign/cp_ads_list", "response", resultMap);
 	}
+	/*
 	public ModelAndView adsEditForm(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
 		
@@ -319,7 +443,7 @@ public class CpmgrController extends AdsrvMultiActionController
 		resultMap.put("codelist", codelist);
 
 		return new ModelAndView("campaign/ads_editform", "response", resultMap);
-	}
+	}*/
 	public ModelAndView adsInfo(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
 		String adsid = StringUtil.isNull(request.getParameter("adsid"));
@@ -585,14 +709,13 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 	
 	
 	public ModelAndView cpList(HttpServletRequest request, HttpServletResponse response) throws Exception {		
-		String startday = StringUtil.isNull(request.getParameter("startday"));
-		String endday = StringUtil.isNull(request.getParameter("endday"));
-		String agent = StringUtil.isNull(request.getParameter("agent"));
-		String agency = StringUtil.isNull(request.getParameter("agency"));
-		String status = StringUtil.isNull(request.getParameter("status"));
+		String sday = StringUtil.isNull(request.getParameter("sday"));
+		String eday = StringUtil.isNull(request.getParameter("eday"));
+		String state = StringUtil.isNull(request.getParameter("state"));
 		String page = StringUtil.isNull(request.getParameter("p"));
 		String sch_column = StringUtil.isNull(request.getParameter("sch_column"));
 		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+		sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
 		
 			
 		String yymm = "";
@@ -609,8 +732,10 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		
 	
 		Map<String, String> map = new HashMap<String, String>();
-
-		map.put("skip", String.valueOf(skip))	;
+		map.put("cp_state", state)	;
+		map.put("sday", sday);
+		map.put("eday", eday);
+		map.put("skip", String.valueOf(skip));
 		map.put("max", String.valueOf(max))	;
 		map.put("sch_text", sch_text);
 		map.put("sch_column", sch_column);		
@@ -620,11 +745,15 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		map.put("ismgr", "1");
 		List<User> tclist = usermgrFacade.getUserList(map);
 	
+		//상태 목록
+		map.put("code", "ads_state");
+		List<Map<String, String>> stlist = cpmgrFacade.getCodeList(map);	
 
 	
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
 		resultMap.put("cplist", cplist);
+		resultMap.put("stlist", stlist);
 		resultMap.put("tclist", tclist);
 		resultMap.put("skip", skip);
 		resultMap.put("max", max);
@@ -637,10 +766,14 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 	
 	public ModelAndView adsList(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
-		String cpid = StringUtil.isNull(request.getParameter("cpid"));
+		String state = StringUtil.isNull(request.getParameter("state"));
 		String page = StringUtil.isNull(request.getParameter("p"));
+		String sday = StringUtil.DateStr(StringUtil.isNull(request.getParameter("sday")));
+		String eday = StringUtil.DateStr(StringUtil.isNull(request.getParameter("eday")));
 		String sch_column = StringUtil.isNull(request.getParameter("sch_column"));
 		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+		sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
+		
 		
 		Map<String, String> map = new HashMap<String, String>();	
 		
@@ -651,35 +784,45 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		Integer max = Constant.PAGE_LIST_L;
 		Integer skip = (Integer.parseInt(page)-1)*max;
 		
+		map.put("ads_state", state)	;
+		map.put("sday", sday);
+		map.put("eday", eday);
 		map.put("skip", String.valueOf(skip))	;
 		map.put("max", String.valueOf(max))	;
 		map.put("sch_text", sch_text);
 		map.put("sch_column", sch_column);		
 		List<Ads> adslist = cpmgrFacade.getAdsList(map);
 		Integer totalCount = cpmgrFacade.getAdsCnt(map);
-		
+		//상태 목록
+		map.put("code", "ads_state");
+		List<Map<String, String>> stlist = cpmgrFacade.getCodeList(map);	
+
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("adslist", adslist);
+		resultMap.put("stlist", stlist);
 		resultMap.put("skip", skip);
 		resultMap.put("max", max);
 		resultMap.put("totalCount", totalCount);
 		resultMap.put("nowPage", page);	
+		resultMap.put("sday", sday);	
+		resultMap.put("eday", eday);	
 		return new ModelAndView("campaign/ads_list", "response", resultMap);
 	}	
 	
 	public ModelAndView targetList(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
-		String targettype = StringUtil.isNull(request.getParameter("targettype"));
+		String s_type = StringUtil.isNull(request.getParameter("s_type"));
 		String page = StringUtil.isNullReplace(request.getParameter("p"),"1");
 		String sch_column = StringUtil.isNull(request.getParameter("sch_column"));
 		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+		sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
 
 		Integer max = Constant.PAGE_LIST_L;
 		Integer skip = (Integer.parseInt(page)-1)*max;
 		
 		Map<String, String> map = new HashMap<String, String>();
 	    
-		map.put("targettype", targettype)	;
+		map.put("targettype", s_type)	;
 		map.put("skip", String.valueOf(skip))	;
 		map.put("max", String.valueOf(max))	;
 		map.put("sch_text", sch_text);
@@ -1069,6 +1212,7 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		String page = StringUtil.isNullReplace(request.getParameter("p"),"1");
 		String sch_column = StringUtil.isNull(request.getParameter("sch_column"));
 		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+		sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
 
 		Integer max = Constant.PAGE_LIST_L;
 		Integer skip = (Integer.parseInt(page)-1)*max;
@@ -1113,6 +1257,7 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 
 		return new ModelAndView("campaign/template_form", "response", resultMap);
 	}
+	
 	public ModelAndView tmpSave(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
 		String mode = StringUtil.isNull(request.getParameter("mode"));
@@ -1141,23 +1286,30 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 	}
 	public ModelAndView crList(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
-		String stat = StringUtil.isNull(request.getParameter("stat"));
-		String sday = StringUtil.isNull(request.getParameter("sday"));
-		String eday = StringUtil.isNull(request.getParameter("eday"));
+		String state = StringUtil.isNull(request.getParameter("state"));
+		String prtype = StringUtil.isNull(request.getParameter("prtype"));
 		String width = StringUtil.isNull(request.getParameter("width"));
 		String height = StringUtil.isNull(request.getParameter("height"));
 		String page = StringUtil.isNullReplace(request.getParameter("p"),"1");
 		String sch_column = StringUtil.isNull(request.getParameter("sch_column"));
 		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+		sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
 
+		String sday = StringUtil.DateStr(StringUtil.isNull(request.getParameter("sday")));
+		String eday = StringUtil.DateStr(StringUtil.isNull(request.getParameter("eday")));
+		if(sday.equals("")) {
+			  sday = DateUtil.getPreMon(DateUtil.curDate(), 3);
+			  eday = DateUtil.curDate();
+		}
 		Integer max = Constant.PAGE_LIST_L;
 		Integer skip = (Integer.parseInt(page)-1)*max;
 		
 		Map<String, String> map = new HashMap<String, String>();
 	    
-		map.put("cr_state", stat);
+		map.put("cr_state", state);
 		map.put("sday", sday);
 		map.put("eday", eday);
+		map.put("prtype", prtype);
 		map.put("width", width);
 		map.put("height", height);
 		map.put("skip", String.valueOf(skip))	;
@@ -1185,6 +1337,8 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		resultMap.put("max", max);
 		resultMap.put("totalCount", totalCount);
 		resultMap.put("nowPage", page);		
+		resultMap.put("sday", sday);		
+		resultMap.put("eday", eday);		
 		return new ModelAndView("campaign/creative_list", "response", resultMap);
 	}
 	public ModelAndView crAddForm(HttpServletRequest request, HttpServletResponse response) throws Exception {	
@@ -1207,7 +1361,7 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		resultMap.put("codelist", codelist);
 		resultMap.put("tmplist", tmplist);
 
-		return new ModelAndView("campaign/creative_addform", "response", resultMap);
+		return new ModelAndView("campaign/cr_edit", "response", resultMap);
 	}
 	
 	

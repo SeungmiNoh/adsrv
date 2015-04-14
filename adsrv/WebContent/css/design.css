@@ -1,4 +1,4 @@
- /* css 에 한글내용이 있는경우 한글이 깨지지 않도록 설정  */
+﻿ /* css 에 한글내용이 있는경우 한글이 깨지지 않도록 설정  */
  
  @charset "utf-8";
  [hidden] {
@@ -433,7 +433,7 @@
      text-align: left;
      border-right: 1px solid #d3d2d2;
      border-bottom: 1px solid #d3d2d2;
-     font-size: 8px;
+     font-size: 10px;
  }
  .viewTable th {
      color: #555555;

@@ -61,6 +61,7 @@ try
   
 <script type="text/javascript">
 $(function(){
+	$(".debug").css("display","none");
 	
 	$("#btnPopup").click(function(e){
 		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
@@ -250,7 +251,7 @@ for(int k=0; k<corplist.size(); k++){
                              <td class="textLeft">
                              <span name="corpmod" corpid="<%=String.valueOf(corp.get("corpid"))%>" role="button" class="point label label-<%=corp.get("text") %>" style="cursor:pointer; width:80px; margin-right:10px"><%=corp.get("corptypename") %></span>                           
                              <a href="usermgr.do?a=corpView&corpid=<%=String.valueOf(corp.get("corpid"))%>"><%=corp.get("corpname") %></a></td>                           
-                            <td><%=DateUtil.getYMD(String.valueOf(corp.get("insertdate"))) %></td>
+                            <td><%=DateUtil.getYMDHM(String.valueOf(corp.get("insertdate")),"-") %></td>
                             <td><%=corp.get("insertusername") %></td>                            
                         </tr>
 <%} %>                        
@@ -287,9 +288,9 @@ for(int k=0; k<corplist.size(); k++){
                 <div class="modal-body">
                     <!-- search form Start -->
                     <form id="frmRegist" name="frmRegist" method="post" action="usermgr.do?a=corpRegist">
-                    <input type="text" id="corpid" name="corpid" class="cvalue">
-                    <input type="text" id="beforetype" name="beforetype" class="cvalue">
-                    <input type="text" id="change" name="change" value="" class="cvalue">
+                    <input type="hidden" id="corpid" name="corpid" class="cvalue">
+                    <input type="hidden" id="beforetype" name="beforetype" class="cvalue">
+                    <input type="hidden" id="change" name="change" value="" class="cvalue">
                         <table class="addTable">
                             <colgroup>
                                 <col width="20%">
@@ -329,7 +330,7 @@ for(int k=0; k<corplist.size(); k++){
 	                        </tr>  
                             <tr class="modify">                           
                         	<th>최종수정</th>
-                            <td class="form-inline" id="updatedate"><%=DateUtil.getYMD(DateUtil.curDate()) %></td>
+                            <td class="form-inline" id="updatedate"><%=DateUtil.getYMDHM(DateUtil.curDate(),"-") %></td>
                         	</tr> 
 	                        <tr class="modify">                       
 	                        <th>수정인</th>
@@ -342,9 +343,9 @@ for(int k=0; k<corplist.size(); k++){
                  </div>
                 <div class="modal-footer">
                 	<span id="warningMsg" style="color:#a00"></span>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
                     <button type="button" class="new btn btn-danger btn-sm" id="btnRegist">등록</button>                    
                     <button type="button" class="modify btn btn-danger btn-sm" id="btnUpdate">수정</button>                    
-                    <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
                 </div>
             </div>
             <!-- /.modal-content -->

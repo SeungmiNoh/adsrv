@@ -14,7 +14,8 @@ try
 	String s_siteid = StringUtil.isNull(request.getParameter("s_siteid"));
 	String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
 	String s_type = StringUtil.isNull(request.getParameter("s_type"));
-	   
+	sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
+  
 	Map<String,Object> map = (Map)request.getAttribute("response");
 
 	List<Map<String,String>> sitelist = (List<Map<String,String>>)map.get("sitelist");   
@@ -218,7 +219,7 @@ $(function(){
 				<div class="form-inline">
                         <div class="form-group">
                             <select id="s_siteid" name="s_siteid" class="form-control input-sm" style="width:140px">
-                                <option value="">사이트</option>
+                                <option value="">사이트 선택</option>
                                 <%for(int i=0;i<sitelist.size();i++){ 
                                 	Map<String,String> site = sitelist.get(i);
                                 %>

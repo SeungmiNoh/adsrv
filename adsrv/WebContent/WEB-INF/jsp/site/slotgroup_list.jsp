@@ -96,7 +96,7 @@ $(function(){
 	$(".debug").css("display","none");
 
 	$("#s_siteid").change(function(e){		
-		$("#s_secid").html('<option value="0">섹션</option>');
+		$("#s_secid").html('<option value="0">섹션 선택</option>');
 		if($("#s_siteid").val()!=0){
 		
 			for(var i=0;i<arrSection.length;i++){
@@ -299,7 +299,7 @@ $(function(){
 			var cname = $('#groupname').val();			
 			var cid = $('#groupid').val();			
 			
-			MasDwrService.getSlotGroupCnt(cname, 0, 
+			MasDwrService.getSlgroupCnt(cname, 0, 
 		   		function(data) {
 					if(data>0) {
 						$("#groupname").css("border-color","red").select();
@@ -337,7 +337,7 @@ $(function(){
                     <div class="form-inline">
                         <div class="form-group">
                             <select id="s_siteid" name="s_siteid" class="form-control input-sm" style="width:140px">
-                                <option value="0">사이트</option>
+                                <option value="0">사이트 선택</option>
                                 <%for(int i=0;i<sitelist.size();i++){ 
                                 	Map<String,String> site = sitelist.get(i);
                                 %>
@@ -345,7 +345,7 @@ $(function(){
                                   <%} %>
                             </select>
                             <select id="s_secid" name="s_secid" class="form-control input-sm" style="width:140px">
-                                <option value="0">섹션</option>
+                                <option value="0">섹션 선택</option>
                                 <%
                                 if(!s_siteid.equals("")){
 	                                for(int i=0;i<seclist.size();i++){ 
@@ -384,8 +384,7 @@ $(function(){
 				<col width="40">
 				<col width="200"><!-- 그룹명 -->
 				<col width="60"><!-- 사이즈 -->
-			    <col width="60"><!-- 위치수 -->
-			    <col width="60"><!-- 위치수 -->
+			     <col width="60"><!-- 위치수 -->
 			   <col width="100"><!-- 등록일 -->
 				<col width="80"><!-- 담당자 -->
 					</colgroup>                   
@@ -394,7 +393,6 @@ $(function(){
                             <th>No</th>
                             <th>그룹명</th>  
                             <th>사이즈</th>  
-                            <th>사이트 개수</th>  
                             <th>위치 개수</th>  
                             <th>최종수정</th>
                             <th>수정자</th>
@@ -416,9 +414,9 @@ for(int k=0; k<slotlist.size(); k++){
                             <td><%=skip+(k+1) %></td>
                             <td><a href="#none" name="groupmod" groupid="<%=String.valueOf(slot.get("groupid"))%>"><%=slot.get("groupname") %></a></td>
                             <td><%=StringUtil.isNull(String.valueOf(slot.get("width"))) %> x <%=StringUtil.isNull(String.valueOf(slot.get("height"))) %></td>
-                              <td><%=String.valueOf(slot.get("sitecnt")) %></td>
+                              <!--  td><%=String.valueOf(slot.get("sitecnt")) %></td-->
                           <td class="textLeft"><%--String.valueOf(slot.get("slotcnt")) --%><%=slot.get("slotstr").replaceAll("\n", "<br/>") %></td>
-                            <td><%=DateUtil.getYMD(slot.get("updatedate")) %></td>
+                            <td><%=DateUtil.getYMDHM(slot.get("updatedate"),"-") %></td>
                             <td><%=slot.get("updateusername") %></td>                            
                         </tr>
 <%} %>                        
@@ -472,8 +470,8 @@ for(int k=0; k<slotlist.size(); k++){
                             <tr>
                                 <th>사이즈<span style="color:red"> * </span></th>
                                 <td class="form-inline">
-                                    <input type="text" name="width" id="width" class="form-control input-sm" style="width:60px" placeholder="넓이"> x
-                                    <input type="text" name="height" id="height" class="form-control input-sm" style="width:60px" placeholder="높이">
+                                    <input type="text" name="width" id="width" class="form-control input-sm" style="width:60px" placeholder="가로"> x
+                                    <input type="text" name="height" id="height" class="form-control input-sm" style="width:60px" placeholder="세로">
                                     	<select id="siteid" name="siteid" class="form-control input-sm" style="width:200px">
                                 	<option value="0">사이트</option>
 	                                <%for(int i=0;i<sitelist.size();i++){ 
@@ -551,9 +549,9 @@ for(int k=0; k<slotlist.size(); k++){
                  </div>
                 <div class="modal-footer">
                 	<span id="warningMsg" style="color:#a00"></span>
+                     <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
                     <button type="button" class="new btn btn-danger btn-sm" id="btnRegist">등록</button>                    
                     <button type="button" class="modify btn btn-danger btn-sm" id="btnUpdate">수정</button>                    
-                    <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
                 </div>
             </div>
             <!-- /.modal-content -->

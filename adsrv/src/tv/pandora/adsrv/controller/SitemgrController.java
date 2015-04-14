@@ -23,6 +23,10 @@ import tv.pandora.adsrv.common.util.StringUtil;
 
 
 
+
+
+
+
 import org.springframework.web.servlet.ModelAndView;
 
 public class SitemgrController extends AdsrvMultiActionController
@@ -32,6 +36,7 @@ public class SitemgrController extends AdsrvMultiActionController
 		String s_type = StringUtil.isNull(request.getParameter("s_type"));
 		String page = StringUtil.isNull(request.getParameter("p"));
 		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+		sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
 
 		if (page.equals("")) {
 			page = "1";
@@ -108,6 +113,7 @@ public class SitemgrController extends AdsrvMultiActionController
 		String s_siteid = StringUtil.isNull(request.getParameter("s_siteid"));
 		String page = StringUtil.isNull(request.getParameter("p"));
 		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+		sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
 
 		if (page.equals("")) {
 			page = "1";
@@ -180,6 +186,7 @@ public class SitemgrController extends AdsrvMultiActionController
 		String s_siteid = StringUtil.isNull(request.getParameter("s_siteid"));
 		String page = StringUtil.isNull(request.getParameter("p"));
 		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+		sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
 
 		if (page.equals("")) {
 			page = "1";
@@ -264,6 +271,7 @@ public class SitemgrController extends AdsrvMultiActionController
 		String page = StringUtil.isNull(request.getParameter("p"));
 		String sch_column = StringUtil.isNull(request.getParameter("sch_column"));
 		String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+		sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
 
 		if (page.equals("")) {
 			page = "1";

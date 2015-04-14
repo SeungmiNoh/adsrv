@@ -32,6 +32,8 @@ public class Campaign implements Serializable{
 		private String cp_state;
 		private String cp_statename;
 		private String text;
+		private String istarget;
+		private String isprism;
 		
 		public String getCpid() {
 			return cpid;
@@ -187,6 +189,18 @@ public class Campaign implements Serializable{
 		}
 		
 		
+		public String getIstarget() {
+			return istarget;
+		}
+		public void setIstarget(String istarget) {
+			this.istarget = istarget;
+		}
+		public String getIsprism() {
+			return isprism;
+		}
+		public void setIsprism(String isprism) {
+			this.isprism = isprism;
+		}
 		public String getText() {
 			return text;
 		}

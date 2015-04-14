@@ -27,6 +27,8 @@ import java.util.Map;
 
 
 
+
+
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
 import tv.pandora.adsrv.domain.Creative;
@@ -180,6 +182,13 @@ public class CpmgrImpl implements CpmgrFacade{
 	public Integer getCreativeCnt(Map<String, String> map){
 		return cpmgrModel.getCreativeCnt(map);
 	}
+	public List<Map<String,String>> getCrClickList(Map<String, String> map){
+		return cpmgrModel.getCrClickList(map);
+	}
+	public List<Map<String,String>> getCrFileList(Map<String, String> map){
+		return cpmgrModel.getCrFileList(map);
+	}
+
 	public Creative getCreative(Map<String, String> map){
 		return cpmgrModel.getCreative(map);
 	}
@@ -188,6 +197,9 @@ public class CpmgrImpl implements CpmgrFacade{
 	}
 	public void addCreativeClick(List<Map<String, String>> list){
 		cpmgrModel.addCreativeClick(list);
+	}
+	public void addCreativeFile(List<Map<String, String>> list){
+		cpmgrModel.addCreativeFile(list);
 	}
 	public Integer modCreative(Creative cr){
 		return cpmgrModel.modCreative(cr);
@@ -200,5 +212,10 @@ public class CpmgrImpl implements CpmgrFacade{
 	public void addAdsCreative(List<Map<String, String>> list) {
 		cpmgrModel.addAdsCreative(list);
 	}
-
+	public Integer copyCreative(Map<String, String> map){
+		return cpmgrModel.copyCreative(map);
+	}
+	public void copyCreativeClick(Map<String, String> map){
+		cpmgrModel.copyCreativeClick(map);
+	}
 }

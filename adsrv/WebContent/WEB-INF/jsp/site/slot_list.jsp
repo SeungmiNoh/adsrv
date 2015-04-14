@@ -122,7 +122,7 @@ $(function(){
 				});
 	});
 	$("#s_siteid").change(function(e){		
-		$("#s_secid").html('<option value="">섹션</option>');
+		$("#s_secid").html('<option value="">섹션 선택</option>');
 		if($("#s_siteid").val()!=0){
 		
 			for(var i=0;i<arrSection.length;i++){
@@ -138,7 +138,7 @@ $(function(){
 		console.log("sitetag="+sitetag);
 		$("#sitetag").val(sitetag);
 
-		$("#secid").html('<option value="">섹션</option>');
+		$("#secid").html('<option value="">섹션 선택</option>');
 		if($("#siteid").val()!=0){
 		
 			for(var i=0;i<arrSection.length;i++){
@@ -283,7 +283,7 @@ $(function(){
                     <div class="form-inline">
                         <div class="form-group">
                             <select id="s_siteid" name="s_siteid" class="form-control input-sm" style="width:140px">
-                                <option value="">사이트</option>
+                                <option value="">사이트 선택</option>
                                 <%for(int i=0;i<sitelist.size();i++){ 
                                 	Map<String,String> site = sitelist.get(i);
                                 %>
@@ -291,7 +291,7 @@ $(function(){
                                   <%} %>
                             </select>
                             <select id="s_secid" name="s_secid" class="form-control input-sm" style="width:140px">
-                                <option value="">섹션</option>
+                                <option value="">섹션 선택</option>
                                 <%
                                 if(!s_siteid.equals("")){
 	                                for(int i=0;i<seclist.size();i++){ 
@@ -445,8 +445,8 @@ for(int k=0; k<slotlist.size(); k++){
                             <tr>
                                 <th>사이즈<span style="color:red"> * </span></th>
                                 <td class="form-inline">
-                                    <input type="text" name="width" id="width" class="form-control input-sm" style="width:80px" placeholder="넓이"> x
-                                    <input type="text" name="height" id="height" class="form-control input-sm" style="width:80px" placeholder="높이">
+                                    <input type="text" name="width" id="width" class="form-control input-sm" style="width:80px" placeholder="가로"> x
+                                    <input type="text" name="height" id="height" class="form-control input-sm" style="width:80px" placeholder="세로">
                                 </td>
                             </tr>                           
                             <tr>

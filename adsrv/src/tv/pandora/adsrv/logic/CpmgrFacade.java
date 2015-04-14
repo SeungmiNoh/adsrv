@@ -56,13 +56,18 @@ public interface CpmgrFacade {
 	public void modTemplate(Map<String,String> map);
 	
 	public List<Creative> getCreativeList(Map<String, String> map);
+	public List<Map<String,String>> getCrClickList(Map<String, String> map);
+	public List<Map<String,String>> getCrFileList(Map<String, String> map);
+
 	public Integer getCreativeCnt(Map<String, String> map);
 	public Creative getCreative(Map<String, String> map);
 	public Integer addCreative(Creative cr);
 	public void addCreativeClick(List<Map<String, String>> list);
+	public void addCreativeFile(List<Map<String, String>> list);
 	public Integer modCreative(Creative cr);
 	public void addAdsTargeting(List<Map<String, String>> list);
 	public void addAdsCreative(List<Map<String, String>> list);
-	
+	public Integer copyCreative(Map<String, String> map);
+	public void copyCreativeClick(Map<String, String> map);
 
 }

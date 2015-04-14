@@ -134,52 +134,7 @@ try
 			}
 		});
 
-		$.datepicker.regional['ko'] = {
-				closeText: '닫기',
-				prevText: '이전달',
-				nextText: '다음달',
-				currentText: '오늘',
-				monthNames: ['1월','2월','3월','4월','5월','6월', '7월','8월','9월','10월','11월','12월'],
-				monthNamesShort: ['1월','2월','3월','4월','5월','6월', '7월','8월','9월','10월','11월','12월'],
-				dayNames: ['일','월','화','수','목','금','토'],
-				dayNamesShort: ['일','월','화','수','목','금','토'],
-				dayNamesMin: ['일','월','화','수','목','금','토'],
-				weekHeader: 'Wk',
-				dateFormat: 'yy-mm-dd',
-				firstDay: 0,
-				isRTL: false,
-				duration:200,
-				showOn: "button",
-				buttonImage: "<%=web%>/img/calendar-icon-red.gif",
-				buttonImageOnly: true,
-				showAnim:'show',
-				showMonthAfterYear: true,
-				yearSuffix: '년'};
-			$.datepicker.setDefaults($.datepicker.regional['ko']);
-		
-			$("#start").datepicker({
-				dateFormat: 'yy-mm-dd',
-				changeMonth:true,
-				changeYear:true,
-				onClose: function(selectDate){
-						$("#end").datepicker("option","minDate",selectDate);					
-				}
-		});
-		$("#end").datepicker({
-				dateFormat: 'yy-mm-dd',
-				changeMonth:true,
-				changeYear:true,
-				onClose: function(selectDate){
-						$("#start").datepicker("option","maxDate",selectDate);
-						
-				}
-		});
-	/*	
-		auto_corp("client","C");
-		auto_agency("agency","C");
-		auto_medrep("client","C");
-		
-*/
+	
 	    $.ajax({		    
 			url : "cpmgr.do?a=auto_corp&corptype=2",
 		    datatype:"json",
@@ -298,7 +253,7 @@ try
 
                 <!-- add Table Start -->
                 <form name="frmRegCp" id="frmRegCp" role="form" action="cpmgr.do?a=cpRegist" method="POST">
-                    <table class="addTable">
+                    <table class="addTable" style="width:980px">
                         <colgroup>
                             <col width="15%">
                                 <col width="85%">
@@ -306,7 +261,7 @@ try
                         <tr>
                             <th>캠페인명<span style="color:red"> * </span></th>
                             <td class="form-inline">
-                                <input type="text" id="cpname" name="cpname" class="form-control input-sm" style="width:480px" value="<%=DateUtil.curDate()%>_">
+                                <input type="text" id="cpname" name="cpname" class="form-control input-sm" style="width:320px" value="<%=DateUtil.curDate()%>_">
                                 <!--  a class="btn btn-success btn-sm" href="#" role="button">중복확인</a-->
                             </td>
                         </tr>
@@ -315,7 +270,7 @@ try
                             <td>
  					    		<input class="debug" size=8 type="text" name="clientname" id="clientname"/>
 					    		<input class="debug" size=4 type="text" name="clientid" id="clientid"/>
-                                <input type="text"  id="client" class="form-control input-sm" autocomplete="off" style="width:300px" placeholder="">
+                                <input type="text"  id="client" class="form-control input-sm" autocomplete="off" style="width:240px" placeholder="">
 					     
                             </td>
                         </tr>
@@ -324,7 +279,7 @@ try
                             <td>
   					    		<input class="debug" size=8 type="text" name="agencyname" id="agencyname"/>
 					    		<input class="debug" size=4 type="text" name="agencyid" id="agencyid"/>
-                                <input type="text" id="agency" class="form-control input-sm" autocomplete="off" style="width:300px" placeholder="">
+                                <input type="text" id="agency" class="form-control input-sm" autocomplete="off" style="width:240px" placeholder="">
                             </td>
                         </tr>
                         <tr>
@@ -332,7 +287,7 @@ try
                             <td>
     					    	<input class="debug" size=8 type="text" name="medrepname" id="medrepname"/>
 					    		<input class="debug" size=4 type="text" name="medrepid" id="medrepid"/>
-                                <input type="text" id="medrep" class="form-control input-sm" autocomplete="off" style="width:300px" placeholder="">
+                                <input type="text" id="medrep" class="form-control input-sm" autocomplete="off" style="width:240px" placeholder="">
                              
                             </td>
                         </tr>
@@ -343,29 +298,18 @@ try
                             </td>
                         </tr>
                         <tr>
-                            <th>시작일<span style="color:red"> * </span></th>
+                            <th>캠페인 기간<span style="color:red"> * </span></th>
                             <td>
                                 <div class="form-inline">
-                                    
-                                    <input type="text" class="form-control input-sm datepicker" style="cursor:pointer;width:190px" id="start" name="startdate" placeholder="캠페인 시작일" >
-                                    <!-- datePicker Btn Start
-                                    <a class="btn btn-success btn-sm" href="#" role="button"><span class="glyphicon glyphicon-calendar"></span></a>
-                                     datePicker Btn End -->
-                                </div>
+                             		<input type="text" class="form-control input-sm" name="startdate" id="start" style="width:120px" placeholder="캠페인 시작일">
+                            		<a class="btn btn-success btn-sm" href="#none" role="button" id="btnSday"><span class="glyphicon glyphicon-calendar"></span></a>
+                                ~
+                             		<input type="text" class="form-control input-sm" name="enddate" id="end" style="width:120px" placeholder="캠페인 종료일">
+                            		<a class="btn btn-success btn-sm" href="#none" role="button" id="btnEday"><span class="glyphicon glyphicon-calendar"></span></a>
+                                 </div>
                             </td>
                         </tr>
-                        <tr>
-                            <th>종료일<span style="color:red"> * </span></th>
-                            <td>
-                                <div class="form-inline">
-                                   <input type="text" class="form-control input-sm datepicker" style="cursor:pointer;width:190px" id="end" name="enddate" placeholder="캠페인 종료일" >
-                                     <!-- datePicker Btn Start 
-                                    <a class="btn btn-success btn-sm" href="#" role="button"><span class="glyphicon glyphicon-calendar"></span></a>
-                                     datePicker Btn End -->
-                                </div>
-
-                            </td>
-                        </tr>
+                        
                         <tr>
                             <th>담당자<span style="color:red"> * </span></th>
                             <td>
@@ -400,26 +344,10 @@ try
                 </form>
                 <!-- add Table End -->
                 <!-- button group Start -->
-                <div class="buttonGroup">
-              
-                    
-                    
-                    <span id="warningMsg" style="color:#a00"></span>
-					
-					<button type="button" class="btn btn-danger btn-sm" id="btnRegCp">등록</button>
-					<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">취소</button>
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
+                <div class="buttonGroup" style="width:980px">
+                     <span id="warningMsg" style="color:#a00"></span>
+					<a role="button" class="btn btn-default btn-sm" href="cpmgr.do?a=cpList">목록</a>
+ 					<button type="button" class="btn btn-danger btn-sm" id="btnRegCp">등록</button>
                 </div>
                 <!-- button group End -->
             </section>

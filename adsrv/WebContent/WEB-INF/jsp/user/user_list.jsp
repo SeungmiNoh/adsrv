@@ -11,10 +11,12 @@
 <%	
 try
 {
+	String sch_column = StringUtil.isNull(request.getParameter("sch_column"));
 	String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
 	String s_type = StringUtil.isNull(request.getParameter("s_type"));
 	String s_per = StringUtil.isNull(request.getParameter("s_per"));
-	
+	sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
+
 	Map<String,Object> map = (Map<String,Object>)request.getAttribute("response");
 
 	List<User> userlist = (List<User>)map.get("userlist");   
@@ -185,9 +187,9 @@ $(function(){
                            </select>
                         </div>
                         <div class="form-group formGroupPadd">
-                            <select name="sch_type" class="form-control input-sm">
-                            <option value="username">사용자</option>
-                            <option value="corpname">회사명</option>
+                            <select name="sch_column" class="form-control input-sm">
+                            <option value="a.username" <%=sch_column.equals("a.username")?"selected":"" %>>사용자</option>
+                            <option value="corpname" <%=sch_column.equals("corpname")?"selected":"" %>>회사명</option>
                             </select>
                         </div>
                          <div class="form-group formGroupPadd">

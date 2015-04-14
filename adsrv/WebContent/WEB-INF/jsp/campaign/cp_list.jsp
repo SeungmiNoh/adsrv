@@ -1,6 +1,3 @@
-
-
-
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -15,13 +12,18 @@
 <% 
 try
 {
+	String state = StringUtil.isNull(request.getParameter("state"));	
 	String sch_column = StringUtil.isNull(request.getParameter("sch_column"));
 	String sch_text = StringUtil.isNull(request.getParameter("sch_text"));	
+	sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
 
 	Map<String,Object> map = (Map)request.getAttribute("response");
+	String sday = DateUtil.getYMD((String)map.get("sday"));
+	String eday = DateUtil.getYMD((String)map.get("eday"));
 
 	List<Campaign> cplist = (List<Campaign>)map.get("cplist");   
 	List<User> tclist = (List<User>)map.get("tclist");
+	List<Map<String,String>> stlist = (List<Map<String,String>>)map.get("stlist");   
 	
     String totalCount = map.get("totalCount").toString();
     String nowPage = map.get("nowPage").toString();
@@ -208,29 +210,24 @@ $(function(){
 				<input type="hidden" name="a" value="cpList"/>
 				<input type="hidden" name="p" id="page"/>
                     <div class="form-inline">
-                        <div class="form-group formGroupPadd">
+                          <div class="form-group formGroupPadd">
                             <label>기간</label>
-                            <input type="text" class="form-control input-sm" name="" placeholder="20150101">
-                            <!-- datePicker Btn Start -->
-                            <a class="btn btn-success btn-sm" href="#" role="button"><span class="glyphicon glyphicon-calendar"></span></a>
-                            <!-- datePicker Btn End -->
+                            <input type="text" class="form-control input-sm" name="sday" id="start" value="<%=sday%>" style="width:90px">
+                            <a class="btn btn-success btn-sm" href="#none" role="button" id="btnSday"><span class="glyphicon glyphicon-calendar"></span></a>
                         </div>
                         <div class="form-group formGroupPadd">
-                            <input type="text" class="form-control input-sm" name="" placeholder="20150101">
-                            <!-- datePicker Btn Start -->
-                            <a class="btn btn-success btn-sm" href="#" role="button"><span class="glyphicon glyphicon-calendar"></span></a>
-                            <!-- datePicker Btn End -->
-                        </div>
+                            <input type="text" class="form-control input-sm"  name="eday" id="end" value="<%=eday%>" style="width:90px">
+                            <a class="btn btn-success btn-sm" href="#none" role="button" id="btnEday"><span class="glyphicon glyphicon-calendar"></span></a>
+                        </div>                        
                         <div class="form-group formGroupPadd">
-                            <select name="cp_state" class="form-control input-sm">
-                                <option>상태</option>
-                                <option>진행</option>
-                                <option>예약</option>
-                                <option>준비</option>
-                                <option>완료</option>
-                                <option>중지</option>
-                                <option>취소</option>
-                            </select>
+                             <select id="state" name="state" class="form-control input-sm">
+                                <option value="">상태</option>
+                               <%for(int i=0;i<stlist.size();i++){ 
+                                	Map<String,String> st = stlist.get(i);
+                                %>
+                                <option value="<%=String.valueOf(st.get("isid")) %>" <%=state.equals(String.valueOf(st.get("isid")))?"selected":"" %>><%=st.get("isname") %></option>                               
+                                <%} %>
+                              </select>
                         </div>
                         <div class="form-group formGroupPadd">
                             <select id="sch_column" name="sch_column" class="form-control input-sm">
@@ -242,7 +239,7 @@ $(function(){
                             </select>
                         </div>
                         <div class="form-group formGroupPadd">
-                            <input type="text" class="form-control input-sm" name="sch_text">
+                            <input type="text" class="form-control input-sm" name="sch_text" value="<%=sch_text %>">
                         </div>
                         <div class="form-group formGroupPadd">
                             <button type="submit" class="btn btn-warning btn-sm">조회</button>
@@ -268,10 +265,12 @@ $(function(){
 				<col width="90"><!-- 종료일 -->
 				<col width="80"><!-- 집행금액 -->
 				<col width="100"><!-- 목표량 -->
+				<%-- 
 				<col width="100"><!-- 노출 -->
 				<col width="80"><!-- 달성율 -->
 				<col width="100"><!-- 클릭 -->
 				<col width="80"><!-- CTR -->
+				--%>
 			    <col width="100"><!-- 등록일 -->
 				<col width="90"><!-- 담당자 -->
 				<col width="100"><!-- 상태 -->
@@ -286,10 +285,11 @@ $(function(){
                             <th>종료일</th>
                             <th>집행금액</th>
                             <th>목표량</th>
+                            <!--  
                             <th>노출</th>
                             <th>달성율</th>
                             <th>클릭</th>
-                            <th>CTR</th>
+                            <th>CTR</th>-->
                             <th>등록일</th>
                             <th>담당자</th>
                             <th>상태</th>
@@ -309,8 +309,8 @@ for(int k=0; k<cplist.size(); k++){
                         <tr>
                             <td><%=skip+(k+1) %></td>
                             <td class="textLeft">
-                            <span name="cpmod" cpid="<%=cp.getCpid()%>" class="label label-<%=k%3==0?"info":"default"%>">T</span> 
-                            <span name="cpmod" cpid="<%=cp.getCpid()%>" style="margin-right:6px" class="label label-<%=k%3==0?"warning":"default"%>">P</span> 
+                            <span name="cpmod" cpid="<%=cp.getCpid()%>" class="label label-<%=cp.getIstarget().equals("Y")?"info":"default"%>">T</span> 
+                            <span name="cpmod" cpid="<%=cp.getCpid()%>" class="label label-<%=cp.getIsprism().equals("Y")?"warning":"default"%>" style="margin-right:6px">P</span> 
                             <a href="cpmgr.do?a=cpAdsList&cpid=<%=cp.getCpid()%>" class="<%=cp.getText()%>"><%=cp.getCpname() %></a>
                             </td>
                             <td><%=cp.getClientname() %></td>
@@ -318,14 +318,16 @@ for(int k=0; k<cplist.size(); k++){
                             <td><%=DateUtil.getYMD(cp.getStartdate(),".") %></td>
                             <td><%=DateUtil.getYMD(cp.getEnddate(), ".") %></td>
                             <td class="textRight"><%=StringUtil.addComma(cp.getBudget()) %></td>
-                            <td class="textRight">10,000,000</td>
-                            <td class="textRight">3,333,333</td>
+                             
+                            <td class="textRight"></td>
+                           <!-- <td class="textRight">3,333,333</td>
                             <td class="textRight">101%</td>
                             <td class="textRight">33,333</td>
                             <td class="textRight">0.24%</td>
+                            -->
                             <td><%=DateUtil.getYMD(cp.getInsertdate(),".") %></td>
                             <td><%=cp.getTcname()%></td>
-                            <td><span class="<%=cp.getText()%>"><%=cp.getCp_statename() %></span></td>
+                            <td><span class="<%=cp.getText()%>"><%=StringUtil.isNull(cp.getCp_statename()) %></span></td>
                         </tr>
 <%} %>                        
                         

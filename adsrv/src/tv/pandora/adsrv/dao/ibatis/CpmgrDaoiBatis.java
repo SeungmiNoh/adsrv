@@ -49,6 +49,7 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 			return null;
 		}	
 	}
+	
 	@Override
 	public Integer modCampaign(Campaign cp) {
 		try {
@@ -106,7 +107,22 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}	
-	}
+	}	
+	public Integer copyCreative(Map<String, String> map){
+		try {
+			return (Integer) sqlMapClientTemplateMaster.insert("copyCreative", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}	
+	}	
+	public void copyCreativeClick(Map<String, String> map){
+		try {
+			 sqlMapClientTemplateMaster.insert("copyCreativeClick", map);
+		} catch (EmptyResultDataAccessException e) {
+			 ;
+		}	
+	}	
+
 	@Override
 	public Integer modAds(Ads ads) {
 		try {
@@ -328,6 +344,21 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 			return null;
 		}		
 	}
+	public List<Map<String,String>> getCrClickList(Map<String, String> map){
+		try {
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getCrClickList", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}		
+	}
+	public List<Map<String,String>> getCrFileList(Map<String, String> map){
+		try {
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getCrFileList", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}		
+	}
+
 	public Integer addCreative(Creative cr){
 		try {
 			return (Integer) sqlMapClientTemplateMaster.insert("addCreative", cr);
@@ -340,6 +371,11 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("List", list);
 		sqlMapClientTemplateMaster.insert("addCreativeClick", param);
+	}
+	public void addCreativeFile(List<Map<String, String>> list){
+		HashMap<String, Object> param = new HashMap<String, Object>();
+		param.put("List", list);
+		sqlMapClientTemplateMaster.insert("addCreativeFile", param);
 	}
 	public Integer modCreative(Creative cr){
 		try {
@@ -379,5 +415,18 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 			;
 		}	
 	}
-
+	public Integer delFile(Map<String, String> map){
+		try {
+			return (Integer) sqlMapClientTemplateMaster.insert("delFile", map);
+		} catch (EmptyResultDataAccessException e) {
+			return 0;
+		}	
+	}
+	public Integer delClick(Map<String, String> map){
+		try {
+			return (Integer) sqlMapClientTemplateMaster.insert("delClick", map);
+		} catch (EmptyResultDataAccessException e) {
+			return 0;
+		}	
+	}
 }

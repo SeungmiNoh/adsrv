@@ -22,6 +22,13 @@
 
  * 20080301 에 8 개월 더하기 ==> addDate("m", 8, "20080301", "");
  --------------------------------------------------------------------------- */
+function newTab(link){
+	if(link.length>0) {
+		var tab=window.open(link,'_blank'); 
+		   //tab.focus(); 
+	}
+}
+
 function addDate(pInterval, pAddVal, pYyyymmdd, pDelimiter)
 {
 	var yyyy;
@@ -629,77 +636,53 @@ jQuery.fn.extend({
 
 
 
-
-/*
 jQuery(function($) {
-	 $.datepicker.regional['ko']= {
-	     closeText:'닫기',
-	     prevText:'이전달',	
-	     nextText:'다음달',
-	     currentText:'오늘',
-	     monthNames:['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-	     monthNamesShort:['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-	     dayNames:['일','월','화','수','목','금','토'],
-	     dayNamesShort:['일','월','화','수','목','금','토'],
-	     dayNamesMin:['일','월','화','수','목','금','토'],
-	     weekHeader:'Wk',
-	     dateFormat:'yy-mm-dd',
-	     firstDay:0,
-	     isRTL:false,
-	     showMonthAfterYear:true,
-	     yearSuffix:''
-	 };
-	 
-	 $.datepicker.setDefaults($.datepicker.regional['ko']);
-	 
-	 $(".s_date").datepicker({
-	     buttonText:"달력",
-	     //showOn: "button",
-	    // buttonImage: "images/calendar.gif", //버튼이미지에 사용할 이미지 경로
-	     buttonImageOnly: false, //버튼이미지를 나오게 한다.
-	     dateFormat: 'yy-mm-dd', //데이터 포멧형식
-	     minDate: '-3M',   //오늘 부터 3달전까지만 선택 할 수 있다.
-	     maxDate: '+36M',   //오늘 부터 36개월후까지만 선택 할 수 있다.
-	     yearRange: '2009:2040', // 년도 제한하기
-	     //changeMonth: true, //달별로 선택 할 수 있다.
-	     //changeYear: true,   //년별로 선택 할 수 있다.
-	     showOtherMonths: true, //이번달 달력안에 상/하 빈칸이 있을경우 전달/다음달 일로 채워준다.
-	     selectOtherMonths: false, 
-	     numberOfMonths: 1, //오늘부터 3달치의 달력을 보여준다.
-	     showButtonPanel: false, //오늘 날짜로 돌아가는 버튼 및 닫기 버튼을 생성한다.
-	  	 beforeShow: customRange //함수호출
-	 });
-	 $(".e_date").datepicker({
-	     buttonText:"달력",
-	    // showOn: "button",
-	     //buttonImage: "images/calendar.gif", //버튼이미지에 사용할 이미지 경로
-	     buttonImageOnly: false, //버튼이미지를 나오게 한다.
-	     dateFormat: 'yy-mm-dd', //데이터 포멧형식
-	     minDate: '-3M',   //오늘 부터 3달전까지만 선택 할 수 있다.
-	     maxDate: '+36M',   //오늘 부터 36개월후까지만 선택 할 수 있다.
-	     yearRange: '2009:2040', // 년도 제한하기
-	     changeMonth: false, //달별로 선택 할 수 있다.
-	     changeYear: false,   //년별로 선택 할 수 있다.
-	     showOtherMonths: true, //이번달 달력안에 상/하 빈칸이 있을경우 전달/다음달 일로 채워준다.
-	     selectOtherMonths: true, 
-	     numberOfMonths: 1, //오늘부터 3달치의 달력을 보여준다.
-	     showButtonPanel: false, //오늘 날짜로 돌아가는 버튼 및 닫기 버튼을 생성한다.
-	  beforeShow: customRange //함수호출
-	 });
-	});
-	 
-	function customRange(input) {
-	    return {
-	        minDate: (input.id == 'e_date' ? $('.s_date').datepicker('getDate') : null),
-	        maxDate: (input.id == 's_date' ? $('.e_date').datepicker('getDate') : null)
-	    };
-	}
+	
 
-	$(function() {	
-		
-		//날짜
-		$('.cal').datepicker({
-			dateFormat: 'yy-mm-dd'
-		});
-		
-	}); */
+$.datepicker.regional['ko'] = {
+		closeText: '닫기',
+		prevText: '이전달',
+		nextText: '다음달',
+		currentText: '오늘',
+		monthNames: ['1월','2월','3월','4월','5월','6월', '7월','8월','9월','10월','11월','12월'],
+		monthNamesShort: ['1월','2월','3월','4월','5월','6월', '7월','8월','9월','10월','11월','12월'],
+		dayNames: ['일','월','화','수','목','금','토'],
+		dayNamesShort: ['일','월','화','수','목','금','토'],
+		dayNamesMin: ['일','월','화','수','목','금','토'],
+		weekHeader: 'Wk',
+		dateFormat: 'yy-mm-dd',
+		firstDay: 0,
+		isRTL: false,
+		duration:200,
+		showAnim:'show',
+		showMonthAfterYear: true,
+		yearSuffix: '년'};
+	$.datepicker.setDefaults($.datepicker.regional['ko']);
+
+	$("#start").datepicker({
+		dateFormat: 'yy-mm-dd',
+		changeMonth:true,
+		changeYear:true,
+		onClose: function(selectDate){
+				$("#end").datepicker("option","minDate",selectDate);					
+		}
+});
+$("#end").datepicker({
+		dateFormat: 'yy-mm-dd',
+		changeMonth:true,
+		changeYear:true,
+		onClose: function(selectDate){
+				$("#start").datepicker("option","maxDate",selectDate);
+		}
+});
+$('#btnSday').click(function(){
+    $(document).ready(function(){
+        $("#start").datepicker().focus();
+    });
+});
+$('#btnEday').click(function(){
+    $(document).ready(function(){
+        $("#end").datepicker().focus();
+    });
+});
+});

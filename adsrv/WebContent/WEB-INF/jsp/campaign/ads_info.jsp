@@ -164,11 +164,13 @@ for(int k=0; k<adslist.size(); k++){
                 	</li>
                                 <li><a href="cpmgr.do?a=cpAdsList&cpid=<%=ads.getCpid()%>">애즈 목록 <span class="glyphicon glyphicon-menu-right"></span></a>
                                 </li>
-                                <li><a href="cpmgr.do?a=adsInfo&adsid=<%=ads.getAdsid()%>" class="active">애즈 정보 <span class="glyphicon glyphicon-menu-right"></span></a>
+                           	    <li><a href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>">애즈등록<span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>
+                                 <li><a href="cpmgr.do?a=adsInfo&adsid=<%=ads.getAdsid()%>" class="active">애즈 정보 <span class="glyphicon glyphicon-menu-right"></span></a>
                                 </li>
                                 <li><a href="cpmgr.do?a=adsEdit&adsid=<%=ads.getAdsid()%>">애즈 수정 <span class="glyphicon glyphicon-menu-right"></span></a>
                                 </li>                               
-                            </ul>
+                               </ul>
                         </nav>
                     </div>
                 </div>
@@ -204,7 +206,7 @@ for(int k=0; k<adslist.size(); k++){
  <%} %>                       
                     </select>    --%>               
                                 <a class="btn btn-danger btn-xs" href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>" role="button" style="float:right;margin-left:5px;">애즈등록</a>
-                                <a class="btn btn-success btn-xs" href="cpmgr.do?a=adsEditForm&adsid=<%=ads.getAdsid() %>" role="button" style="float:right;margin-left:5px;">수정</a>
+                                <a class="btn btn-success btn-xs" href="cpmgr.do?a=adsEdit&adsid=<%=ads.getAdsid() %>" role="button" style="float:right;margin-left:5px;">수정</a>
                             </td>
                             <th>판매방식</th>
                             <td>

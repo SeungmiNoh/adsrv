@@ -41,6 +41,9 @@ public class Ads implements Serializable{
 		private String realenddate;
 		private String memo;
 		private String text;
+		private String target;
+		private String istarget;
+		private String isprism;
 		
 		public String getCpid() {
 			return cpid;
@@ -255,6 +258,26 @@ public class Ads implements Serializable{
 		}
 		public void setText(String text) {
 			this.text = text;
+		}
+		
+		
+		public String getIstarget() {
+			return istarget;
+		}
+		public void setIstarget(String istarget) {
+			this.istarget = istarget;
+		}
+		public String getIsprism() {
+			return isprism;
+		}
+		public void setIsprism(String isprism) {
+			this.isprism = isprism;
+		}
+		public String getTarget() {
+			return target;
+		}
+		public void setTarget(String target) {
+			this.target = target;
 		}
 		public static long getSerialversionuid() {
 			return serialVersionUID;

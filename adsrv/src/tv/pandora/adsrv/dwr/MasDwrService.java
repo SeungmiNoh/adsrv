@@ -52,6 +52,36 @@ public class MasDwrService {
 		map.put("cpid", cpid);				
 		return cpmgrModel.getCampaign(map);
 	}
+	public Integer getCreativeCnt(String crname, String not_crid){
+		Map<String, String> map = new HashMap<String, String>();	
+		map.put("crname", crname.trim());
+		if(!not_crid.equals("0")) map.put("not_crid", not_crid);
+		return cpmgrModel.getCreativeCnt(map);
+	}
+	public Integer delClick(String crid, String ckid){
+		try
+		{
+			Map<String, String> map = new HashMap<String, String>();	
+			map.put("crid", crid);
+			map.put("ckid", ckid);
+			cpmgrModel.delClick(map);
+			return 1;
+		} catch(Exception e) {
+			return -1;
+		}
+	}	
+	public Integer delFile(String crid, String fileidx){
+		try
+		{
+			Map<String, String> map = new HashMap<String, String>();	
+			map.put("crid", crid);
+			map.put("fileidx", fileidx);
+			cpmgrModel.delFile(map);
+			return 1;
+		} catch(Exception e) {
+			return -1;
+		}
+	}
 	public Integer getCorpCnt(String corpname){
 		Map<String, String> map = new HashMap<String, String>();	
 		map.put("corpname", corpname.trim());

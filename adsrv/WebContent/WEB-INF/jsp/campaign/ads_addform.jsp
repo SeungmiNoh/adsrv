@@ -51,6 +51,7 @@ try
   <script src="<%=web%>/js/common.js"></script>
   <script type="text/javascript">
   $(document).ready(function() {
+	  $(".debug").css("display","none");
 		$('.numinput').numberOnly();
 		$("#adsname").focus();
 		defaultDate();
@@ -134,7 +135,7 @@ try
   $(function() {
 		//$(".debug").css("display","none");
 	  	
-		$("#btnRegist").on("click", function(e){
+		$("#btnRegist").on("click", function(e){			
 			e.preventDefault();
 			$("#btnRegist input, #btnRegist select").css("border-color", "#ccc");
 			if($.trim($("#adsname").val()).length==0){
@@ -169,13 +170,12 @@ try
 				$("#enddate").val(enddate);
 				$('.numinput').onlyNumberDelComma();
 				if(confirm("애즈를 등록하시겠습니까?")){
-					//$("#frmRegAds").submit();					
+					$("#frmRegAds").submit();					
 				}
 			}
 			
 		});
 
-		
 		$.datepicker.regional['ko'] = {
 				closeText: '닫기',
 				prevText: '이전달',
@@ -191,30 +191,32 @@ try
 				firstDay: 0,
 				isRTL: false,
 				duration:200,
+				showOn: "button",
+				buttonImage: "<%=web%>/img/calendar-icon-red.gif",
+				buttonImageOnly: true,
 				showAnim:'show',
 				showMonthAfterYear: true,
 				yearSuffix: '년'};
 			$.datepicker.setDefaults($.datepicker.regional['ko']);
 		
-			$("#start").datepicker({
+		
+		
+			$(".start").datepicker({
 				dateFormat: 'yy-mm-dd',
 				changeMonth:true,
 				changeYear:true,
 				onClose: function(selectDate){
-						$("#end").datepicker("option","minDate",selectDate);
-						$(this).trigger("change");
+						$(".end").datepicker("option","minDate",selectDate);					
 				}
-		});
-		$("#end").datepicker({
+			});
+			$(".end").datepicker({
 				dateFormat: 'yy-mm-dd',
 				changeMonth:true,
 				changeYear:true,
 				onClose: function(selectDate){
-						$("#start").datepicker("option","maxDate",selectDate);
-						$(this).trigger("change");
+						$(".start").datepicker("option","maxDate",selectDate);					
 				}
-		});
- 
+			});	
 	    
 	    
   });
@@ -283,16 +285,14 @@ try
                     <!-- title End -->
                     <div class="tapBox">
                         <nav class="tapMenu">
-                            <ul>
-                                <li><a href="" class="active">애즈 정보 <span class="glyphicon glyphicon-menu-right"></span></a>
+                               <ul>  
+                               <li><a href="#none"  class="active">애즈등록<span class="glyphicon glyphicon-menu-right"></span></a>
                                 </li>
-                                <li><a href="">타겟팅 <span class="glyphicon glyphicon-menu-right"></span></a>
+                                <li><a href="cpmgr.do?a=cpAdsList&cpid=<%=cp.getCpid()%>">애즈 목록 <span class="glyphicon glyphicon-menu-right"></span></a>
                                 </li>
-                                <li><a href="">광고물 <span class="glyphicon glyphicon-menu-right"></span></a>
-                                </li>
-                                <li><a href="">광고지면 <span class="glyphicon glyphicon-menu-right"></span></a>
-                                </li>
+                                                            
                             </ul>
+                            
                         </nav>
                     </div>
                 </div>
@@ -328,8 +328,8 @@ try
                             </td>
                             <th>시작일<span style="color:red"> * </span></th>
                             <td class="form-inline">
-                                <input type="text" class="form-control input-sm" style="cursor:pointer;width:100px" id="start" placeholder="시작일" readonly>                                
-                                	<select id="start_hour" name="start_hour" class="form-control input-sm period">
+                                <input type="text" id="start" class="start form-control input-xs datepicker" style="width:90px">                                
+                               		<select id="start_hour" name="start_hour" class="form-control input-sm period">
                                      <%for(int i=0;i<=23;i++){ %>
                                     <option value="<%=DateUtil.getMMStr(String.valueOf(i))%>"><%=DateUtil.getMMStr(String.valueOf(i))%>시</option>
                                     <%} %>
@@ -345,7 +345,7 @@ try
                             
                             <th>종료일<span style="color:red"> * </span></th>
                             <td class="form-inline">
-                                 <input type="text" class="form-control input-sm" style="cursor:pointer;width:100px" id="end" placeholder="종료일" readonly>                                
+                                 <input type="text" id="end" class="end form-control input-xs datepicker" style="width:90px">                                
                                 	<select id="end_hour" name="end_hour" class="form-control input-sm period">
                                      <%for(int i=0;i<=24;i++){ %>
                                     <option value="<%=DateUtil.getMMStr(String.valueOf(i))%>" <%=i==24?"selected":"" %>><%=DateUtil.getMMStr(String.valueOf(i))%>시</option>

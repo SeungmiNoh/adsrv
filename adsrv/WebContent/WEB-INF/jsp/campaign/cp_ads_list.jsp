@@ -111,7 +111,10 @@ try
                         <td></td>
                     </tr>
                 </table>
-                <br>
+                <div class="buttonGroup" style="width:900px">
+                                         
+                </div>
+               
                 <!-- view Table End -->
                 <!-- campaign view End -->
                 <!-- ads add Table Start -->
@@ -147,7 +150,7 @@ try
                 
                 
                 
-                                   <div class="boxtitle2">
+                  <div class="boxtitle2">
                      <!-- title Start -->
                     <div class="title3">애즈</div>
                     <!-- title End -->
@@ -155,7 +158,9 @@ try
                     <div class="tapBox">
                     
                         <nav class="tapMenu">
-                            <ul>                           
+                            <ul>  
+                               <li><a href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>">애즈등록<span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>
                                 <li><a href="#none" class="active">애즈 목록<span class="glyphicon glyphicon-menu-right"></span></a>
                                </li>
                                 <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsInfo&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>">애즈 정보 <span class="glyphicon glyphicon-menu-right"></span></a>
