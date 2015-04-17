@@ -3,10 +3,12 @@ package tv.pandora.adsrv.dao;
 import java.util.List;
 import java.util.Map;
 
+import tv.pandora.adsrv.domain.Slot;
+
 public interface SitemgrDao {
 	public List<Map<String,String>> getSiteList(Map<String, String> map);
 	public List<Map<String,String>> getSectionList(Map<String, String> map);
-	public List<Map<String,String>> getSlotList(Map<String, String> map);
+	public List<Slot> getSlotList(Map<String, String> map);
 	
 	public Integer getSiteCnt(Map<String, String> map);
 	public Integer addSite(Map<String, String> map);
@@ -34,7 +36,7 @@ public interface SitemgrDao {
 	
 	public Map<String,String> getSite(Map<String, String> map);
 	public Map<String,String> getSection(Map<String, String> map);
-	public Map<String,String> getSlot(Map<String, String> map);
+	public Slot getSlot(Map<String, String> map);
 	public Map<String,String> getSlgroup(Map<String, String> map);
 	
 

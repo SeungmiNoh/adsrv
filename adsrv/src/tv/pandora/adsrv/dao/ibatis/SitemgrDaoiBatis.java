@@ -9,6 +9,7 @@ import org.springframework.orm.ibatis.SqlMapClientTemplate;
 
 import tv.pandora.adsrv.common.util.StringUtil;
 import tv.pandora.adsrv.dao.SitemgrDao;
+import tv.pandora.adsrv.domain.Slot;
 
 public class SitemgrDaoiBatis implements SitemgrDao {
 	private SqlMapClientTemplate sqlMapClientTemplateMaster;
@@ -32,13 +33,13 @@ public class SitemgrDaoiBatis implements SitemgrDao {
 			return null;
 		}
 	}
-	public List<Map<String,String>> getSlotList(Map<String, String> map){
+	public List<Slot> getSlotList(Map<String, String> map){
 		String sql = "getSlotList";
 		if(!StringUtil.isNull(map.get("adsid")).equals("") || !StringUtil.isNull(map.get("cpid")).equals("")) {
 			sql = "getAdsSlotList";
 		}		
 		try {
-			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList(sql, map);
+			return (List<Slot>) sqlMapClientTemplateMaster.queryForList(sql, map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
@@ -189,9 +190,9 @@ public class SitemgrDaoiBatis implements SitemgrDao {
 			return null;
 		}
 	}
-	public Map<String,String> getSlot(Map<String, String> map){
+	public Slot getSlot(Map<String, String> map){
 		try {
-			return (Map<String,String>) sqlMapClientTemplateMaster.queryForObject("getSlot", map);
+			return (Slot) sqlMapClientTemplateMaster.queryForObject("getSlot", map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}

@@ -50,6 +50,36 @@ try
   <script src="<%=web%>/js/basic.js"></script>
   <script src="<%=web%>/js/common.js"></script>
   <script type="text/javascript">
+  function setGoaltype() {
+		if($("#goaltype").val()<=1) // 목표기간 완료, 목표 없음	
+		{
+			$(".goalText").text("");				
+			$("#goal_total").val("0");
+			$("#goal_total").prop( "disabled", true );	
+			$("#book_total").val("0");
+			$("#book_total").prop( "disabled", true );	
+		} else {
+			if($("#goaltype").val()==2){ // 목표 노출 완료
+				$(".goalText").text("노출 ");					
+			} else if($("#goaltype").val()==3)  {	// 목표 클릭 완료
+				$(".goalText").text("클릭 ");
+			} else if($("#goaltype").val()==4) { // 목표 Hit 완료
+				$(".goalText").text("Hit ");
+			}
+			$("#goal_total").prop( "disabled", false );				
+			$("#goal_total").attr("placeholder",$("#goalText").text()+"목표량");
+			$("#book_total").prop( "disabled", false );				
+			$("#book_total").attr("placeholder",$("#goalText").text()+"보장량");
+		}
+	}
+	function setDate() {
+		var startdate = delDash($("#start").val())+$("#start_hour").val()+$("#start_min").val();				
+		var enddate = delDash($("#end").val())+$("#end_hour").val()+$("#end_min").val();
+		$("#startdate").val(startdate);
+		$("#enddate").val(enddate);
+		
+	} 
+  
   $(document).ready(function() {
 	  $(".debug").css("display","none");
 		$('.numinput').numberOnly();
@@ -57,16 +87,22 @@ try
 		defaultDate();
 		
 		$("[name=period]").on("click", function(e){
-		
 			
-			if($('input:radio[name="period"]:checked').val()==0){
+			if($
+					
+					
+					('input:radio[name="period"]:checked').val()==0){
 				
 				$("#start").val("<%=DateUtil.getYMD(cp.getStartdate())%>");
-				$("#end").val("9999-12-31");
+				$("#end").val("2037-12-31");
+				$("#start_hour").val("00");
+				$("#start_min").val("00");
+				$("#end").val("2037-12-31");
+				$("#end_hour").val("24");
+				$("#end_min").val("00");
 
-				$(".period").val("0");				
 				$(".period").prop( "disabled", true );
-				
+				setDate();
 				$(".datepicker").prop( "disabled", true );
 				$(".datepicker").datepicker( "option", "disabled", true );
 			} else {
@@ -74,28 +110,23 @@ try
 				defaultDate();
 				$(".datepicker").datepicker( "option", "disabled", false );
 			}
-	
-		});
+		});	
+
 		
-		$("#goaltype").on("change", function(e){
-			if($("#goaltype").val()<=1) // 목표기간 완료, 목표 없음	
+		$("#goaltype").on("change", function(e){				
+			setGoaltype();
+		});	
+		
+		$("#salestype").on("change", function(e){
+			if($("#salestype").val()==3) // 하우스경우 
 			{
-				$("#goal_total").val("0");
-				$("#goalText").text("");
-				$("#goal_total").prop( "disabled", true );				
+				$("#goaltype").val("1");				
 			} else {
-				if($("#goaltype").val()==2){ // 목표 노출 완료
-					$("#goalText").text("노출 목표량");					
-				} else if($("#goaltype").val()==3)  {	// 목표 클릭 완료
-					$("#goalText").text("클릭 목표량");
-				} else if($("#goaltype").val()==4) { // 목표 Hit 완료
-					$("#goalText").text("Hit 목표량");
-				}
-				$("#goal_total").prop( "disabled", false );				
-				$("#goal_total").attr("placeholder",$("#goalText").text());
+				$("#goaltype").val("2");
 			}
-			
-		});
+			setGoaltype();
+		});	
+		
 		
 		function defaultDate() {
 			$("#start").val("<%=DateUtil.getYMD(cp.getStartdate())%>");
@@ -122,56 +153,60 @@ try
 			
 			
 			$("#"+code_data[k].code).append(htmlstr);
-			console.log(htmlstr);
+			//console.log(htmlstr);
 		}
 		
-		
+		// 등록시는 준비만 선택 가능하도록 나머지 옵션 삭제
+		$("select[name='ads_state'] option[value!=1]").remove();
+		 
 		
 	});
-  
-  
- 
+
  
   $(function() {
 		//$(".debug").css("display","none");
 	  	
 		$("#btnRegist").on("click", function(e){			
 			e.preventDefault();
-			$("#btnRegist input, #btnRegist select").css("border-color", "#ccc");
+			$("#frmRegAds input, #frmRegAds select").css("border-color", "#ccc");
 			if($.trim($("#adsname").val()).length==0){
 				$("#adsname").css("border-color","red").focus();
 				$("#warningMsg").text("애즈명을 입력해주세요.");
-				return;
-			}else if($.trim($("#start").val()).length!=10){
-				$("#start").css("border-color","red").focus();
-				$("#warningMsg").text("시작일을 선택해주세요.");
-				return;
-			}else if($.trim($("#end").val()).length!=10){
-				$("#end").css("border-color","red").focus();
-				$("#warningMsg").text("종료일을 선택해주세요.");
-				return;
-			}else if($.trim($("#goal_total").val()).length==0){
-				$("#goal_total").css("border-color","red").focus();
-				$("#warningMsg").text($("#goalText").text()+"을 입력해주세요.");
 				return;
 			}else if($.trim($("#budget").val()).length==0){
 				$("#budget").css("border-color","red").focus();
 				$("#warningMsg").text("집행 금액을 입력해주세요.");
 				return;
-			}else if($.trim($("#book_total").val()).length==0){
+			}else if($.trim($("#start").val()).length!=10){
+				$("#start").css("border-color","red").focus();
+				$("#warningMsg").text("시작일을 선택해주세요.");
+				return;
+			}else if (delDash($("#start").val()) < $("[name=cp_startdate]").val()) {
+				$("#start").css("border-color","red").focus();				
+	          	$("#warningMsg").text("애즈 기간은 캠페인 기간을 벗어날 수 없습니다.");
+				return;
+	        }else if($.trim($("#end").val()).length!=10){
+				$("#end").css("border-color","red").focus();
+				$("#warningMsg").text("종료일을 선택해주세요.");
+				return;
+			}else if($("#period").val()!=0 && delDash($("#end").val()) > $("[name=cp_enddate]").val()) {
+				$("#end").css("border-color","red").focus();				
+	          	$("#warningMsg").text("애즈 기간은 캠페인 기간을 벗어날 수 없습니다.");
+				return;
+	        }else if($.trim($("#book_total").val()).length==0){
 				$("#book_total").css("border-color","red").focus();
-				$("#warningMsg").text("보쟝량을 입력해주세요.");
+				$("#warningMsg").text($("#goalText").text()+"보장량을 입력해주세요.");
+				return;
+			}else if($.trim($("#goal_total").val()).length==0){
+				$("#goal_total").css("border-color","red").focus();
+				$("#warningMsg").text($("#goalText").text()+"목표량을 입력해주세요.");
 				return;
 			}else{
-				
-				var startdate = delDash($("#start").val())+$("#start_hour").val()+$("#start_min").val();				
-				var enddate = delDash($("#end").val())+$("#end_hour").val()+$("#end_min").val();
-				$("#startdate").val(startdate);
-				$("#enddate").val(enddate);
+				setDate();
+			}
+			if(confirm("애즈를 등록하시겠습니까?")){
 				$('.numinput').onlyNumberDelComma();
-				if(confirm("애즈를 등록하시겠습니까?")){
-					$("#frmRegAds").submit();					
-				}
+				$("#frmRegAds").submit();					
 			}
 			
 		});
@@ -191,7 +226,7 @@ try
 				firstDay: 0,
 				isRTL: false,
 				duration:200,
-				showOn: "button",
+				//showOn: "button",
 				buttonImage: "<%=web%>/img/calendar-icon-red.gif",
 				buttonImageOnly: true,
 				showAnim:'show',
@@ -206,7 +241,7 @@ try
 				changeMonth:true,
 				changeYear:true,
 				onClose: function(selectDate){
-						$(".end").datepicker("option","minDate",selectDate);					
+						$(".end").datepicker("option","minDate",selectDate);	
 				}
 			});
 			$(".end").datepicker({
@@ -216,7 +251,7 @@ try
 				onClose: function(selectDate){
 						$(".start").datepicker("option","maxDate",selectDate);					
 				}
-			});	
+			});
 	    
 	    
   });
@@ -260,9 +295,9 @@ try
                     </tr>
                     <tr>
                         <th>보장량</th>
-                        <td></td>
+                        <td><%=StringUtil.addComma(cp.getBook_total()) %></td>
                         <th>목표량</th>
-                        <td></td>
+                        <td><%=StringUtil.addComma(cp.getGoal_total()) %></td>
                         <th>집행금액</th>
                         <td><%=StringUtil.addComma(cp.getBudget()) %></td>
                     </tr>
@@ -272,7 +307,7 @@ try
                         <th>종료일</th>
                         <td><%=DateUtil.getYMD(cp.getEnddate(), "-") %></td>
                         <th>상태</th>
-                        <td></td>
+                        <td><span class="<%=cp.getText()%>"><%=StringUtil.isNull(cp.getCp_statename()) %></span></td>
                     </tr>
                 </table>
                 <br>
@@ -286,9 +321,9 @@ try
                     <div class="tapBox">
                         <nav class="tapMenu">
                                <ul>  
-                               <li><a href="#none"  class="active">애즈등록<span class="glyphicon glyphicon-menu-right"></span></a>
+                               <li><a href="cpmgr.do?a=cpAdsList&cpid=<%=cp.getCpid()%>">애즈 목록 <span class="glyphicon glyphicon-menu-right"></span></a>
                                 </li>
-                                <li><a href="cpmgr.do?a=cpAdsList&cpid=<%=cp.getCpid()%>">애즈 목록 <span class="glyphicon glyphicon-menu-right"></span></a>
+                                <li><a href="#none"  class="active">애즈등록<span class="glyphicon glyphicon-menu-right"></span></a>
                                 </li>
                                                             
                             </ul>
@@ -309,99 +344,91 @@ try
                         <col width="9%">
                         <col width="27%">
                         </colgroup>
-                        <tr>
-                            <th>애즈명<span style="color:red"> * </span></th>
-                            <td class="form-inl  ine" colspan="3">
-                                <input type="text" name="adsname" id="adsname" class="form-control input-sm" style="width:400px">
+                       <tr>
+                            <th>애즈명</th>
+                            <td class="form-inline" colspan="3">
+                                <input type="text" name="adsname" id="adsname" class="form-control input-sm" value="" style="width:280px">
                             </td>
-                            <th>판매방식<span style="color:red"> * </span></th>
+                            <th>광고상품</th>
                             <td class="form-inline">
-                                <select id="salestype" name="salestype" class="form-control input-sm"  style="width:160px;">
-                                </select>
+                                <select id="prtype" name="prtype" class="form-control input-sm" style="width:100px;">
+                                 </select>
                             </td>
                         </tr>
+  						<tr>
+                             <th>세일즈 구분</th>
+                            <td class="form-inline">
+                                <select id="salestype" name="salestype" class="form-control input-sm"  style="width:100px;">
+                                </select>
+                            </td>
+                             <th>집행금액</th>
+                            <td class="form-inline">
+                                <input type="text" name="budget" id="budget" class="form-control input-sm numinput" style="width:160px; text-align:right">
+                            </td>
+                       		<th>상태</th>
+                            <td class="form-inline">
+                                <select id="ads_state" name="ads_state" style="width:100px" class="form-control input-sm">
+                                 </select>
+                            </td>
+                        </tr>  
                         <tr>
-                            <th>기간<span style="color:red"> * </span></th>
+                            <th>기간</th>
                             <td class="form-inline">
                                 <label class="radio-inline"><input type="radio" name="period" value="1" checked> Period</label>
                                 <label class="radio-inline"><input type="radio" name="period" value="0"> No Period</label>
                             </td>
-                            <th>시작일<span style="color:red"> * </span></th>
+                            <th>시작일</th>
                             <td class="form-inline">
-                                <input type="text" id="start" class="start form-control input-xs datepicker" style="width:90px">                                
-                               		<select id="start_hour" name="start_hour" class="form-control input-sm period">
+                                <input type="text" id="start" class="start form-control nopad datepicker" style="width:90px">                                
+                                	<select id="start_hour" name="start_hour" class="form-control nopad input-sm period">
                                      <%for(int i=0;i<=23;i++){ %>
                                     <option value="<%=DateUtil.getMMStr(String.valueOf(i))%>"><%=DateUtil.getMMStr(String.valueOf(i))%>시</option>
                                     <%} %>
                                 </select>
-                                <select id="start_min" name="start_min" class="form-control input-sm period">
+                                <select id="start_min" name="start_min" class="form-control nopad input-sm period">
                                        <%for(int i=0;i<6;i++){ %>
                                     <option value="<%=DateUtil.getMMStr(String.valueOf(i*10))%>"><%=DateUtil.getMMStr(String.valueOf(i*10))%>분</option>
                                     <%} %>                                    
                                 </select>
                                 <input type="text" id="startdate" name="startdate" class="debug" size=10/>
                             </td>
-                            
-                            
-                            <th>종료일<span style="color:red"> * </span></th>
+                             <th>종료일</th>
                             <td class="form-inline">
-                                 <input type="text" id="end" class="end form-control input-xs datepicker" style="width:90px">                                
-                                	<select id="end_hour" name="end_hour" class="form-control input-sm period">
+                                 <input type="text" id="end" class="end form-control nopad input-xs datepicker" style="width:90px">                                
+                                	<select id="end_hour" name="end_hour" class="form-control nopad input-sm period">
                                      <%for(int i=0;i<=24;i++){ %>
-                                    <option value="<%=DateUtil.getMMStr(String.valueOf(i))%>" <%=i==24?"selected":"" %>><%=DateUtil.getMMStr(String.valueOf(i))%>시</option>
+                                    <option value="<%=DateUtil.getMMStr(String.valueOf(i))%>"><%=DateUtil.getMMStr(String.valueOf(i))%>시</option>
                                     <%} %>
                                 </select>
-                                <select id="end_min" name="end_min" class="form-control input-sm period">
+                                <select id="end_min" name="end_min" class="form-control nopad input-sm period">
                                       <%for(int i=0;i<6;i++){ %>
-                                    <option value="<%=DateUtil.getMMStr(String.valueOf(i*10))%>" ><%=DateUtil.getMMStr(String.valueOf(i*10))%>분</option>
+                                    <option value="<%=DateUtil.getMMStr(String.valueOf(i*10))%>"><%=DateUtil.getMMStr(String.valueOf(i*10))%>분</option>
                                     <%} %>                                    
                                 </select>
                                 <input type="text" id="enddate" name="enddate" class="debug" size=10/>
                          </td>
                         </tr>
                        <tr>
-                            
-                            <th>목표타입<span style="color:red"> * </span></th>
+                            <th>목표타입</th>
                             <td class="form-inline">
-                                <select id="goaltype" name="goaltype" class="form-control input-sm" style="width:160px;">
+                                <select id="goaltype" name="goaltype" class="form-control input-sm" style="width:100px">
                                 </select>
-                            </td>	
-                            <th><label id="goalText">노출 목표량</label><span style="color:red"> * </span></th>
+                            </td>
+                            <th><label class="goalText" id="goalText">노출</label> 보장량</th>
+                            <td class="form-inline">
+                                <input type="text" name="book_total" id="book_total" class="form-control input-sm numinput goal" style="width:160px; text-align:right" placeholder="보장량">                             
+							</td>                            	
+                            <th><label class="goalText">노출</label> 목표량</th>
                             <td class="form-inline">
                                 <input type="text" name="goal_total" id="goal_total" class="form-control input-sm numinput goal" style="width:160px; text-align:right" placeholder="목표 노출량">                             
 							</td>
-                        
-                            
-                            <th>일 목표 노출량</th>
-                            <td class="form-inline">
-                                <input type="text" name="goal_daily" class="form-control input-sm numinput" style="width:160px; text-align:right" placeholder="일간 목표 노출량">
-                            </td>
    						</tr>
-                         
-   <tr>
-                             
-                           <th>광고상품<span style="color:red"> * </span></th>
+                         <tr>
+  							<th>일 목표 노출량</th>
                             <td class="form-inline">
-                                <select id="prtype" name="prtype" class="form-control input-sm" style="width:160px;">
-                                 </select>
+                                <input type="text" id="goal_daily" name="goal_daily" class="form-control input-sm numinput" style="width:160px; text-align:right" placeholder="일간 목표 노출량">
                             </td>
-                              <th>집행금액<span style="color:red"> * </span></th>
-                            <td class="form-inline">
-                                <input type="text" name="budget" id="budget" class="form-control input-sm numinput" style="width:160px; text-align:right">
-                            </td>
-                            <th><label id="goalText">보장량</label><span style="color:red"> * </span></th>
-                            <td class="form-inline">
-                                <input type="text" name="book_total" id="book_total" class="form-control input-sm numinput goal" style="width:160px; text-align:right" placeholder="보장량">                             
-							</td>
-                        </tr>  
-                        <tr>
-                        <th>상태<span style="color:red"> * </span></th>
-                            <td class="form-inline">
-                                <select id="ads_state" name="ads_state" class="form-control input-sm" disabled="disabled">
-                                 </select>
-                            </td>
-                                          
-                        <th>등록일</th>
+                            <th>등록일</th>
                             <td class="form-inline">
                                 <%=DateUtil.getYMD(DateUtil.curDate()) %>
                             </td>

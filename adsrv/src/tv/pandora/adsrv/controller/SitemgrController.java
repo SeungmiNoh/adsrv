@@ -27,6 +27,8 @@ import tv.pandora.adsrv.common.util.StringUtil;
 
 
 
+import tv.pandora.adsrv.domain.Slot;
+
 import org.springframework.web.servlet.ModelAndView;
 
 public class SitemgrController extends AdsrvMultiActionController
@@ -198,13 +200,13 @@ public class SitemgrController extends AdsrvMultiActionController
 	    
 		map.put("siteid", s_siteid)	;
 		map.put("secid", s_secid)	;
-		map.put("sitetype", s_type)	;
+		map.put("prtype", s_type)	;
 		map.put("skip", String.valueOf(skip))	;
 		map.put("max", String.valueOf(max))	;
 		map.put("sch_text", sch_text);
 		map.put("sch_column", "slotname");
 		Integer totalCount = sitemgrFacade.getSlotCnt(map);
-		List<Map<String, String>> slotlist = sitemgrFacade.getSlotList(map);
+		List<Slot> slotlist = sitemgrFacade.getSlotList(map);
 
 		map.clear();
 		map.put("order_str", "sitename");
@@ -214,11 +216,17 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("order_str", "secname");
 		List<Map<String, String>> seclist = sitemgrFacade.getSectionList(map);
 		
+		//광고상품 목록
+		map.clear();
+		map.put("code", "prtype");
+		List<Map<String, String>> codelist = cpmgrFacade.getCodeList(map);	
+		
 
 		Map<String, Object> resultMap = new HashMap<String, Object>();		
 		resultMap.put("sitelist", sitelist);
 		resultMap.put("seclist", seclist);
 		resultMap.put("slotlist", slotlist);
+		resultMap.put("codelist", codelist);
 		
 		resultMap.put("skip", skip);
 		resultMap.put("max", max);
@@ -236,6 +244,7 @@ public class SitemgrController extends AdsrvMultiActionController
 		String slottag = StringUtil.isNull(request.getParameter("slottag"));
 		String width = StringUtil.isNull(request.getParameter("width"));
 		String height = StringUtil.isNull(request.getParameter("height"));
+		String prtype = StringUtil.isNull(request.getParameter("prtype"));
 		String memo= StringUtil.isNull(request.getParameter("memo"));
 		
 		String userID = (String)SessionUtil.getAttribute("userID");
@@ -245,6 +254,7 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("siteid", siteid);
 		map.put("secid", secid);
 		map.put("slotname", slotname.trim());
+		map.put("prtype", prtype);
 		map.put("slottag", slottag.trim());
 		map.put("width", width.trim());
 		map.put("height", height.trim());
@@ -284,7 +294,7 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("siteid", s_siteid)	;
 		map.put("width", s_width)	;
 		map.put("height", s_height)	;
-		map.put("sitetype", s_type)	;
+		map.put("prtype", s_type)	;
 		map.put("skip", String.valueOf(skip))	;
 		map.put("max", String.valueOf(max))	;
 		map.put("sch_text", sch_text);
@@ -300,11 +310,16 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("order_str", "secname");
 		List<Map<String, String>> seclist = sitemgrFacade.getSectionList(map);
 		
+		//광고상품 목록
+		map.clear();
+		map.put("code", "prtype");
+		List<Map<String, String>> codelist = cpmgrFacade.getCodeList(map);	
 
 		Map<String, Object> resultMap = new HashMap<String, Object>();		
 		resultMap.put("sitelist", sitelist);
 		resultMap.put("seclist", seclist);
 		resultMap.put("grouplist", grouplist);
+		resultMap.put("codelist", codelist);
 		
 		resultMap.put("skip", skip);
 		resultMap.put("max", max);
@@ -321,6 +336,7 @@ public class SitemgrController extends AdsrvMultiActionController
 		String width = StringUtil.isNull(request.getParameter("width"));
 		String height = StringUtil.isNull(request.getParameter("height"));
 		String memo= StringUtil.isNull(request.getParameter("memo"));
+		String prtype = StringUtil.isNull(request.getParameter("prtype"));
 		
 		
 		
@@ -331,6 +347,7 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("groupname", groupname);
 		map.put("width", width.trim());
 		map.put("height", height.trim());
+		map.put("prtype", prtype);
 		map.put("memo", StringUtil.htmlEncode(memo));
 		if(groupid.equals("")) {
 			map.put("insertdate", DateUtil.simpleDate2());

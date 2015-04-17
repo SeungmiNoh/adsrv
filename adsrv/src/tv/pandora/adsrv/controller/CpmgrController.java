@@ -20,6 +20,7 @@ import tv.pandora.adsrv.common.util.StringUtil;
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
 import tv.pandora.adsrv.domain.Creative;
+import tv.pandora.adsrv.domain.Slot;
 import tv.pandora.adsrv.domain.Target;
 import tv.pandora.adsrv.domain.User;
 
@@ -123,7 +124,7 @@ public class CpmgrController extends AdsrvMultiActionController
 		Campaign cp = cpmgrFacade.getCampaign(map);	
 		
 		//애즈 선택 옵션 목록
-		map.put("tbname", "ads");
+		  
 		List<Map<String, String>> codelist = cpmgrFacade.getCodeList(map);	
 		
 		
@@ -137,6 +138,7 @@ public class CpmgrController extends AdsrvMultiActionController
 	public ModelAndView adsRegist(HttpServletRequest request, HttpServletResponse response) throws Exception {			
 		
 		String adsid = StringUtil.isNull(request.getParameter("adsid"));
+		String goal_total = StringUtil.isNullZero(request.getParameter("goal_total"));
 
 		String userID = (String)SessionUtil.getAttribute("userID");
 		Ads ads = new Ads();
@@ -145,10 +147,10 @@ public class CpmgrController extends AdsrvMultiActionController
 		ads.setUpdateuser(userID);
 		ads.setInsertdate(DateUtil.simpleDate2());
 		ads.setInsertuser(userID);
-		
+		ads.setGoal_total(goal_total);
 		String realenddate = ads.getEnddate();
 		
-		System.out.println("prtype============"+ads.getPrtype());
+
 	
 				
 		if(DateUtil.getCutHH(ads.getEnddate()).equals("24")){
@@ -165,7 +167,8 @@ public class CpmgrController extends AdsrvMultiActionController
 		ads.setRealenddate(realenddate);
 		System.out.println("realenddate="+realenddate);
 			
-		
+		System.out.println("ads============"+ads);
+		System.out.println("ads.getGoaltype()============"+ads.getGoaltype());
 		if(adsid.equals("")){
 			Integer iadsid = cpmgrFacade.addAds(ads);	
 			adsid = String.valueOf(iadsid);
@@ -174,8 +177,31 @@ public class CpmgrController extends AdsrvMultiActionController
 		}
 		
 		
-		return new ModelAndView("redirect:cpmgr.do?a=adsInfo&adsid="+adsid, null);
+		return new ModelAndView("redirect:cpmgr.do?a=adsEdit&adsid="+adsid, null);
 	}	
+	public ModelAndView adsCopy(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String adsid = StringUtil.isNull(request.getParameter("adsid"));
+		String userID = (String)SessionUtil.getAttribute("userID");
+			
+		 Map<String, String> map = new HashMap<String, String>();
+			
+         map.put("adsid", adsid);
+         map.put("insertdate", DateUtil.simpleDate2());
+         map.put("insertuser", userID);
+		Integer icopyid = cpmgrFacade.copyAds(map);
+		
+		if(icopyid != null) {
+			map.clear();
+			map.put("adsid", adsid);
+			map.put("copyid", String.valueOf(icopyid));
+			map.put("insertdate", DateUtil.simpleDate2());
+			map.put("insertuser", userID);
+			cpmgrFacade.copyAdsTargeting(map);
+			cpmgrFacade.copyAdsCreative(map);
+			cpmgrFacade.copyAdsSlot(map);
+		}
+		return new ModelAndView("redirect:cpmgr.do?a=adsEdit&adsid="+String.valueOf(icopyid), null);
+	}
 	public ModelAndView crInfo(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		String crid = StringUtil.isNull(request.getParameter("crid"));
 
@@ -232,7 +258,7 @@ public class CpmgrController extends AdsrvMultiActionController
 	}
 	public ModelAndView crRegist(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
-		String crid = StringUtil.isNull(request.getParameter("crid"));
+		String crid = StringUtil.isNullZero(request.getParameter("crid"));
 		String userID = (String)SessionUtil.getAttribute("userID");
 		
 		Creative cr = new Creative();
@@ -244,7 +270,7 @@ public class CpmgrController extends AdsrvMultiActionController
 		
 			
 		
-		if(crid.equals("")){
+		if(crid.equals("0")){
 			Integer icrid = cpmgrFacade.addCreative(cr);	
 			crid = String.valueOf(icrid);
 		} else {
@@ -331,6 +357,7 @@ public class CpmgrController extends AdsrvMultiActionController
 		
 		ArrayList<Map<String,String>> list = new ArrayList<Map<String,String>>();
 		
+		String tgstr = "";
 		for(int i=0; i<tid.length;i++){
 			if(!StringUtil.isNullZero(tid[i].trim()).equals("0")) {
 				
@@ -341,29 +368,37 @@ public class CpmgrController extends AdsrvMultiActionController
 		         ipmap.put("targettype", targettype[i]);
 		         ipmap.put("updatedate", DateUtil.simpleDate2());
 		         ipmap.put("updateuser", userID);
-				
+		         tgstr += targettype[i]+",";
 				System.out.println(i+") Map : " + ipmap);
 				list.add(ipmap);					
 			}
 		}
 		System.out.println(" List : " + list);
-		cpmgrFacade.addAdsTargeting(list);
-		
-		return new ModelAndView("redirect:cpmgr.do?a=adsInfo&adsid="+adsid, null);
+		if(list.size()>0) {
+			cpmgrFacade.addAdsTargeting(list);
+			tgstr = tgstr.substring(0,tgstr.length()-1);
+		}
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("adsid", adsid);
+		map.put("tgstr", tgstr);
+        map.put("updatedate", DateUtil.simpleDate2());
+        map.put("updateuser", userID);
+		cpmgrFacade.modDelAdsTargeting(map);
+		return new ModelAndView("redirect:cpmgr.do?a=adsEdit&adsid="+adsid, null);
 	}
 	public ModelAndView adsCreativeSave(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		String adsid = request.getParameter("adsid");
+		String ads_state = request.getParameter("ads_state");
 		String ads_startdate = request.getParameter("ads_startdate");
 		String ads_enddate = request.getParameter("ads_enddate");
 		String ads_realenddate = request.getParameter("ads_realenddate");
-		
+		//if(ads_state.equals("1")) ads_state = "2";
+		ads_state = "3";
 		String userID = (String)SessionUtil.getAttribute("userID");
 		
 		Map<String, String> amap = new HashMap<String, String>();		
 			
 		String[] crid = request.getParameterValues("crid");
-		String[] targettype = request.getParameterValues("targettype");
-
 		
 		ArrayList<Map<String,String>> list = new ArrayList<Map<String,String>>();
 		
@@ -373,12 +408,16 @@ public class CpmgrController extends AdsrvMultiActionController
 		         Map<String, String> ipmap = new HashMap<String, String>();
 
 		         ipmap.put("adsid", adsid);
+			     ipmap.put("crid", crid[i]);
 		         ipmap.put("startdate", ads_startdate);
 		         ipmap.put("enddate", ads_enddate);
 		         ipmap.put("realenddate", ads_realenddate);
-			     ipmap.put("crid", crid[i]);
+			     ipmap.put("weight", "100");
+			     ipmap.put("cr_state", ads_state);			     
 		         ipmap.put("insertdate", DateUtil.simpleDate2());
 		         ipmap.put("insertuser", userID);
+		         ipmap.put("updatedate", DateUtil.simpleDate2());
+		         ipmap.put("updateuser", userID);
 				
 				System.out.println(i+") Map : " + ipmap);
 				list.add(ipmap);					
@@ -386,6 +425,93 @@ public class CpmgrController extends AdsrvMultiActionController
 		}
 		System.out.println(" List : " + list);
 		cpmgrFacade.addAdsCreative(list);
+		
+		return new ModelAndView("redirect:cpmgr.do?a=adsEdit&adsid="+adsid, null);
+	}
+	public ModelAndView adsCreativeUpdate(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String adsid = request.getParameter("adsid");
+		String userID = (String)SessionUtil.getAttribute("userID");
+		
+		Map<String, String> amap = new HashMap<String, String>();		
+			
+		String[] crid = request.getParameterValues("crid");
+		String[] cr_state = request.getParameterValues("cr_state");
+		String[] weight = request.getParameterValues("weight");
+		String[] startdate = request.getParameterValues("startdate");
+		String[] enddate = request.getParameterValues("enddate");
+		
+		ArrayList<Map<String,String>> list = new ArrayList<Map<String,String>>();
+		
+		for(int i=0; i<crid.length;i++){
+			if(!StringUtil.isNullZero(crid[i].trim()).equals("0")) {
+				
+		         Map<String, String> ipmap = new HashMap<String, String>();
+		         
+		         String realenddate = enddate[i];
+		         if(DateUtil.getCutHH(enddate[i]).equals("24")){
+		 			realenddate = DateUtil.nextDayOfDate(DateUtil.getCutYMD(enddate[i]), 1)+ "00";
+		 			realenddate += DateUtil.getCutMM(enddate[i]);
+		 		}	         
+		         ipmap.put("adsid", adsid);
+			     ipmap.put("crid", crid[i]);
+		         ipmap.put("startdate", startdate[i]);
+		         ipmap.put("enddate", enddate[i]);
+		         ipmap.put("realenddate", realenddate);
+		         ipmap.put("weight", weight[i]);
+		         ipmap.put("cr_state", cr_state[i]);
+		         ipmap.put("updatedate", DateUtil.simpleDate2());
+		         ipmap.put("updateuser", userID);
+				
+				System.out.println(i+") Map : " + ipmap);
+				list.add(ipmap);					
+			}
+		}
+		System.out.println(" List : " + list);
+		cpmgrFacade.addAdsCreative(list);
+		
+		return new ModelAndView("redirect:cpmgr.do?a=adsEdit&adsid="+adsid, null);
+	}
+	public ModelAndView adsCreativeDelete(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String adsid = request.getParameter("adsid");
+		String crstr = request.getParameter("crstr");
+		String userID = (String)SessionUtil.getAttribute("userID");
+		
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("adsid", adsid);
+		map.put("crstr", crstr);
+        map.put("updatedate", DateUtil.simpleDate2());
+        map.put("updateuser", userID);
+        cpmgrFacade.modDelAdsCreative(map);
+		
+		return new ModelAndView("redirect:cpmgr.do?a=adsEdit&adsid="+adsid, null);
+	}
+	public ModelAndView adsSlotUpdate(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String adsid = request.getParameter("adsid");
+		String slot_state = request.getParameter("slot_state");
+		String slotstr = request.getParameter("slotstr");
+		String userID = (String)SessionUtil.getAttribute("userID");
+		
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("adsid", adsid);
+		map.put("slotstr", slotstr);
+		map.put("slot_state", slot_state);
+        map.put("updatedate", DateUtil.simpleDate2());
+        map.put("updateuser", userID);
+        cpmgrFacade.modAdsSlot(map);
+		return new ModelAndView("redirect:cpmgr.do?a=adsEdit&adsid="+adsid, null);
+	}
+	public ModelAndView adsSlotDelete(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		String adsid = request.getParameter("adsid");
+		String slotstr = request.getParameter("slotstr");
+		String userID = (String)SessionUtil.getAttribute("userID");
+		
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("adsid", adsid);
+		map.put("slotstr", slotstr);
+		map.put("stat", "0");
+        map.put("updatedate", DateUtil.simpleDate2());
+        map.put("updateuser", userID);
+        cpmgrFacade.modAdsSlot(map);
 		
 		return new ModelAndView("redirect:cpmgr.do?a=adsEdit&adsid="+adsid, null);
 	}
@@ -406,7 +532,7 @@ public class CpmgrController extends AdsrvMultiActionController
 		List<Map<String, String>> targetlist = cpmgrFacade.getTargetList(map);
 		
 		// 위치목록
-		List<Map<String, String>> adsslotlist = sitemgrFacade.getSlotList(map);
+		List<Slot> adsslotlist = sitemgrFacade.getSlotList(map);
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("cp", cp);
@@ -470,7 +596,7 @@ public class CpmgrController extends AdsrvMultiActionController
 		map.put("adsid", adsid);		
 		List<Creative> crlist = cpmgrFacade.getCreativeList(map);
 		// 위치목록
-		List<Map<String, String>> adsslotlist = sitemgrFacade.getSlotList(map);
+		List<Slot> adsslotlist = sitemgrFacade.getSlotList(map);
 		
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -512,7 +638,7 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		map.put("adsid", adsid);		
 		List<Creative> crlist = cpmgrFacade.getCreativeList(map);
 		// 위치목록
-		List<Map<String, String>> adsslotlist = sitemgrFacade.getSlotList(map);
+		List<Slot> adsslotlist = sitemgrFacade.getSlotList(map);
 		// 애즈 목록
 		map.clear();
 		map.put("stat", "1");				
@@ -522,30 +648,41 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		
 		
 		//위치목록 추가리스트
+		map.clear();
+		map.put("prtype", ads.getPrtype());		
 		List<Map<String, String>> grouplist = sitemgrFacade.getSlgroupList(map);
 
 		map.clear();
+		map.put("prtype", ads.getPrtype());		
 		map.put("order_str", "sitename");
 		List<Map<String, String>> sitelist = sitemgrFacade.getSiteList(map);
 		
 		map.clear();
+		map.put("prtype", ads.getPrtype());		
 		map.put("order_str", "secname");
 		List<Map<String, String>> seclist = sitemgrFacade.getSectionList(map);
 		map.clear();
+		map.put("prtype", ads.getPrtype());		
 		map.put("order_str", "slotname");
-		List<Map<String, String>> slotlist = sitemgrFacade.getSlotList(map);
+		List<Slot> slotlist = sitemgrFacade.getSlotList(map);
 		
-		
-		
-		//애즈 선택 옵션 목록
-		map.put("tbname", "ads");
-		List<Map<String, String>> ads_code = cpmgrFacade.getCodeList(map);	
-
 		// 광고물 상태 목록
 		map.clear();
 		map.put("code", "cr_state");
 		List<Map<String, String>> crstat_code = cpmgrFacade.getCodeList(map);		
 	
+		
+		//애즈 선택 옵션 목록
+		map.clear();
+		map.put("tbname", "ads");
+		map.put("not_code", "ads_state");
+		List<Map<String, String>> ads_code = cpmgrFacade.getCodeList(map);	
+		
+		//애즈 상태 변경 가능한 상태만
+		map.clear();
+		map.put("curid", ads.getAds_state());
+		List<Map<String, String>> nxtcodelist = cpmgrFacade.getCodeList(map);	
+		ads_code.addAll(nxtcodelist);
 		
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -641,6 +778,7 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 
 		return new ModelAndView("campaign/ads_creative", "response", resultMap);
 	}
+	
 	public ModelAndView adsSlot(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
 		String adsid = StringUtil.isNull(request.getParameter("adsid"));
@@ -656,7 +794,7 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		map.put("cpid", ads.getCpid());		
 		Campaign cp = cpmgrFacade.getCampaign(map);	
 		// 위치목록
-		List<Map<String, String>> adsslotlist = sitemgrFacade.getSlotList(map);
+		List<Slot> adsslotlist = sitemgrFacade.getSlotList(map);
 		
 		// 애즈 목록
 		map.clear();
@@ -677,7 +815,7 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		List<Map<String, String>> seclist = sitemgrFacade.getSectionList(map);
 		map.clear();
 		map.put("order_str", "slotname");
-		List<Map<String, String>> slotlist = sitemgrFacade.getSlotList(map);
+		List<Slot> slotlist = sitemgrFacade.getSlotList(map);
 		
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -872,7 +1010,7 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		
 			map.clear();
 			map.put("order_str", "slotname");
-			List<Map<String, String>> slotlist = sitemgrFacade.getSlotList(map);	
+			List<Slot> slotlist = sitemgrFacade.getSlotList(map);	
 			map.clear();
 			map.put("order_str", "sitename");
 			List<Map<String, String>> sitelist = sitemgrFacade.getSiteList(map);			
@@ -935,7 +1073,7 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 			
 			map.clear();
 			map.put("order_str", "slotname");
-			List<Map<String, String>> slotlist = sitemgrFacade.getSlotList(map);	
+			List<Slot> slotlist = sitemgrFacade.getSlotList(map);	
 			map.clear();
 			map.put("order_str", "sitename");
 			List<Map<String, String>> sitelist = sitemgrFacade.getSiteList(map);			
@@ -1099,6 +1237,7 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("targettype", tgtype);
 		map.put("targetname", targetname);
+		map.put("updatedate", DateUtil.simpleDate2());
 		map.put("updateuser", userID);
 		Integer tid = cpmgrFacade.addTarget(map);
 		
@@ -1274,6 +1413,7 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		map.put("memo", memo);
 		map.put("tmpcode", StringUtil.encodeURIComponent(tmpcode));
 		map.put("userid", userID);
+		map.put("updatedate", DateUtil.simpleDate2());
 		if(!tmpid.equals("") && mode.equals("E")) {
 			map.put("tmpid", tmpid);				
 			cpmgrFacade.modTemplate(map);
@@ -1343,7 +1483,8 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 	}
 	public ModelAndView crAddForm(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
-		String clientid = StringUtil.isNull(request.getParameter("clientid"));
+		String newClientid = StringUtil.isNull(request.getParameter("newClientid"));
+		String newClientname = StringUtil.isNull(request.getParameter("newClientname"));
 		
 		Map<String, String> map = new HashMap<String, String>();	
 		
@@ -1352,7 +1493,7 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		List<Map<String, String>> codelist = cpmgrFacade.getCodeList(map);	
 
 		map.clear();
-		map.put("order_str", "tmpname")	;
+		map.put("order_str", "tmpname");
 		List<Map<String, String>> tmplist = cpmgrFacade.getTemplateList(map);
 		
 		
@@ -1360,6 +1501,8 @@ public ModelAndView adsEdit(HttpServletRequest request, HttpServletResponse resp
 		
 		resultMap.put("codelist", codelist);
 		resultMap.put("tmplist", tmplist);
+		resultMap.put("newClientid", newClientid);
+		resultMap.put("newClientname", newClientname);
 
 		return new ModelAndView("campaign/cr_edit", "response", resultMap);
 	}

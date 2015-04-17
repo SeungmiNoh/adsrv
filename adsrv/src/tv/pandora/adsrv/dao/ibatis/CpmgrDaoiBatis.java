@@ -36,8 +36,13 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 		}		
 	}	
 	public List<Map<String,String>> getCodeList(Map<String, String> map){
+		String sql = "getCodeList";
+		if(!StringUtil.isNull(String.valueOf(map.get("curid"))).equals("")){
+			sql = "getCodeChangeList";
+		}
+		
 		try {
-			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getCodeList", map);
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList(sql, map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}		
@@ -126,7 +131,7 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 	@Override
 	public Integer modAds(Ads ads) {
 		try {
-			return (Integer) sqlMapClientTemplateMaster.update("addAds", ads);
+			return (Integer) sqlMapClientTemplateMaster.update("modAds", ads);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}	
@@ -322,7 +327,9 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 	public List<Creative> getCreativeList(Map<String, String> map){
 		try {
 			String sql = "getCreativeList";
-			if(!StringUtil.isNull(String.valueOf(map.get("cpid"))).equals("") || !StringUtil.isNull(String.valueOf(map.get("adsid"))).equals("")){
+			if(!StringUtil.isNull(String.valueOf(map.get("pop"))).equals("")){
+				sql = "getCreativeList";
+			}else if(!StringUtil.isNull(String.valueOf(map.get("cpid"))).equals("") || !StringUtil.isNull(String.valueOf(map.get("adsid"))).equals("")){
 				sql = "getCpCreativeList";
 			}
 			return (List<Creative>) sqlMapClientTemplateMaster.queryForList(sql, map);
@@ -331,8 +338,12 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 		}		
 	}
 	public Integer getCreativeCnt(Map<String, String> map){
+		String sql = "getCreativeCnt";
+		if(!StringUtil.isNull(map.get("crname")).equals("")){
+			sql = "getCrnameCnt";
+		}
 		try {
-			return (Integer) sqlMapClientTemplateMaster.queryForObject("getCreativeCnt", map);
+			return (Integer) sqlMapClientTemplateMaster.queryForObject(sql, map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}		
@@ -389,10 +400,25 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 		param.put("List", list);
 		sqlMapClientTemplateMaster.insert("addAdsTargeting", param);
 	}
+	public void modDelAdsTargeting(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.update("modDelAdsTargeting", map);
+		} catch (EmptyResultDataAccessException e) {
+			;
+		}	
+	}
 	public void addAdsCreative(List<Map<String, String>> list){
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("List", list);
 		sqlMapClientTemplateMaster.insert("addAdsCreative", param);
+	}
+	
+	public void modDelAdsCreative(Map<String, String> map) {
+		try {
+			sqlMapClientTemplateMaster.update("modDelAdsCreative", map);
+		} catch (EmptyResultDataAccessException e) {
+			;
+		}	
 	}
 	public void addAdsSlot(Map<String, String> map){
 		try {
@@ -410,23 +436,52 @@ public class CpmgrDaoiBatis implements CpmgrDao {
 	}
 	public void modAdsSlot(Map<String, String> map){
 		try {
-			sqlMapClientTemplateMaster.insert("modAdsSlot", map);
+			sqlMapClientTemplateMaster.update("modAdsSlot", map);
 		} catch (EmptyResultDataAccessException e) {
 			;
 		}	
 	}
 	public Integer delFile(Map<String, String> map){
 		try {
-			return (Integer) sqlMapClientTemplateMaster.insert("delFile", map);
+			return (Integer) sqlMapClientTemplateMaster.update("delFile", map);
 		} catch (EmptyResultDataAccessException e) {
 			return 0;
 		}	
 	}
 	public Integer delClick(Map<String, String> map){
 		try {
-			return (Integer) sqlMapClientTemplateMaster.insert("delClick", map);
+			return (Integer) sqlMapClientTemplateMaster.update("delClick", map);
 		} catch (EmptyResultDataAccessException e) {
 			return 0;
+		}	
+	}
+	
+	public Integer copyAds(Map<String, String> map){
+		try {
+			return (Integer) sqlMapClientTemplateMaster.insert("copyAds", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}	
+	}	
+	public void copyAdsTargeting(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.insert("copyAdsTargeting", map);
+		} catch (EmptyResultDataAccessException e) {
+			;
+		}	
+	}
+	public void copyAdsCreative(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.insert("copyAdsCreative", map);
+		} catch (EmptyResultDataAccessException e) {
+			;
+		}	
+	}
+	public void copyAdsSlot(Map<String, String> map){
+		try {
+			sqlMapClientTemplateMaster.insert("copyAdsSlot", map);
+		} catch (EmptyResultDataAccessException e) {
+			;
 		}	
 	}
 }

@@ -29,6 +29,8 @@ function newTab(link){
 	}
 }
 
+
+
 function addDate(pInterval, pAddVal, pYyyymmdd, pDelimiter)
 {
 	var yyyy;
@@ -447,6 +449,14 @@ function roundXL(n, digits) {
             });
         });
     };
+    
+    //폼리셋
+	formReset = function(){
+		$("form").each(function() {  
+            if(this.id == "frmRegist") this.reset();  
+         }); 
+	}
+
      
 })(jQuery);
 
@@ -638,7 +648,7 @@ jQuery.fn.extend({
 
 jQuery(function($) {
 	
-
+/*
 $.datepicker.regional['ko'] = {
 		closeText: '닫기',
 		prevText: '이전달',
@@ -674,7 +684,7 @@ $("#end").datepicker({
 		onClose: function(selectDate){
 				$("#start").datepicker("option","maxDate",selectDate);
 		}
-});
+});*/
 $('#btnSday').click(function(){
     $(document).ready(function(){
         $("#start").datepicker().focus();
@@ -686,3 +696,14 @@ $('#btnEday').click(function(){
     });
 });
 });
+
+
+$(document).ready( function(){
+	$('input').focus(function(e) {
+	var readonly = $(this).attr("readonly");
+	if (readonly) {
+	$(this).next('input:not([readonly])').focus();
+	e.preventDefault();
+	}
+	});
+	});

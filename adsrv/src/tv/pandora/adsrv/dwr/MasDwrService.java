@@ -23,6 +23,7 @@ import tv.pandora.adsrv.common.util.DateUtil;
 import tv.pandora.adsrv.common.util.StringUtil;
 import tv.pandora.adsrv.domain.Campaign;
 import tv.pandora.adsrv.domain.Creative;
+import tv.pandora.adsrv.domain.Slot;
 import tv.pandora.adsrv.domain.User;
 import tv.pandora.adsrv.model.SitemgrModel;
 import tv.pandora.adsrv.model.UsermgrModel;
@@ -141,7 +142,7 @@ public class MasDwrService {
 		map.put("secid", secid);				
 		return sitemgrModel.getSection(map);
 	}
-	public Map<String,String> getSlot(String slotid){
+	public Slot getSlot(String slotid){
 		
 		Map<String, String> map = new HashMap<String, String>();	
 		map.put("slotid", slotid);				
@@ -193,19 +194,30 @@ System.out.println("---------------getSlgroupInSlotList");
 		List<Map<String,String>> resultmap = sitemgrModel.getSlgroupInSlotList(map);
 		return resultmap;
 	}
-	public List<Map<String,String>> getSlotList(String width, String height,  String siteid){
+	public List<Slot> getSlotList(String prtype, String width, String height,  String siteid){
+System.out.println("prtype----------"+prtype);		
+System.out.println("width----------"+width);		
+System.out.println("height----------"+height);		
+System.out.println("siteid----------"+siteid);		
+
 		Map<String, String> map = new HashMap<String, String>();	
+		map.put("prtype", prtype);
 		map.put("siteid", siteid);
 		map.put("width", width);
 		map.put("height", height);
-		List<Map<String,String>> resultmap = sitemgrModel.getSlotList(map);
+		
+System.out.println("map----------"+map);		
+		
+		List<Slot> resultmap = sitemgrModel.getSlotList(map);
 		return resultmap;
 	}
-	public List<Creative> getCrList(String start, String end,  String clientid){
+	public List<Creative> getCrList(String start, String end,  String clientid,  String adsid){
 		Map<String, String> map = new HashMap<String, String>();	
 		map.put("start", StringUtil.DateStr(start));
 		map.put("end", StringUtil.DateStr(end));
 		map.put("clientid", clientid);
+		map.put("adsid", adsid);
+		map.put("pop", "pop");
 		List<Creative> resultmap = cpmgrModel.getCreativeList(map);
 		return resultmap;
 	}
@@ -272,13 +284,13 @@ System.out.println("---------------getSlgroupInSlotList");
 		}
 	}
 	
-	public Map<String, String> getAdsSlot(String adsid, String slotid){
+	public Slot getAdsSlot(String adsid, String slotid){
 		try
 		{
 			Map<String, String> map = new HashMap<String, String>();	
 			map.put("adsid", adsid);
 			map.put("slotid", slotid);			
-			Map<String, String> slot = sitemgrModel.getSlotList(map).get(0);
+			Slot slot = sitemgrModel.getSlotList(map).get(0);
 			return slot;
 		} catch(Exception e) {
 			return null;

@@ -11,6 +11,7 @@
 <%@page import="tv.pandora.adsrv.domain.Campaign"%>    
 <%@page import="tv.pandora.adsrv.domain.Ads"%>    
 <%@page import="tv.pandora.adsrv.domain.Creative"%>    
+<%@page import="tv.pandora.adsrv.domain.Slot"%>    
 <%	
 try
 {
@@ -26,7 +27,7 @@ try
 	List<Map<String,String>> codelist = (List<Map<String,String>>)map.get("codelist");
 	List<Map<String,String>> tglist = (List<Map<String,String>>)map.get("tglist");
 	List<Creative> crlist = (List<Creative>)map.get("crlist");
-	List<Map<String,String>> adsslotlist = (List<Map<String,String>>)map.get("adsslotlist");
+	List<Slot> adsslotlist = (List<Slot>)map.get("adsslotlist");
 %>  
 <!DOCTYPE html>
 <html lang="en">
@@ -116,9 +117,9 @@ $(document).ready(function() {
                     </tr>
                     <tr>
                         <th>보장량</th>
-                        <td></td>
+                        <td><%=StringUtil.addComma(cp.getBook_total()) %></td>
                         <th>목표량</th>
-                        <td></td>
+                        <td><%=StringUtil.addComma(cp.getGoal_total()) %></td>
                         <th>집행금액</th>
                         <td><%=StringUtil.addComma(cp.getBudget()) %></td>
                     </tr>
@@ -128,7 +129,7 @@ $(document).ready(function() {
                         <th>종료일</th>
                         <td><%=DateUtil.getYMD(cp.getEnddate(), "-") %></td>
                         <th>상태</th>
-                        <td></td>
+                        <td><span class="<%=cp.getText()%>"><%=StringUtil.isNull(cp.getCp_statename()) %></span></td>
                     </tr>
                 </table>
                 <br>
@@ -204,10 +205,10 @@ for(int k=0; k<adslist.size(); k++){
 %>                     
                         <option value="<%=mads.getAdsid()%>" <%=ads.getAdsid().equals(mads.getAdsid())?"selected":"" %>><%=mads.getAdsname() %></option>
  <%} %>                       
-                    </select>    --%>               
+                    </select>                   
                                 <a class="btn btn-danger btn-xs" href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>" role="button" style="float:right;margin-left:5px;">애즈등록</a>
                                 <a class="btn btn-success btn-xs" href="cpmgr.do?a=adsEdit&adsid=<%=ads.getAdsid() %>" role="button" style="float:right;margin-left:5px;">수정</a>
-                            </td>
+                            --%></td>
                             <th>판매방식</th>
                             <td>
                                 <%=ads.getSalestypename() %>
@@ -356,8 +357,8 @@ for(int k=0; k<adslist.size(); k++){
                             <th>종료일</th>
                             <th>비중</th>
                             <th>상태</th>
-                            <th>등록인</th>
                             <th>최종수정</th>
+                            <th>등록인</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -374,14 +375,19 @@ for(int k=0; k<crlist.size(); k++){
                         <tr>
                             <td><%=(k+1) %></td>
                             <td class="textCenter"><%=cr.getPrtypename() %></td>
-                            <td class="textLeft"><a href="cpmgr.do?a=crView&crid=<%=cr.getCrid()%>"><%=cr.getCrname() %></a></td>
-                           <td><%=cr.getWidth() %> x <%=cr.getHeight() %></td>
-                             <td><%=DateUtil.getYMDHM(cr.getStartdate(),"-") %></td>
-                            <td><%=DateUtil.getYMDHM(cr.getEnddate(),"-") %></td>
+                            <td class="textLeft"><a href=javascript:newTab("<%=cr.getCrurl() %>")><span class="glyphicon glyphicon-download"></span></a>
+                            <a href="cpmgr.do?a=crInfo&crid=<%=cr.getCrid()%>"><%=cr.getCrname() %></a></td>
+                            <td><%=cr.getWidth() %> x <%=cr.getHeight() %></td>
+                            <td><span class="txtBlack mr4"><%=DateUtil.getYMD(cr.getStartdate(),"-") %></span>
+                                 <%=DateUtil.getCutHH(cr.getStartdate())%>:<%=DateUtil.getCutMM(cr.getStartdate())%>
+                            </td>
+                            <td><span class="txtBlack mr4"><%=DateUtil.getYMD(cr.getEnddate(),"-") %></span>
+                                 <%=DateUtil.getCutHH(cr.getEnddate())%>:<%=DateUtil.getCutMM(cr.getEnddate())%>
+                            </td>
                               <td><%=cr.getWeight() %></td>
                              <td><span class="<%=cr.getText() %>"><%=cr.getCr_statename() %></span></td>
-                            <td><%=cr.getUpdateusername()%></td>
                             <td><%=DateUtil.getYMDHM(cr.getUpdatedate(),".") %></td>
+                            <td><%=cr.getUpdateusername()%></td>
                         </tr>
 <%} if(crlist.size()==0){
 %>
@@ -419,8 +425,8 @@ for(int k=0; k<crlist.size(); k++){
                             <th>사이즈</th>
                             <th>위치 정보</th>
                             <th>상태</th>
-                            <th>등록자</th>
                             <th>등록일</th>
+                            <th>등록인</th>
                         </tr>
                     </thead>
 
@@ -429,23 +435,23 @@ for(int k=0; k<crlist.size(); k++){
 
  for(int k=0; k<adsslotlist.size(); k++){
      
-		Map<String,String> slot = adsslotlist.get(k);
+		Slot slot = adsslotlist.get(k);
   %>                    
- 						<tr id="adsSlot<%=String.valueOf(slot.get("slotid"))%>">
+ 						<tr id="adsSlot<%=slot.getSlotid()%>">
                             <td>
                                <%=k+1 %> 
                             </td>
-                            <td class="textLeft"><%=slot.get("sitetag") %>/<%=slot.get("sectag") %>@<%=slot.get("slottag") %></td>
-                            <td><%=StringUtil.isNull(String.valueOf(slot.get("width"))) %> x <%=StringUtil.isNull(String.valueOf(slot.get("height"))) %></td>
-                            <td class="textLeft">
-                                <%=slot.get("sitename") %> / <%=slot.get("secname") %> / <%=slot.get("sitename") %>
-                            </td>
-                            <td>
-                                <%=String.valueOf(slot.get("slot_state")).equals("1")?"진행":"중지"%>
-                            </td>
+                            <td class="textLeft"><%=slot.getSlottag()%></td>
+                            <td><%=slot.getWidth() %> x <%= slot.getHeight()%></td>
+                            <td class="textLeft"><%=slot.getSlottag() %></td>
+                            <td class="<%=slot.getSlot_state().equals("1")?"txtRed":"txtBlue"%>"><%=slot.getSlot_state().equals("1")?"진행":"중지"%></span>
+                            <td><%=DateUtil.getYMDHM(slot.getUpdatedate(),"-") %></td>
                            
-                            <td><%=slot.get("insertusername") %></td>
-                            <td><%=DateUtil.getYMD(String.valueOf(slot.get("insertdate"))) %></td>
+                           <td><%=slot.getUpdateusername() %>
+                           <%-- 
+                           imp/<%=slot.getSitetag()%>/?adsid=<%=slot.getAdsid()%>&cpid=<%=cp.getCpid()%>
+                           --%></td>
+                           
                       </tr>
 <%} if(adsslotlist.size()==0){
 %>

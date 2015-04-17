@@ -34,6 +34,8 @@ public class Campaign implements Serializable{
 		private String text;
 		private String istarget;
 		private String isprism;
+		private String book_total;
+		private String goal_total;
 		
 		public String getCpid() {
 			return cpid;
@@ -206,6 +208,20 @@ public class Campaign implements Serializable{
 		}
 		public void setText(String text) {
 			this.text = text;
+		}
+		
+		
+		public String getBook_total() {
+			return book_total;
+		}
+		public void setBook_total(String book_total) {
+			this.book_total = book_total;
+		}
+		public String getGoal_total() {
+			return goal_total;
+		}
+		public void setGoal_total(String goal_total) {
+			this.goal_total = goal_total;
 		}
 		public static long getSerialversionuid() {
 			return serialVersionUID;

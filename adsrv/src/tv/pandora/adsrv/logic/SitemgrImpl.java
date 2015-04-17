@@ -3,6 +3,7 @@ package tv.pandora.adsrv.logic;
 import java.util.List;
 import java.util.Map;
 
+import tv.pandora.adsrv.domain.Slot;
 import tv.pandora.adsrv.model.SitemgrModel;
 
 public class SitemgrImpl implements SitemgrFacade{
@@ -22,7 +23,7 @@ public class SitemgrImpl implements SitemgrFacade{
 	}
 
 	@Override
-	public List<Map<String, String>> getSlotList(Map<String, String> map) {
+	public List<Slot> getSlotList(Map<String, String> map) {
 		return sitemgrModel.getSlotList(map);
 	}
 
@@ -104,7 +105,7 @@ public class SitemgrImpl implements SitemgrFacade{
 	public Map<String,String> getSection(Map<String, String> map){
 		return sitemgrModel.getSection(map);
 	}
-	public Map<String,String> getSlot(Map<String, String> map){
+	public Slot getSlot(Map<String, String> map){
 		return sitemgrModel.getSlot(map);
 	}
 	public Map<String,String> getSlgroup(Map<String, String> map){

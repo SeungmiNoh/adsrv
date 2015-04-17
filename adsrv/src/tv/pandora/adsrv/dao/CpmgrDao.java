@@ -76,7 +76,10 @@ public interface CpmgrDao {
 	public Integer modCreative(Creative cr);
 	
 	public void addAdsTargeting(List<Map<String, String>> list);
+	public void modDelAdsTargeting(Map<String, String> map);
 	public void addAdsCreative(List<Map<String, String>> list);
+	public void modDelAdsCreative(Map<String, String> map);
+	
 	public void addAdsSlot(Map<String, String> map);
 	public void addAdsSlotByGroup(Map<String, String> map);
 	public void modAdsSlot(Map<String, String> map);
@@ -87,6 +90,10 @@ public interface CpmgrDao {
 	public Integer copyCreative(Map<String, String> map);
 	public void copyCreativeClick(Map<String, String> map);
 	
+	public Integer copyAds(Map<String, String> map);
+	public void copyAdsTargeting(Map<String, String> map);
+	public void copyAdsCreative(Map<String, String> map);
+	public void copyAdsSlot(Map<String, String> map);
 
 }
   

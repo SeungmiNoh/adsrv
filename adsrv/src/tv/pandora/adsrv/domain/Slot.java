@@ -14,6 +14,8 @@ public class Slot implements Serializable{
 	private String slottag;
 	private String width;
 	private String height;
+	private String adsid;
+	private String adsname;
 	private String secid;
 	private String secname;
 	private String siteid;
@@ -25,6 +27,13 @@ public class Slot implements Serializable{
 	private String updatedate;
 	private String updateuser;
 	private String updateusername;
+	private String prtype;
+	private String prtypename;
+	private String prtag;
+	private String sitetag;
+	private String sectag;
+	private String slot_state;
+	
 	public String getSlotid() {
 		return slotid;
 	}
@@ -91,6 +100,26 @@ public class Slot implements Serializable{
 	public void setUrl(String url) {
 		this.url = url;
 	}
+	
+	
+	public String getPrtype() {
+		return prtype;
+	}
+	public void setPrtype(String prtype) {
+		this.prtype = prtype;
+	}
+	public String getPrtypename() {
+		return prtypename;
+	}
+	public void setPrtypename(String prtypename) {
+		this.prtypename = prtypename;
+	}
+	public String getPrtag() {
+		return prtag;
+	}
+	public void setPrtag(String prtag) {
+		this.prtag = prtag;
+	}
 	public String getInsertdate() {
 		return insertdate;
 	}
@@ -120,6 +149,40 @@ public class Slot implements Serializable{
 	}
 	public void setUpdateusername(String updateusername) {
 		this.updateusername = updateusername;
+	}
+	
+	public String getSlot_state() {
+		return slot_state;
+	}
+	public void setSlot_state(String slot_state) {
+		this.slot_state = slot_state;
+	}
+	
+	
+	public String getAdsid() {
+		return adsid;
+	}
+	public void setAdsid(String adsid) {
+		this.adsid = adsid;
+	}
+	public String getAdsname() {
+		return adsname;
+	}
+	public void setAdsname(String adsname) {
+		this.adsname = adsname;
+	}
+	
+	public String getSitetag() {
+		return sitetag;
+	}
+	public void setSitetag(String sitetag) {
+		this.sitetag = sitetag;
+	}
+	public String getSectag() {
+		return sectag;
+	}
+	public void setSectag(String sectag) {
+		this.sectag = sectag;
 	}
 	public static long getSerialversionuid() {
 		return serialVersionUID;

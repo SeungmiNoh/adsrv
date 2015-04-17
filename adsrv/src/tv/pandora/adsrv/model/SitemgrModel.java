@@ -5,6 +5,7 @@ import java.util.Map;
 
 import tv.pandora.adsrv.common.handler.MessageHandler;
 import tv.pandora.adsrv.dao.SitemgrDao;
+import tv.pandora.adsrv.domain.Slot;
 
 
 public class SitemgrModel {
@@ -24,7 +25,7 @@ public class SitemgrModel {
 	public List<Map<String,String>> getSectionList(Map<String, String> map) {
 	   	return sitemgrDaoMaster.getSectionList(map);
 	}
-	public List<Map<String,String>> getSlotList(Map<String, String> map) {
+	public List<Slot> getSlotList(Map<String, String> map) {
 	   	return sitemgrDaoMaster.getSlotList(map);
 	}
 	
@@ -90,7 +91,7 @@ public class SitemgrModel {
 	public Map<String,String> getSection(Map<String, String> map){
 		return sitemgrDaoMaster.getSection(map);
 	}
-	public Map<String,String> getSlot(Map<String, String> map){
+	public Slot getSlot(Map<String, String> map){
 		return sitemgrDaoMaster.getSlot(map);
 	}
 	public Map<String,String> getSlgroup(Map<String, String> map){

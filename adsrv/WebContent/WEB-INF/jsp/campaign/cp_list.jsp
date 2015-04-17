@@ -319,7 +319,7 @@ for(int k=0; k<cplist.size(); k++){
                             <td><%=DateUtil.getYMD(cp.getEnddate(), ".") %></td>
                             <td class="textRight"><%=StringUtil.addComma(cp.getBudget()) %></td>
                              
-                            <td class="textRight"></td>
+                            <td class="textRight"><%=StringUtil.addComma(cp.getGoal_total()) %></td>
                            <!-- <td class="textRight">3,333,333</td>
                             <td class="textRight">101%</td>
                             <td class="textRight">33,333</td>

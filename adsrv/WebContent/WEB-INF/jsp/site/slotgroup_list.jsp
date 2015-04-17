@@ -7,7 +7,7 @@
 <%@page import="net.sf.json.JSONArray"%>
 <%@page import="tv.pandora.adsrv.common.util.StringUtil"%>
 <%@page import="tv.pandora.adsrv.common.util.DateUtil"%>    
-<%@page import="tv.pandora.adsrv.domain.Campaign"%>    
+<%@page import="tv.pandora.adsrv.domain.Slot"%>      
 <%	
 try
 {
@@ -21,7 +21,8 @@ try
 
 	List<Map<String,String>> sitelist = (List<Map<String,String>>)map.get("sitelist");   
 	List<Map<String,String>> seclist = (List<Map<String,String>>)map.get("seclist");   
-	List<Map<String,String>> slotlist = (List<Map<String,String>>)map.get("grouplist");   
+	List<Map<String,String>> grouplist = (List<Map<String,String>>)map.get("grouplist");   
+	List<Map<String,String>> codelist = (List<Map<String,String>>)map.get("codelist");   
 
 	Integer skip = (Integer)map.get("skip");
     Integer max = (Integer)map.get("max");
@@ -116,8 +117,9 @@ $(function(){
 	$("#btnPopup").click(function(e){	
 		$("#searchList").html("");
 		$("#addList").html("");
-		$("#frmRegist input").val("");
-		$("#frmRegist select").val("0");
+		formReset();
+		$("#prtype").attr("disabled", false);
+		
 		if($("#s_siteid").val()!=0){
 			$("#siteid").val($("#s_siteid").val());			
 			$("#secid").html($("#s_secid").html());			
@@ -137,19 +139,20 @@ $(function(){
 	});
 	$("a[name=groupmod]").click(function(e){	
 		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
-		$(".debug").val(""); //값 초기화	 (groupid, change)	
+		formReset();	
+		$("#prtype").attr("disabled", true);
 		var groupid = $(this).attr("groupid");
 		$('#myModal').modal();
-		
-		$("#searchList").html("");
+			$("#searchList").html("");
 		
 		$(".modify").css("display","");
 		$(".new").css("display", "none");
-		console.log("-------------------groupid ---"+groupid);
 		MasDwrService.getSlgroup(groupid,
 		   		function(data) {
 					console.log(data.error);
+					
 					$("#groupid").val(groupid);
+					$("#prtype").val(data.prtype);
 					$("#groupname").val(data.groupname);
 					$("#width").val(data.width);
 					$("#height").val(data.height);
@@ -157,7 +160,6 @@ $(function(){
 					$("#updatedate").html(getYMDHM(data.updatedate, '-'));
 					$("#updateuser").html(data.updateusername);
 				});
-		console.log("------------------getSlgroupInSlotList -groupid ---"+groupid);
 		MasDwrService.getSlgroupInSlotList(groupid,
 		   		function(data) {
 					for(var k=0; k<data.length; k++){
@@ -177,45 +179,62 @@ $(function(){
 	});
 	
 	$("#btnSearch").click(function(e){		
+		var prtype = $("#prtype").val();
 		var width = $("#width").val();
 		var height = $("#height").val();
 		var siteid = $("#siteid").val();
-		
-		$("#searchList").html("");
-		
-		MasDwrService.getSlotList(width, height, siteid,
-	   		function(data) {
-				var htmlstr = '';
-				
-				if(data.length >0) 
-				{
-					for(var k=0; k<data.length; k++) {
-						htmlstr += '<tr>';
-						htmlstr += '<td><input type="checkbox" name="ckslot" onclick="checkSlot(this)"';
-						htmlstr += ' id="chkBox'+data[k].slotid+'"'; 
-						htmlstr += ' value="'+data[k].slotid+'"'; 
-						htmlstr += ' sitename="'+data[k].sitename+'"'; 
-						htmlstr += ' slotname="'+data[k].slotname+'"'; 
-						if($('#add'+data[k].slotid).length>0) {
-							htmlstr += ' checked';
-						}
-						htmlstr +='"/>';
-						htmlstr +='</td>';
-						htmlstr += '<td>'+data[k].sitename+'</td>';
-						htmlstr += '<td class="textLeft">'+data[k].slotname+'</td>';
-						htmlstr += '<td class="textLeft">'+data[k].width+' x '+data[k].height+'</td>';
-						htmlstr += '<td class="textLeft">'+data[k].sitetag+'/'+data[k].sectag+'/'+data[k].slottag+'</td>';
-						htmlstr += '</tr>';
-					}
-				} else {
-					htmlstr += '<tr>';
-					htmlstr += '<td colspan="5">조건에 맞는 위치가 없습니다.</td>';
-					htmlstr += '</tr>';
+		if($("#prtype").val()==0){
+			$("#prtype").css("border-color","red").focus();
+			$("#warningMsg").text("광고상품을 선택해주세요.");
+			return;
+		} /*else if($.trim($("#width").val()).length==0){
+			$("#width").css("border-color","red").focus();
+			$("#warningMsg").text("사이즈를 입력해주세요.");
+			return;
+		} else if($.trim($("#height").val()).length==0){
+			$("#height").css("border-color","red").focus();
+			$("#warningMsg").text("사이즈를 입력해주세요.");
+			return;
+		}  */
+		else{
+			$("#searchList").html("");
+		console.log("prtype="+prtype);	
+		console.log("width="+width);	
+		console.log("height="+height);	
+		console.log("siteid="+siteid);	
+			MasDwrService.getSlotList(prtype, width, height, siteid,
+		   		function(data) {
+					var htmlstr = '';
 					
-				}
-				console.log("htmlstr="+htmlstr);
-				$("#searchList").append(htmlstr);
-		});
+					if(data.length >0) 
+					{
+						for(var k=0; k<data.length; k++) {
+							htmlstr += '<tr>';
+							htmlstr += '<td><input type="checkbox" name="ckslot" onclick="checkSlot(this)"';
+							htmlstr += ' id="chkBox'+data[k].slotid+'"'; 
+							htmlstr += ' value="'+data[k].slotid+'"'; 
+							htmlstr += ' sitename="'+data[k].sitename+'"'; 
+							htmlstr += ' slotname="'+data[k].slotname+'"'; 
+							if($('#add'+data[k].slotid).length>0) {
+								htmlstr += ' checked';
+							}
+							htmlstr +='"/>';
+							htmlstr +='</td>';
+							htmlstr += '<td>'+data[k].sitename+'</td>';
+							htmlstr += '<td class="textLeft">'+data[k].slotname+'</td>';
+							htmlstr += '<td class="textLeft">'+data[k].width+' x '+data[k].height+'</td>';
+							htmlstr += '<td class="textLeft">'+data[k].slottag+'</td>';
+							htmlstr += '</tr>';
+						}
+					} else {
+						htmlstr += '<tr>';
+						htmlstr += '<td colspan="5">조건에 맞는 위치가 없습니다.</td>';
+						htmlstr += '</tr>';
+						
+					}
+					$("#searchList").append(htmlstr);
+			});
+		}
 	});
 
 	$(document).on("click", "a[name=btnSecRemove]", function(e){
@@ -251,8 +270,6 @@ $(function(){
 		else{	
 			var cname = $('#groupname').val();			
 			var cid = $('#groupid').val();		
-			console.log("------------------cname---"+cname);
-			console.log("------------------cid---"+cid);
 		
 		
 			MasDwrService.getSlgroupCnt(cname, cid,
@@ -355,6 +372,16 @@ $(function(){
 	                                  <%} 
                                 } %>
                             </select>
+                        <div class="form-group formGroupPadd">
+                            <select name="s_type" class="form-control input-sm">
+                             <option value="">광고상품</option>
+                                <%for(int i=0;i<codelist.size();i++){ 
+                                	Map<String,String> code = codelist.get(i);
+                                %>
+                                <option value="<%=String.valueOf(code.get("isid")) %>" <%=s_type.equals(String.valueOf(code.get("isid")))?"selected":"" %>><%=code.get("isname") %></option>                               
+                                <%} %>
+                            </select>
+                        </div>
                             <select name="sch_column" class="form-control input-sm" style="width:140px">
                             <option value="groupname">위치그룹</option>
                             <option value="slotname">위치</option>
@@ -382,6 +409,7 @@ $(function(){
                 <table class="listTable">
 				<colgroup>
 				<col width="40">
+				<col width="80"><!-- 광고상품 -->				
 				<col width="200"><!-- 그룹명 -->
 				<col width="60"><!-- 사이즈 -->
 			     <col width="60"><!-- 위치수 -->
@@ -391,7 +419,8 @@ $(function(){
 				<thead>
                         <tr>
                             <th>No</th>
-                            <th>그룹명</th>  
+               <th>광고상품</th>  
+                                         <th>그룹명</th>  
                             <th>사이즈</th>  
                             <th>위치 개수</th>  
                             <th>최종수정</th>
@@ -402,9 +431,9 @@ $(function(){
                     <tbody>
 <%
 
-for(int k=0; k<slotlist.size(); k++){
+for(int k=0; k<grouplist.size(); k++){
                                         
-	Map<String,String> slot = slotlist.get(k);
+	Map<String,String> slot = grouplist.get(k);
     
 	 
  %>                    
@@ -412,10 +441,10 @@ for(int k=0; k<slotlist.size(); k++){
                     
                         <tr>
                             <td><%=skip+(k+1) %></td>
+                            <td><%=slot.get("prtypename") %></td>
                             <td><a href="#none" name="groupmod" groupid="<%=String.valueOf(slot.get("groupid"))%>"><%=slot.get("groupname") %></a></td>
-                            <td><%=StringUtil.isNull(String.valueOf(slot.get("width"))) %> x <%=StringUtil.isNull(String.valueOf(slot.get("height"))) %></td>
-                              <!--  td><%=String.valueOf(slot.get("sitecnt")) %></td-->
-                          <td class="textLeft"><%--String.valueOf(slot.get("slotcnt")) --%><%=slot.get("slotstr").replaceAll("\n", "<br/>") %></td>
+                            <td><%=String.valueOf(slot.get("width")) %> x <%=String.valueOf(slot.get("height")) %></td>
+                            <td class="textLeft"><%=slot.get("slotstr").replaceAll("\n", "<br/>") %></td>
                             <td><%=DateUtil.getYMDHM(slot.get("updatedate"),"-") %></td>
                             <td><%=slot.get("updateusername") %></td>                            
                         </tr>
@@ -461,18 +490,36 @@ for(int k=0; k<slotlist.size(); k++){
                                 <col width="16%">
                                     <col width="">
                             </colgroup>
+                          <tr>
+                            <th>광고상품<span style="color:red"> * </span></th>
+                            <td>
+	                            <select id="prtype" name="prtype" class="form-control input-sm" style="width:100px">
+	                             <option value="0">선택</option>
+	                                <%for(int i=0;i<codelist.size();i++){ 
+	                                	Map<String,String> code = codelist.get(i);
+	                                %>
+	                                <option value="<%=String.valueOf(code.get("isid")) %>"><%=code.get("isname") %></option>                               
+	                                <%} %>
+	                            </select>
+	                        </td>
+	                        </tr>                            
                            <tr>
                                 <th>위치그룹명<span style="color:red"> * unique</span></th>
                                 <td class="form-inline">
                                      <input type="text" name="groupname" id="groupname" class="form-control input-sm" style="width:240px">                                    
                                </td>
                             </tr>
-                            <tr>
+                           <tr>
                                 <th>사이즈<span style="color:red"> * </span></th>
                                 <td class="form-inline">
                                     <input type="text" name="width" id="width" class="form-control input-sm" style="width:60px" placeholder="가로"> x
                                     <input type="text" name="height" id="height" class="form-control input-sm" style="width:60px" placeholder="세로">
-                                    	<select id="siteid" name="siteid" class="form-control input-sm" style="width:200px">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>사이트</th>
+                                <td class="form-inline">
+                                    <select id="siteid" name="siteid" class="form-control input-sm" style="width:200px">
                                 	<option value="0">사이트</option>
 	                                <%for(int i=0;i<sitelist.size();i++){ 
 	                                	Map<String,String> site = sitelist.get(i);

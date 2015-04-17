@@ -170,9 +170,16 @@ public class CpmgrModel {
 	public void addAdsTargeting(List<Map<String, String>> list){
 		cpmgrDaoMaster.addAdsTargeting(list);
 	}
+	public void modDelAdsTargeting(Map<String, String> map){
+		cpmgrDaoMaster.modDelAdsTargeting(map);
+	}
 	public void addAdsCreative(List<Map<String, String>> list){
 		cpmgrDaoMaster.addAdsCreative(list);
 	}
+	public void modDelAdsCreative(Map<String, String> map){
+		cpmgrDaoMaster.modDelAdsCreative(map);
+	}
+	
 	public void addAdsSlot(Map<String, String> map){
 		cpmgrDaoMaster.addAdsSlot(map);
 	}
@@ -193,5 +200,17 @@ public class CpmgrModel {
 	}
 	public void copyCreativeClick(Map<String, String> map){
 		cpmgrDaoMaster.copyCreativeClick(map);
+	}
+	public Integer copyAds(Map<String, String> map){
+		return cpmgrDaoMaster.copyAds(map);
+	}
+	public void copyAdsTargeting(Map<String, String> map){
+		cpmgrDaoMaster.copyAdsTargeting(map);
+	}
+	public void copyAdsCreative(Map<String, String> map){
+		cpmgrDaoMaster.copyAdsCreative(map);
+	}
+	public void copyAdsSlot(Map<String, String> map){
+		cpmgrDaoMaster.copyAdsSlot(map);
 	}
 }

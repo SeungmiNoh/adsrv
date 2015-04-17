@@ -29,6 +29,9 @@ import java.util.Map;
 
 
 
+
+
+
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
 import tv.pandora.adsrv.domain.Creative;
@@ -208,14 +211,35 @@ public class CpmgrImpl implements CpmgrFacade{
 	public void addAdsTargeting(List<Map<String, String>> list) {
 		cpmgrModel.addAdsTargeting(list);
 	}
+	public void modDelAdsTargeting(Map<String, String> map){
+		cpmgrModel.modDelAdsTargeting(map);
+	}
 	@Override
 	public void addAdsCreative(List<Map<String, String>> list) {
 		cpmgrModel.addAdsCreative(list);
+	}
+	public void modDelAdsCreative(Map<String, String> map){
+		cpmgrModel.modDelAdsCreative(map);
+	}
+	public void modAdsSlot(Map<String, String> map){
+		cpmgrModel.modAdsSlot(map);
 	}
 	public Integer copyCreative(Map<String, String> map){
 		return cpmgrModel.copyCreative(map);
 	}
 	public void copyCreativeClick(Map<String, String> map){
 		cpmgrModel.copyCreativeClick(map);
+	}
+	public Integer copyAds(Map<String, String> map){
+		return cpmgrModel.copyAds(map);
+	}
+	public void copyAdsTargeting(Map<String, String> map){
+		cpmgrModel.copyAdsTargeting(map);
+	}
+	public void copyAdsCreative(Map<String, String> map){
+		cpmgrModel.copyAdsCreative(map);
+	}
+	public void copyAdsSlot(Map<String, String> map){
+		cpmgrModel.copyAdsSlot(map);
 	}
 }
