@@ -583,18 +583,21 @@
  }
  .clickLinkBox {
      padding: 2px 0 2px 0;
-     border-bottom: 1px dotted #d3d2d2;
-     margin: 0;
+     /*border-bottom: 1px dotted #d3d2d2;*/
+     margin-left: 10px;
      display: block;
+     
      /*width: 601px;*/
  }
  .clickLinkBox > .clickName {
+ 	 text-align:left;
      display: inline-block;
      width: 100px;
  }
  .clickLinkBox > .clicklink {
      display: inline-block;
      width: 463px;
+     
  }
  /* input file Start */
  

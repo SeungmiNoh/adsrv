@@ -5,7 +5,7 @@
    <typeAlias alias="user" type="tv.pandora.adsrv.domain.User" />
 	
 	<select id="getUserLogin" resultClass="user"  >
-		select userid, username, p.usertype, u.perid, p.pername, u.corpid, c.corpname, c.ismain 
+		select userid, username, p.usertype, u.perid, p.pername, u.corpid, c.corpname, c.ismain, u.allowip 
 		  from users u
 				inner join permission p on u.perid = p.perid
 				inner join corporation c on u.corpid = c.corpid
@@ -222,7 +222,7 @@
 		             perid,
 		             corpid,
 		             stat,
-		             ipstr,
+		             allowip,
 		             insertdate,
 		             insertuser,
 		             updatedate,
@@ -234,7 +234,7 @@
 		        #perid#,
 		        #corpid#,
 		        1,
-		        #ipstr#,
+		        #allowIp#,
 		        #insertdate#,
 		        #insertuser#,
 		        #insertdate#,
@@ -249,7 +249,7 @@
               <isNotEmpty property="perid">perid         = #perid#,   </isNotEmpty>          
               <isNotEmpty property="corpid">corpid        = #corpid#, </isNotEmpty>           
               <isNotEmpty property="stat">stat          = #stat#,   </isNotEmpty>                
-              <isNotEmpty property="ipstr">ipstr       = #ipstr#,  </isNotEmpty>       
+              <isNotEmpty property="allowip">allowip       = #allowIp#,  </isNotEmpty>       
               updatedate    = #updatedate#,
               updateuser    = #updateuser#
             where userid = #userid#

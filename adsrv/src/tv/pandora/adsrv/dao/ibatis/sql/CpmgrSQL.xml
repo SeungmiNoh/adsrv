@@ -728,7 +728,7 @@ select x.*, y.isname as cp_statename, y.text
 					, 0
 					, #List[].clickname#
 					, #List[].clickurl#
-					, now()
+					, #List[].updatedate# 	
 					, #List[].updateuser# 	
 					, 1		
 				)

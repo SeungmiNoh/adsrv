@@ -274,7 +274,7 @@ for(int k=0; k<userlist.size(); k++){
                 			<tr>
                                 <th>허용아이피</th>
                                 <td class="form-inline">
-                                    <input type="text" name="ipstr" id="ipstr" class="form-control input-sm" mexlength=200 style="width:360px">
+                                    <input type="text" name="allowip" id="allowip" class="form-control input-sm" mexlength=200 style="width:360px">
                                     <br/>
                                     <span style="color:green;font-size:8pt;margin-left:0px">
                                      * 허용 아이피는 , 구분자로 복수 입력 가능하며 아이피 대역은 %로 구분합니다.(최대 200byte 입력가능). 

@@ -48,7 +48,28 @@ public class StringUtil {
       
       return( sb.toString() );
   }
+	
+    
+	public static boolean like(String str, String expr) {
+	    expr = expr.toLowerCase(); // ignoring locale for now
+	    expr = expr.replace(".", "\\."); // "\\" is escaped to "\" (thanks, Alan M)
+	    // ... escape any other potentially problematic characters here
+	    expr = expr.replace("?", ".");
+	    expr = expr.replace("%", ".*");
 
+	    str = str.toLowerCase();
+	    
+	    boolean result = false;
+	    
+		for (String current : expr.split(",")) {
+			if(str.matches(current)) {
+				result = true;
+				break;
+			}
+		}
+	    return result;
+	}
+    
   public static boolean isEmptyOrWhitespace(String value) {
   	if (value == null || !StringUtils.hasText(value.toString())) {
   		return true;

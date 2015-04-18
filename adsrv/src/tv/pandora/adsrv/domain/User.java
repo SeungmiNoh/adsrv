@@ -28,15 +28,15 @@ public class User implements Serializable {
 	private String insertusername;
 	private String ismain;
 	private String ismgr;
-	private String ipstr;
+	private String allowIp;
 	private String text;
 	private String stat;
 	
-	public String getIpstr() {
-		return ipstr;
+	public String getAllowIp() {
+		return allowIp;
 	}
-	public void setIpstr(String ipstr) {
-		this.ipstr = ipstr;
+	public void setAllowIp(String ipstr) {
+		this.allowIp = ipstr;
 	}
 	public String getUserid() {
 		return userid;

@@ -312,6 +312,7 @@ public class CpmgrController extends AdsrvMultiActionController
 		if(request.getParameterValues("clickname") != null)
 		{
 		
+			String[] ckid = request.getParameterValues("ckid");
 			String[] clickname = request.getParameterValues("clickname");
 			System.out.println("clickname.legnth="+clickname.length);
 			String[] clickurl = request.getParameterValues("clickurl");
@@ -321,8 +322,8 @@ public class CpmgrController extends AdsrvMultiActionController
 			ArrayList<Map<String,String>> list2 = new ArrayList<Map<String,String>>();
 
 			
-			for(int i=0; i<clickname.length;i++){
-				if(!StringUtil.isNullZero(clickurl[i].trim()).equals("")) {
+			for(int i=0; i<ckid.length;i++){
+				if(StringUtil.isNullZero(ckid[i].trim()).equals("0")) {
 					
 			         Map<String, String> ipmap = new HashMap<String, String>();
 	
