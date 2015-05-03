@@ -1,0 +1,1816 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    <sqlMap namespace="CpmgrSQL">
+    <typeAlias alias="rpt" type="tv.pandora.adsrv.domain.Report" />
+    <typeAlias alias="siterpt" type="tv.pandora.adsrv.domain.SiteReport" />
+    <typeAlias alias="adsrpt" type="tv.pandora.adsrv.domain.AdsReport" />
+   <typeAlias alias="dayrpt" type="tv.pandora.adsrv.domain.DayReport" />
+   <typeAlias alias="ckrpt" type="tv.pandora.adsrv.domain.ClickTime" />
+   <typeAlias alias="prismrpt" type="tv.pandora.adsrv.domain.PrismReport" />
+		<sql id="ADSCR.TABLE">
+			select a.cpid, a.`adsid`, adsname, b.`crid`, crurl, crname, a.startdate, a.enddate, cr_state, a.cost, a.book_total
+			   from ads a, ads_creative b, creative c 
+			  <dynamic prepend="where">
+				  	<isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+				  	<isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+				  	<isNotEmpty property="crid" prepend="and"> b.crid = $crid$</isNotEmpty>
+				  	<isNotEmpty property="prtype" prepend="and"> a.prtype = $prtype$</isNotEmpty>
+			   	     and b.crid = c.crid
+			   	     and a.adsid = b.adsid
+			  </dynamic>
+	   	</sql>
+	 <sql id="SITESLOT.TABLE">
+  	select c.siteid, sitename, a.slotid, slotname, secname, width, height,
+  		   sitetag, sectag, slottag, sitetype, isname as sitetypename
+	  from slot a
+	  	   join section b on a.secid = b.secid
+	  	   join site c on b.siteid = c.siteid
+	  	   left join code_instance s on s.code = 'sitetype' and c.sitetype = s.`isid`
+	  where a.stat = 1
+ 		<isNotEmpty property="siteid" prepend="and"> c.siteid = $siteid$</isNotEmpty>
+ 		<isNotEmpty property="slotid" prepend="and"> a.slotid = $slotid$</isNotEmpty>
+		<isNotEmpty property="groupid" prepend="and"> slotid   in (select g.slotid from slotgroup_slot g where groupid = $groupid$ and stat = 1) </isNotEmpty>	    
+  		<isNotEmpty property="sitetype" prepend="and"> sitetype = $sitetype$</isNotEmpty>
+	</sql>	
+   	
+  	
+	<sql id="ADSSLOT.TABLE">
+   	select c.siteid, a.`adsid`, a.`cost`, b.slotid, a.salestype
+       from ads a
+        	join ads_slot b on a.`adsid` = b.`adsid` and b.stat = 1
+        	join slot c on b.`slotid` = c.`slotid` and b.stat = 1
+ 	where a.stat = 1
+			<isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+			<isNotEmpty property="prtype" prepend="and"> a.prtype = $prtype$</isNotEmpty>
+			<isNotEmpty property="siteid" prepend="and"> c.siteid = $siteid$</isNotEmpty>
+			<isNotEmpty property="slotid" prepend="and"> c.slotid = $slotid$</isNotEmpty>
+ 		   <isNotEmpty property="groupid" prepend="and"> b.slotid in (select g.slotid from slotgroup_slot g where groupid = $groupid$ and stat = 1) </isNotEmpty>			   	           
+  	</sql>	
+	<sql id="ADSSALES.TABLE">
+	select c.siteid, a.`adsid`, a.`salestype`, b.slotid
+	  from ads a
+	       join ads_slot b on a.`adsid` = b.`adsid` and b.stat = 1
+	       join slot c on b.`slotid` = c.`slotid` and b.stat = 1
+	 where a.stat = 1 
+		<isNotEmpty property="siteid" prepend="and"> c.siteid = $siteid$</isNotEmpty>
+		<isNotEmpty property="slotid" prepend="and"> b.slotid = $slotid$</isNotEmpty>
+		<isNotEmpty property="prtype" prepend="and"> a.prtype = $prtype$</isNotEmpty>
+		<isNotEmpty property="groupid" prepend="and"> b.slotid in (select g.slotid from slotgroup_slot g where groupid = $groupid$ and stat = 1) </isNotEmpty>			   	           
+	</sql>
+	
+	<sql id="SLOT.TABLE">
+	select c.siteid, a.slotid
+	  from slot a, section b, site c
+	  where a.secid = b.secid
+ 				<isNotEmpty property="siteid" prepend="and"> c.siteid = $siteid$</isNotEmpty>
+ 				<isNotEmpty property="prtype" prepend="and"> a.prtype = $prtype$</isNotEmpty><!-- 삭제 -->
+ 				<isNotEmpty property="slotid" prepend="and"> a.slotid = $slotid$</isNotEmpty>
+  			<isNotEmpty property="groupid" prepend="and"> slotid in (select g.slotid from slotgroup_slot g where groupid = $groupid$ and stat = 1) </isNotEmpty> 
+	    and b.siteid = c.siteid
+	</sql>
+		
+	<sql id="SLOTGROUP.TABLE">
+	select a.prtype, a.`groupid`, a.`groupname`, b.`slotid`, c.`slotname`, a.width, a.height
+	         from slotgroup a
+	              join slotgroup_slot b on a.`groupid` = b.`groupid`
+	              join slot c on b.`slotid` = c.`slotid` and c.stat = 1
+	        where a.stat = 1
+ 				  <isNotEmpty property="groupid" prepend="and"> a.groupid = $groupid$</isNotEmpty>
+	</sql>  	
+	
+  	<select id="getAdsRptTotal" resultClass="rpt" parameterClass="java.util.Map">
+	    select ifnull(sum(imp),0) imp, ifnull(sum(uv),0) uv, ifnull(sum(click),0) click, ifnull(sum(uc),0) uc , ifnull(sum(views),0) views,
+	        ifnull(round(sum(imp)*100/ifnull(datediff(max(maxday), min(minday))+1,0),0),0) avg_imp,
+	        ifnull(round(sum(click)*100/sum(imp),2),0) ctr,
+	        ifnull(round(sum(uc)*100/sum(imp),2),0) cpr,
+	        ifnull(round(avg(goalrate),2),0) goalrate,
+	        min(minday) startdate, max(maxday) enddate
+	   from (select a.cpid, a.adsid, adsname, ads_state,       
+	                goaltype, book_total, goal_total,        				
+					a.startdate, a.enddate, count(distinct rptday) days, min(rptday) minday, max(rptday) maxday,
+					ifnull(sum(imp),0) imp, ifnull(sum(uv),0) uv, ifnull(sum(click),0) click, ifnull(sum(uc),0) uc , ifnull(sum(views),0) views,
+					case
+	                when goaltype=2 then round(ifnull(sum(imp),0)*100/book_total,2)
+	                when goaltype=3 then round(ifnull(sum(click),0)*100/book_total,2)
+	                when goaltype=4 then round(ifnull(sum(views),0)*100/book_total,2)
+	                else 0
+	                end goalrate
+	           from (select a.*, count(t.targetid) target_cnt, sum(if(a.prtype=2,1,0)) prism_cnt
+	                   from ads a
+	                        left join ads_targeting t on a.adsid = t.adsid and t.stat = 1
+	                  where a.cpid = $cpid$
+	                    and a.stat = 1
+	                  group by a.adsid
+	            ) a
+	            left join rpt_ctrday r on r.adsid = a.adsid and r.cpid = a.cpid
+	      where r.cpid = $cpid$
+			<isNotEmpty property="sday" prepend="and"> r.rptday between $sday$ and $eday$ </isNotEmpty>
+	      group by a.`adsid`
+	      ) x
+	group by cpid
+  </select>  
+    
+	<select id="getAdsRpt" resultClass="rpt" parameterClass="java.util.Map">
+		select x.*,
+            case
+            when goaltype=2 then round(imp*100/book_total,2)
+            when goaltype=3 then round(click*100/book_total,2)
+            when goaltype=4 then round(views*100/book_total,2)
+            else 0
+            end goalrate,
+            ifnull(round(imp*100/days,0),0) avg_imp,
+            ifnull(round(click*100/imp,2),0) ctr,
+            ifnull(round(uc*100/imp,2),0) cpr,
+            y.isname as ads_statename, y.text,
+            z.isname as goaltypename, z.text as icon,
+            ifnull(datediff(maxday, minday)+1,0) days,
+            istarget, isprism
+       from (select a.cpid, a.adsid, adsname, ads_state, goaltype, book_total, goal_total, 
+       				if(target_cnt>0,'Y','N') istarget, if(prism_cnt>0,'Y','N') isprism,
+					a.startdate, a.enddate, count(distinct rptday) days, min(rptday) minday, max(rptday) maxday,
+					ifnull(sum(imp),0) imp, ifnull(sum(uv),0) uv, ifnull(sum(click),0) click, ifnull(sum(uc),0) uc , ifnull(sum(views),0) views
+    		   from (select a.*, count(t.targetid) target_cnt, sum(if(a.prtype=2,1,0)) prism_cnt
+		               from ads a
+		               		left join ads_targeting t on a.adsid = t.adsid and t.stat = 1
+		              where a.cpid = $cpid$
+		                and a.stat = 1
+		                    <isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+		              group by a.adsid
+		       		) a
+       				left join rpt_ctrday r 
+       				on r.adsid = a.adsid 
+       				and r.cpid = a.cpid
+      		        <isNotEmpty property="sday" prepend="and"> r.rptday between $sday$ and $eday$ </isNotEmpty>
+              group by a.`adsid`
+       		) x
+	        left join code_instance y on y.code = 'ads_state' and x.ads_state = y.isid
+	        left join code_instance z on z.code = 'goaltype' and x.goaltype = z.isid   
+		</select>		
+  		<select id="getCrDayTotal" resultClass="rpt" parameterClass="java.util.Map">
+			select  ifnull(imp,0) imp, ifnull(uv,0) uv, ifnull(click,0) click, ifnull(uc,0) uc , ifnull(views,0) views,
+					ifnull(round(click*100/imp,2),0) ctr,	
+					ifnull(round(uc*100/imp,2),0) cpr
+			from (select a.cpid, a.adsid, rptday, a.startdate, a.enddate, 
+						 ifnull(sum(imp),0) imp, ifnull(sum(uv),0) uv, ifnull(sum(click),0) click, ifnull(sum(uc),0) uc , ifnull(sum(views),0) views
+				    from ads a
+						 left join rpt_ctrday r 
+						 on r.adsid = a.adsid 
+						 and r.cpid = a.cpid
+						 <isNotEmpty property="sday" prepend="and"> r.rptday between $sday$ and $eday$ </isNotEmpty>
+					  where a.stat = 1
+				    <isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$ </isNotEmpty>
+				  	<isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+				) x 
+
+  		</select>	
+  		
+  		
+  		<select id="getAdsDayTotal" resultClass="rpt" parameterClass="java.util.Map">
+			select ifnull(imp,0) imp, ifnull(uv,0) uv, ifnull(click,0) click, ifnull(uc,0) uc , ifnull(views,0) views,
+					ifnull(round(click*100/imp,2),0) ctr,
+					ifnull(round(uc*100/imp,2),0) cpr
+			from (select ifnull(sum(imp),0) imp, ifnull(sum(uv),0) uv, ifnull(sum(click),0) click, ifnull(sum(uc),0) uc , ifnull(sum(views),0) views
+						from (
+								<include refid="ADSCR.TABLE" />
+							  ) a join rpt_ctrday b on b.rptday between $sday$ and $eday$ 
+								and a.cpid = b.cpid and a.adsid = b.adsid and a.crid = b.crid
+							) x 
+ 		</select>
+		<select id="getCrRpt" resultClass="rpt" parameterClass="java.util.Map">
+				 select x.*,
+					ifnull(round(imp*100/days,0),0) avg_imp,
+					ifnull(round(click*100/imp,2),0) ctr,
+					ifnull(round(uc*100/imp,2),0) cpr
+			  from (select a.cpid, a.crid, crname, crurl, count(distinct rptday) days,  min(a.startdate) startdate, max(a.enddate) enddate,  
+			               ifnull(sum(imp),0) imp, ifnull(sum(uv),0) uv, ifnull(sum(click),0) click, ifnull(sum(uc),0) uc, ifnull(sum(views),0) views  
+				   	  from (
+								<include refid="ADSCR.TABLE" />
+							  ) a
+							  left join rpt_ctrday b 
+							  on b.rptday between $sday$ and $eday$ 
+								and a.cpid = b.cpid 
+								and a.adsid = b.adsid 
+								and a.crid = b.crid
+					  group by a.cpid, a.crid	
+				  ) x				  
+		</select>
+		<select id="getCrClickRpt" resultClass="rpt" parameterClass="java.util.Map">
+			select i.crid, i.crname, clickcnt, k.ckid, k.clickname, k.clickurl, 
+		        ifnull(i.imp,0) imp, ifnull(i.views,0) views, ifnull(i.uv,0) uv, ifnull(k.click,0) click, ifnull(k.uc,0) uc, 
+		        ifnull(round(click*100/imp,2),0) ctr,
+			    ifnull(round(uc*100/imp,2),0) cpr
+		   from (select x.crid, crname, clickcnt,
+		                sum(r.imp) imp, sum(r.views) views, sum(r.uv) uv
+		           from (select b.crid, c.crname, count(d.`ckid`) clickcnt
+		                  from ads a
+		                      join ads_creative b on a.`adsid` = b.`adsid` and b.stat = 1
+		                      join creative c on b.`crid` = c.`crid` and c.stat = 1
+		                      join creative_click d on c.`crid` = d.`crid` and d.stat = 1
+		                  where a.stat = 1
+		                    and b.crid = $crid$
+		                      <isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+		                      <isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+		                  group by b.crid
+		                  ) x
+		                  left join rpt_ctrday r 
+		                  on x.crid = r.`crid` 
+		                group by x.crid
+		           ) i
+		           join
+		           (select x.crid, crname, ckid, clickname, clickurl, 
+		                    sum(r.click) click, sum(r.uc) uc
+		              from (select a.adsid, adsname, b.crid, c.crname, d.`ckid`, d.`clickname`, d.`clickurl`,  
+		              				substr(a.startdate,1,8) startdate, substr(a.enddate,1,8) enddate 
+		                      from ads a
+		                          join ads_creative b on a.`adsid` = b.`adsid` and b.stat = 1
+		                          join creative c on b.`crid` = c.`crid` and c.stat = 1
+		                          join creative_click d on c.`crid` = d.`crid` and d.stat = 1
+		                  where a.stat = 1
+		                     and b.crid = $crid$
+		                      <isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+		                      <isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+		            		) x
+		            	left join rpt_click r 
+		              		on x.ckid = r.`clickid` 
+		              		and x.crid = r.`crid` 
+		              		and r.rptday between x.startdate and x.enddate
+		               group by x.crid, ckid
+		        	) k
+		      on i.crid = k.crid
+
+  		</select>
+	
+		<select id="getCrClickDaily" resultClass="rpt" parameterClass="java.util.Map">
+			select i.crid, i.crname, clickcnt, k.ckid, k.clickname, k.clickurl, 
+		        ifnull(i.imp,0) imp, ifnull(i.views,0) views, ifnull(i.uv,0) uv, ifnull(k.click,0) click, ifnull(k.uc,0) uc, 
+		        ifnull(round(click*100/imp,2),0) ctr,
+			    ifnull(round(uc*100/imp,2),0) cpr
+		   from (select x.crid, crname, clickcnt,
+		                sum(r.imp) imp, sum(r.views) views, sum(r.uv) uv
+		           from (select b.crid, c.crname, count(d.`ckid`) clickcnt
+		                  from ads a
+		                      join ads_creative b on a.`adsid` = b.`adsid` and b.stat = 1
+		                      join creative c on b.`crid` = c.`crid` and c.stat = 1
+		                      join creative_click d on c.`crid` = d.`crid` and d.stat = 1
+		                  where a.stat = 1
+		                      <isNotEmpty property="crid" prepend="and"> b.crid = $crid$</isNotEmpty>
+		                      <isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+		                      <isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+		                  group by b.crid
+		                  ) x
+		                  left join rpt_ctrday r 
+		                  on x.adsid = r.`adsid` 
+		                  and x.crid = r.`crid` 
+		                group by x.crid
+		           ) i
+		           join
+		           (select x.crid, crname, ckid, clickname, clickurl, 
+		                    sum(r.click) click, sum(r.uc) uc
+		              from (select a.adsid, adsname, b.crid, c.crname, d.`ckid`, d.`clickname`, d.`clickurl`,  
+		              				substr(a.startdate,1,8) startdate, substr(a.enddate,1,8) enddate 
+		                      from ads a
+		                          join ads_creative b on a.`adsid` = b.`adsid` and b.stat = 1
+		                          join creative c on b.`crid` = c.`crid` and c.stat = 1
+		                          join creative_click d on c.`crid` = d.`crid` and d.stat = 1
+		                  where a.stat = 1
+		                      <isNotEmpty property="crid" prepend="and"> b.crid = $crid$</isNotEmpty>
+		                      <isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+		                      <isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+		            		) x
+		            	left join rpt_click r 
+		              		on x.adsid = r.`adsid` 
+		              		and x.crid = r.`crid` 
+		              		and r.rptday between x.startdate and x.enddate
+		               group by x.crid, ckid
+		        	) k
+		      on i.crid = k.crid	
+
+  		</select>		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+  			<select id="getCrRptTotal" resultClass="rpt" parameterClass="java.util.Map">
+			select x.*,
+					ifnull(round(imp*100/days,0),0) avg_imp,
+					ifnull(round(click*100/imp,2),0) ctr,
+					ifnull(round(uc*100/imp,2),0) cpr
+			  from (select a.cpid, count(distinct rptday) days,  min(a.startdate) startdate, max(a.enddate) enddate, 
+				              ifnull(sum(imp),0) imp, ifnull(sum(uv),0) uv, ifnull(sum(click),0) click, ifnull(sum(uc),0) uc , ifnull(sum(views),0) views
+						from (
+								<include refid="ADSCR.TABLE" />
+							  ) a 
+							  join rpt_ctrday b 
+							    on b.rptday between $sday$ and $eday$ 
+							   and a.cpid = b.cpid and a.adsid = b.adsid and a.crid = b.crid
+					         group by a.cpid
+							) x		
+		</select>
+		<select id="getAdsDayRpt" resultClass="rpt" parameterClass="java.util.Map">
+			select y.yymmdd as rptday, weekday,  ifnull(imp,0) imp, ifnull(uv,0) uv, ifnull(click,0) click, ifnull(uc,0) uc , ifnull(views,0) views,
+					ifnull(round(click*100/imp,2),0) ctr,
+					ifnull(round(uc*100/imp,2),0) cpr
+			from ymd y
+			     left join 
+			     (select b.rptday, ifnull(sum(imp),0) imp, ifnull(sum(uv),0) uv, ifnull(sum(click),0) click, ifnull(sum(uc),0) uc , ifnull(sum(views),0) views
+						from (
+								<include refid="ADSCR.TABLE" />
+							  ) a join rpt_ctrday b on b.rptday between $sday$ and $eday$ 
+								and a.cpid = b.cpid and a.adsid = b.adsid and a.crid = b.crid
+					           group by b.rptday
+							) x 
+				  on y.yymmdd = x.rptday
+			where y.yymmdd between $sday$ and $eday$
+			order by y.yymmdd
+  		</select>
+ 		<select id="getAdsTimeRpt" resultClass="rpt" parameterClass="java.util.Map">
+			select y.time_str as rptday,  ifnull(imp,0) imp, ifnull(uv,0) uv, ifnull(click,0) click, ifnull(uc,0) uc , ifnull(views,0) views,
+					ifnull(round(click*100/imp,2),0) ctr,
+					ifnull(round(uc*100/imp,2),0) cpr
+			from times y
+			     left join 
+			     (select b.rpttime, ifnull(sum(imp),0) imp, ifnull(sum(uv),0) uv, ifnull(sum(click),0) click, ifnull(sum(uc),0) uc , ifnull(sum(views),0) views
+						from (
+								<include refid="ADSCR.TABLE" />
+							  ) a join rpt_ctrday b on b.rptday between $sday$ and $eday$ 
+								and a.cpid = b.cpid and a.adsid = b.adsid and a.crid = b.crid
+					           group by b.rpttime
+							) x 
+				  on y.tno = x.rpttime
+			order by y.tno
+  		</select>
+ 		<select id="getAdsCountryRpt" resultClass="rpt" parameterClass="java.util.Map">
+			select country as rptday,  
+				   ifnull(imp,0) imp, ifnull(click,0) click, ifnull(round(click*100/imp,2),0) ctr
+			  from (select b.country, ifnull(sum(imp),0) imp, ifnull(sum(click),0) click
+						from (select adsid, adsname
+						        from ads a 
+						       where stat = 1
+								  	<isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+								  	<isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+							  ) a 
+							  join rpt_country b 
+							    on b.rptday between $sday$ and $eday$ 
+							   and a.adsid = b.adsid
+					         group by b.country
+					) x 
+			</select> 		
+ 		<select id="getAdsCountryDaily" resultClass="rpt" parameterClass="java.util.Map">
+			select y.yymmdd as rptday, weekday,   
+				   ifnull(imp,0) imp, ifnull(click,0) click, ifnull(round(click*100/imp,2),0) ctr
+			  from ymd y
+			       left join 
+			       (select b.rptday, ifnull(sum(imp),0) imp, ifnull(sum(click),0) click
+						from (select adsid, adsname
+						        from ads a 
+						       where stat = 1
+								  	<isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+								  	<isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+							  ) a 
+							  join rpt_country b 
+							    on b.rptday between $sday$ and $eday$ 
+							   and a.adsid = b.adsid
+					         group by b.rptday
+					) x 
+					on y.yymmdd = x.rptday
+				where y.yymmdd between $sday$ and $eday$
+			
+ 		</select> 		
+  		<select id="getAdsCountryTotal" resultClass="rpt" parameterClass="java.util.Map">
+			select ifnull(imp,0) imp, ifnull(sum(click),0) click, ifnull(round(click*100/imp,2),0) ctr
+			from (select ifnull(sum(imp),0) imp, ifnull(sum(click),0) click
+						from (select adsid, adsname
+						        from ads a 
+						       where stat = 1
+								  	<isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+								  	<isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+							  ) a 
+							  join rpt_country b 
+							  on b.rptday between $sday$ and $eday$  			
+							  and a.adsid = b.adsid 
+						<isNotEmpty property="country">
+						where country = #country#	
+						</isNotEmpty>	  
+				  ) x 
+ 		</select>
+
+		<select id="getCountrySummary" resultClass="rpt" parameterClass="java.util.Map">
+			select country as rptday, contno, 
+			       sum(imp) imp, sum(click) click, 
+			       ifnull(round(sum(click)*100/sum(imp),2),0) ctr
+              from (select rownum, 
+                           <![CDATA[ if(rownum<=5, country, 'etc') as country, if(rownum<=5, rownum, 6) as contno, ]]>
+                           imp, click
+                     from (select @rownum:=@rownum+1 rownum, a.*
+      						from (select b.country, ifnull(sum(imp),0) imp, ifnull(sum(imp),0) click
+									from (select adsid, adsname
+									        from ads a 
+									       where stat = 1								  
+										  	<isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+										  	<isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+										  ) a join rpt_country b 
+									   on b.rptday between $sday$ and $eday$
+								      and a.adsid = b.adsid
+					                group by b.country
+					                order by imp desc
+					           		) a  
+					         WHERE (@rownum:=0)=0
+					           
+							) x
+						) a 
+					group by country, contno
+					order by contno
+  		</select>
+ 		<sql id="SLOT_ADSCNT.TABLE">
+ 				select slotid, count(distinct a.adsid) livecnt
+			      from ads a
+				   		join ads_slot b on a.adsid = b.adsid
+			     where a.adsid
+			       and ads_state > 0
+			       <![CDATA[ and substr(startdate,1,8) <= $today$ and substr(enddate,1,8) >= $today$]]>
+			       and b.`slot_state` = 1
+			       group by slotid
+		</sql>
+		
+		<sql id="TODAY_SLOT.TABLE">
+			select c.prtype, d.sitetype, c.siteid, secname, sitename, c.slotid, slotname, width, height, 
+	         	   ifnull(livecnt,0) livecnt
+	          from slot c
+	  			   	join section e on c.secid = e.secid
+					join site d on e.siteid = d.siteid		                           
+					left join (
+	                       <include refid="SLOT_ADSCNT.TABLE"/>
+					) l 
+	      		   on c.slotid = l.slotid
+	      	<dynamic prepend="where">
+	      		<isNotEmpty property="groupid" prepend="and">
+	      		 c.slotid in (select g.slotid from slotgroup_slot g where groupid = $groupid$ and stat = 1) 
+	      		 </isNotEmpty>					   	
+		      	<isEqual property="live" compareValue="Y" prepend="and">
+			      l.slotid is not null
+		     	</isEqual>	   
+		     	<isEqual property="live" compareValue="N" prepend="and">
+			      l.slotid is null
+		     	</isEqual>
+	      	</dynamic>	   
+		</sql> 	
+  	<select id="getSlotMonitoring" resultClass="siterpt" parameterClass="java.util.Map"> 	
+  	select x.*,
+		    (inv_daily - imp) as remain,
+			ifnull(round(ifnull(click,0)*100/imp,2),0) ctr,
+			ifnull(round(avg(total_click*100/total_imp),2),0) total_ctr,  	      
+		  	ifnull(round(ifnull(imp,0)*100/inv_daily,0),0) fillrate 
+	   from (select a.*, sum(if(rptday=$today$,imp,0)) imp, 
+				    sum(if(rptday=$today$,click,0)) click, 
+				    ifnull(sum(imp),0) total_imp, ifnull(sum(click),0) total_click
+			   from (select a.sitetype, a.siteid, sitename, secname, a.slotid, slotname, width, height, livecnt,
+			                ifnull(sum(req),0) as inv, count(distinct b.rptday) days , 
+			                ifnull(round(sum(req)/count(b.rptday)),0) inv_daily      
+			          from (
+			          		<include refid="TODAY_SLOT.TABLE"/>
+			                ) a
+			                left join inventory b on a.slotid = b.slotid and rptday between $sday$ and $eday$	
+			           group by a.slotid
+			        ) a
+			        left join rpt_ctrday b on a.slotid = b.slotid and rptday between $sday$ and $eday$		
+			    group by a.slotid
+			) x
+	<dynamic prepend="where">
+		<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	</dynamic>
+	group by x.slotid
+  
+	</select>
+	<select id="getSlotMonitoringTotal" resultClass="siterpt" parameterClass="java.util.Map">
+		select livecnt, inv, ifnull(today_imp,0) as imp, ifnull(y.today_click,0) click, ifnull(today_ctr,0) as ctr, 
+  	      		(x.inv-ifnull(today_imp,0)) as remain, round(ifnull(today_imp,0)*100/inv,0) fillrate 
+  	   	from (select round(avg(day_req),0) inv
+			    from (select rptday, sum(req) day_req
+						from inventory 
+						where rptday between $sday$ and $eday$
+						  <isNotEmpty property="slotid_str">and slotid in ($slotid_str$) </isNotEmpty>
+						group by rptday
+					 ) a   
+				) x,
+				(select count(distinct adsid) livecnt, group_concat(distinct adsid) ads_str, 
+				        group_concat(distinct slotid) slotid_str,  sum(imp) today_imp, sum(click) today_click, round(avg(click*100/imp),2) today_ctr
+			   		from rpt_ctrday
+		           where rptday = $today$
+		             and slotid in ($slotid_str$)
+		) y
+	</select>
+	
+	<select id="getLiveInfo" resultClass="java.util.HashMap" parameterClass="java.util.Map"><!-- 삭제 -->
+		select cast(group_concat(distinct c.slotid) as char) slotid_str, count(distinct c.slotid) slotcnt, 
+		       cast(group_concat(distinct c.adsid)as char) adsid_str, count(distinct c.adsid) adscnt
+			  from (select c.prtype, c.slotid, c.slotname, c.siteid, a.adsid
+		              from ads a, ads_slot b, slot c, site d
+					 where ads_state > 0
+						<isNotEmpty property="groupid" prepend="and"> slotid in (select g.slotid from slotgroup_slot g where groupid = $groupid$ and stat = 1) </isNotEmpty>
+					   	<isNotEmpty property="prtype" prepend="and"> c.prtype = $prtype$ </isNotEmpty>
+					   	<isNotEmpty property="siteid" prepend="and"> c.siteid = $siteid$ </isNotEmpty>
+					   and b.slot_state = 1
+					   <![CDATA[ and substr(startdate,1,8) <= $today$ and substr(enddate,1,8) >= $today$]]>
+					   and a.`adsid` = b.adsid
+					   and b.`slotid` = c.`slotid`
+					   and c.siteid = d.siteid
+					 group by c.slotid					 
+		           ) c, site d	
+		     where c.siteid = d.siteid				    
+				   	<isNotEmpty property="sitetype" prepend="and"> d.sitetype = $sitetype$ </isNotEmpty>
+				   	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	</select>
+	<select id="getNoneLiveInfo" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		select group_concat(distinct a.slotid) slotid_str, count(distinct a.slotid) slotcnt
+			   from site d, slot a
+					left join 
+					(select slotid
+					   from ads a, ads_slot b
+					  where ads_state > 0
+				        and b.slot_state = 1
+			   	            <![CDATA[ and substr(startdate,1,8) <= $today$ and substr(enddate,1,8) >= $today$]]>
+						and a.`adsid` = b.adsid
+					) b on a.slotid = b.slotid
+			  where b.slotid is null
+			    and a.siteid = d.siteid
+				<isNotEmpty property="groupid" prepend="and"> slotid in (select g.slotid from slotgroup_slot g where groupid = $groupid$ and stat = 1) </isNotEmpty>
+			   	<isNotEmpty property="prtype" prepend="and"> a.prtype = $prtype$ </isNotEmpty>
+			   	<isNotEmpty property="sitetype" prepend="and"> d.sitetype = $sitetype$ </isNotEmpty>
+			   	<isNotEmpty property="siteid" prepend="and"> d.siteid = $siteid$ </isNotEmpty>
+			   	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>				  	
+	</select>
+	<select id="getNoneLiveSlot" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+	select d.sitetype, c.siteid, sitename, slotid, slotname, width, height, ads_cnt
+			  from (select a.*, 0 ads_cnt
+					   from slot a
+							left join 
+							(select slotid
+							   from ads a, ads_slot b
+							  where ads_state > 0
+				   	            <![CDATA[ and substr(startdate,1,8) <= $today$ and substr(enddate,1,8) >= $today$]]>
+								and a.`adsid` = b.adsid
+							) b on a.slotid = b.slotid
+					  where b.slotid is null
+		           ) c, site d	
+		     where c.siteid = d.siteid				    
+					<isNotEmpty property="groupid" prepend="and"> slotid in (select g.slotid from slotgroup_slot g where groupid = $groupid$ and stat = 1) </isNotEmpty>
+				   	<isNotEmpty property="prtype" prepend="and"> a.prtype = $prtype$ </isNotEmpty>
+				   	<isNotEmpty property="sitetype" prepend="and"> d.sitetype = $sitetype$ </isNotEmpty>
+				   	<isNotEmpty property="siteid" prepend="and"> d.siteid = $siteid$ </isNotEmpty>
+				   	<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>				  	
+	</select>	
+	
+	
+	<update id="createLiveInfo" parameterClass="java.util.Map">
+	create view LiveInfo as
+	select group_concat(distinct adsid) adsid_str, group_concat(distinct slotid) slotid_str, count(distinct adsid) livecnt, count(distinct slotid) slotcnt
+      from (select distinct a.`adsid`, b.slotid
+					from ads a, ads_slot b, slot c, site d
+				   where a.stat = 1
+					   <isNotEmpty property="groupid" prepend="and"> b.slotid in (select g.slotid from slotgroup_slot g where groupid = $groupid$ and stat = 1) </isNotEmpty>
+					   <isNotEmpty property="prtype" prepend="and"> c.prtype = $prtype$ </isNotEmpty>
+					   <isNotEmpty property="sitetype" prepend="and"> d.sitetype = $sitetype$ </isNotEmpty>
+					   <isNotEmpty property="siteid" prepend="and"> d.siteid = $siteid$ </isNotEmpty>
+					   <isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>				  	
+					   <isEqual property="live" compareValue="Y">
+					    <![CDATA[ and substr(startdate,1,8) <= $today$ and substr(enddate,1,8) >= $today$]]>
+					   </isEqual>
+					   and a.adsid = b.adsid
+					   and b.slotid = c.slotid
+					   and c.siteid = d.siteid
+			) x	
+	</update>
+					  
+					  
+					  
+  	<select id="getCkSlotAdsMonitoring" resultClass="adsrpt" parameterClass="java.util.Map">
+  	select d.adsid, d.adsname, d.startdate, d.enddate, (totaldays-(godays)) remaindays, totaldays, round((godays)*100/totaldays) go_rate,
+           goaltype, book_total, bookrate, goal_total, goalrate, total_imp, slot_total_imp, 
+           round(total_click*100/total_imp,2) total_ctr, round(slot_total_click*100/slot_total_imp,2) slot_total_ctr, 
+           if(goal_daily=0, round(goal_total/totaldays), goal_daily) as goal_daily,
+		   today_imp, slot_today_imp, 
+           round(today_click*100/today_imp,2) today_ctr, round(slot_today_click*100/slot_today_imp,2) slot_today_ctr,
+           st.isname as ads_state, gt.isname as goaltypename
+      from (select x.*, datediff($today$, startdate)+1 as godays, 
+					case
+	                when goaltype=2 then round(ifnull(total_imp,0)*100/book_total,2)
+	                when goaltype=3 then round(ifnull(total_click,0)*100/book_total,2)
+	                when goaltype=4 then round(ifnull(total_views,0)*100/book_total,2)
+	                else 0
+	                end bookrate,
+	                case
+	                when goaltype=2 then round(ifnull(total_imp,0)*100/goal_total,2)
+	                when goaltype=3 then round(ifnull(total_click,0)*100/goal_total,2)
+	                when goaltype=4 then round(ifnull(total_views,0)*100/goal_total,2)
+	                else 0
+	                end goalrate,
+	                y.slot_total_imp, y.slot_total_click, slot_total_views, slot_today_imp, slot_today_click, slot_today_views
+               from (select a.adsid, adsname, substr(startdate,1,8) startdate, substr(enddate,1,8) enddate,  
+                            datediff(substr(enddate,1,8), substr(startdate,1,8))+1 as totaldays,
+		                    goaltype, goal_total, goal_daily, book_total, ads_state,
+		                    sum(imp) as total_imp, sum(click) as total_click, sum(views) as total_views,
+		                    sum(if(rptday=$today$,imp,0)) today_imp,
+		                    sum(if(rptday=$today$,click,0)) as today_click,
+		                    sum(if(rptday=$today$,views,0)) as today_views
+					     from (select  a.`adsid`, adsname, goaltype, book_total, goal_total, goal_daily, a.`startdate`,
+					                    a.`enddate`, a.ads_state, b.slotid, b.slot_state
+			                   from ads a, ads_slot b
+					       where slotid = $slotid$ 
+			                   and a.ads_state in (2,3)
+			                   and b.slot_state = 1
+			                   and a.`adsid` = b.`adsid`
+			                   <![CDATA[ and substr(startdate,1,8) <= $today$ and substr(enddate,1,8) >= $today$]]>
+					       ) a
+					       left join rpt_ctrday r 
+					       on a.`adsid` = r.`adsid` 
+					       and r.rptday between substr(startdate,1,8) and substr(enddate,1,8)		                
+		                group by a.`adsid`
+		             ) x
+		             join
+		             (select  a.adsid, 
+		                	a.`slotid`, a.`slot_state`, 
+							sum(imp) as slot_total_imp, sum(click) as slot_total_click, sum(views) as slot_total_views,
+							sum(if(rptday=$today$,imp,0)) slot_today_imp, 
+							sum(if(rptday=$today$,click,0)) as slot_today_click, 
+							sum(if(rptday=$today$,views,0)) as slot_today_views
+					     from (select  a.`adsid`, adsname, goaltype, book_total, goal_total, goal_daily, a.`startdate`, a.`enddate`, a.ads_state, b.slotid, b.slot_state
+			                   from ads a, ads_slot b
+					       where slotid = $slotid$ 
+			                   and a.ads_state in (2,3)
+			                   and b.slot_state = 1
+			                   and a.`adsid` = b.`adsid`
+			                   <![CDATA[ and substr(startdate,1,8) <= $today$ and substr(enddate,1,8) >= $today$]]>
+					       ) a
+					       left join rpt_ctrday r 
+					       on a.`adsid` = r.`adsid` 
+					       and a.`slotid` = r.`slotid`
+					       and r.rptday between substr(startdate,1,8) and substr(enddate,1,8)		                
+		                group by a.`adsid`, a.slotid
+		             ) y 
+		            on x.adsid = y.adsid       
+             ) d 
+  			left join code_instance st on st.code = 'ads_state' and d.ads_state = st.isid
+ 			left join code_instance gt on gt.code = 'goaltype' and d.goaltype = gt.isid 	
+  	</select>
+  	<select id="getAdsMonitoring" resultClass="adsrpt" parameterClass="java.util.Map">
+  	select d.adsid, d.adsname, d.startdate, d.enddate, (totaldays-(godays)) remaindays, totaldays, round((godays)*100/totaldays) go_rate,
+           goaltype, book_total, 
+           ifnull(bookrate,0) bookrate, ifnull(goal_total,0) goal_total,
+            ifnull(goalrate,0) goalrate, ifnull(total_imp,0) total_imp, 
+           ifnull(round(total_click*100/total_imp,2),0) total_ctr, 
+           if(goal_daily=0, round(goal_total/totaldays), goal_daily) as goal_daily,
+		   ifnull(today_imp, 0)today_imp, 
+           ifnull(round(today_click*100/today_imp,2),0) today_ctr,
+           st.isname as ads_state, gt.isname as goaltypename
+      from (select x.*, datediff($today$, startdate)+1 as godays, 
+					case
+	                when goaltype=2 then round(ifnull(total_imp,0)*100/book_total,2)
+	                when goaltype=3 then round(ifnull(total_click,0)*100/book_total,2)
+	                when goaltype=4 then round(ifnull(total_views,0)*100/book_total,2)
+	                else 0
+	                end bookrate,
+	                case
+	                when goaltype=2 then round(ifnull(total_imp,0)*100/goal_total,2)
+	                when goaltype=3 then round(ifnull(total_click,0)*100/goal_total,2)
+	                when goaltype=4 then round(ifnull(total_views,0)*100/goal_total,2)
+	                else 0
+	                end goalrate
+               from (select a.adsid, adsname, substr(startdate,1,8) startdate, substr(enddate,1,8) enddate,  datediff(substr(enddate,1,8), substr(startdate,1,8))+1 as totaldays,
+          					goaltype, goal_total, goal_daily, book_total, ads_state, 
+							sum(imp) as total_imp, sum(click) as total_click, sum(views) as total_views,
+							sum(if(rptday=$today$,imp,0)) today_imp, 
+							sum(if(rptday=$today$,click,0)) as today_click, 
+							sum(if(rptday=$today$,views,0)) as today_views
+			               from ads a
+			                    left join rpt_ctrday r on a.`adsid` = r.`adsid` 	
+			                    <![CDATA[ and r.rptday between substr(startdate,1,8) and substr(enddate,1,8) ]]>               		
+		              where a.ads_state in (2,3)		
+		                <![CDATA[ and substr(startdate,1,8) <= $today$ and substr(enddate,1,8) >= $today$]]>
+					    <isNotEmpty property="prtype" prepend="and"> a.prtype = $prtype$ </isNotEmpty>
+					    <isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>				  	
+		                group by a.`adsid`
+		             ) x  
+             ) d 
+ 			left join code_instance st on st.code = 'ads_state' and d.ads_state = st.isid
+ 			left join code_instance gt on gt.code = 'goaltype' and d.goaltype = gt.isid
+  	
+  	</select>  	
+  	<!-- ********************************** 사이트 리포트 ******************************************* -->
+  	<sql id="SALES_CTR.COLUMN">
+		ifnull(inv,0) inv, ifnull(inv-imp,0) remain, 
+		ifnull(imp,0) imp, ifnull(click,0) click, ifnull(round(click*100/imp,2),0) ctr,
+		ifnull(imp_d,0) imp_d, ifnull(click_d,0) click_d, ifnull(round(click_d*100/imp_d,2),0) ctr_d,
+		ifnull(imp_n,0) imp_n, ifnull(click_n,0) click_n, ifnull(round(click_n*100/imp_n,2),0) ctr_n,
+		ifnull(imp_h,0) imp_h, ifnull(click_h,0) click_h, ifnull(round(click_h*100/imp_h,2),0) ctr_h			
+  	</sql>
+  	<sql id="SALES_SUMIMP.COLUMN">
+   					sum(inv) inv,
+   					sum(imp) imp,
+   					sum(imp_d) imp_d,
+      				sum(imp_n) imp_n,
+   					sum(imp_h) imp_h,
+    				sum(click) click,
+   					sum(click_d) click_d,
+      				sum(click_n) click_n,
+   					sum(click_h) click_h  	
+   	</sql>
+  	<sql id="SALES_IMP.COLUMN">
+   					sum(imp) imp,
+   					sum(if(salestype=1,imp,0)) imp_d,
+      				sum(if(salestype=2,imp,0)) imp_n,
+   					sum(if(salestype=2,imp,0)) imp_h,
+    				sum(click) click,
+   					sum(if(salestype=1,click,0)) click_d,
+      				sum(if(salestype=2,click,0)) click_n,
+   					sum(if(salestype=2,click,0)) click_h  	
+   	</sql>
+  					
+					
+					
+					
+  	<select id="getSiteRpt" resultClass="dayrpt" parameterClass="java.util.Map">
+  	select x.*, 
+  			ifnull(round(ifnull(imp,0)*100/inv,0),0) fillrate,
+  			<include refid="SALES_CTR.COLUMN" />
+  	from (
+		   	select m.sitetype, sitetypename, m.siteid, m.sitename, 	
+				<include refid="SALES_SUMIMP.COLUMN" />
+		     from (	
+		     			<include refid="SITESLOT.TABLE" />
+					) m
+					left join
+				    (select siteid, sum(req) inv
+				       from inventory
+				      where rptday between $sday$ and $eday$  
+				       group by siteid
+			    	) i on m.siteid  = i.siteid
+	      			left join
+	     			(select siteid, 
+							<include refid="SALES_IMP.COLUMN" />
+	        			from (
+	        					<include refid="ADSSALES.TABLE" />
+						      ) a left join rpt_ctrday r 
+					       	    on a.adsid = r.adsid
+					           and a.slotid = r.slotid
+					           and rptday between $sday$ and $eday$ 
+					       group by siteid
+				    ) y  on m.siteid = y.siteid    
+			<dynamic prepend="where">		 	  
+				<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+			</dynamic>	
+			group by m.siteid
+		) x
+		</select>
+		<select id="getSlotRpt" resultClass="dayrpt" parameterClass="java.util.Map">
+		   	select m.slotid, m.sitetype, sitetypename, width, height, 
+		   	       cast(concat(sitename,' > ', secname,' > ', slotname) as char) as slotname, 	
+		   	       cast(concat(sitetag,'/', sectag,'/', slottag) as char) as slottag,
+		   	       ifnull(round(ifnull(imp,0)*100/inv,0),0) fillrate,
+				   <include refid="SALES_CTR.COLUMN" />
+		       from (
+		     			<include refid="SITESLOT.TABLE" />
+					) m
+					left join
+				    (select slotid, sum(req) inv
+				       from inventory
+				      where rptday between $sday$ and $eday$  
+				       group by slotid
+			    	) i on m.slotid  = i.slotid
+	      			left join
+	     			(select a.slotid, 
+							<include refid="SALES_IMP.COLUMN" />
+	        			from (
+	        					<include refid="ADSSALES.TABLE" />
+						       ) a left join rpt_ctrday r 
+						       on a.adsid = r.adsid
+						       and a.slotid = r.slotid
+						       and rptday between $sday$ and $eday$ 
+					       group by a.slotid
+				    ) y  on m.slotid = y.slotid    
+				<dynamic prepend="where">		 	  
+					<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+				</dynamic>	
+
+		</select>
+		
+      
+			
+		
+		
+		
+  		<select id="getSlgroupRpt" resultClass="dayrpt" parameterClass="java.util.Map">
+  		select x.*,
+ 			ifnull(round(ifnull(imp,0)*100/inv,0),0) fillrate,
+   			<include refid="SALES_CTR.COLUMN" />
+  		  from (select m.prtype, m.groupid, m.groupname, width, height,			
+						<include refid="SALES_SUMIMP.COLUMN" />
+				  from (
+				  		<include refid="SLOTGROUP.TABLE" />
+				        ) m
+				        left join
+				        (select slotid, sum(req) inv
+				           from inventory
+				          where rptday between $sday$ and $eday$
+				          group by slotid
+				        ) i on m.slotid  = i.slotid
+				        left join
+				        (select a.slotid, 
+								<include refid="SALES_IMP.COLUMN" />  	
+				            from (<include refid="ADSSALES.TABLE" />
+				                  ) a 
+				                  left join rpt_ctrday r 
+				                    on a.adsid = r.adsid
+				                   and a.slotid = r.slotid
+				                   and rptday between $sday$ and $eday$ 
+				                 group by a.slotid
+				         ) y  
+				      on m.slotid = y.slotid    
+					<dynamic prepend="where">		 	  
+						<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+					</dynamic>	
+				group by m.groupid	
+			) x	   	
+		</select>
+		
+		
+ 		<select id="getSiteRptDaily" resultClass="dayrpt" parameterClass="java.util.Map">
+		select y.yymmdd as rptday, weekday,  
+				<include refid="SALES_CTR.COLUMN" />
+		from ymd y
+		     left join 
+		     (select b.rptday, ifnull(sum(req),0) inv
+				from (<include refid="SLOT.TABLE"/>
+			  		) a join inventory b on b.rptday between $sday$ and $eday$ 
+					and a.siteid = b.siteid and a.slotid = b.slotid 
+		           group by b.rptday
+			 ) x on y.yymmdd = x.rptday
+     		left join 
+     		(select rptday, 
+    					<include refid="SALES_IMP.COLUMN" />
+        			from (
+        					<include refid="ADSSALES.TABLE" />
+					       ) a 
+					       left join rpt_ctrday r 
+					       on a.adsid = r.adsid
+					       and a.slotid = r.slotid
+					       and rptday between $sday$ and $eday$ 
+			       group by rptday				       
+			    ) z  on z.rptday = y.yymmdd      
+		where y.yymmdd between $sday$ and $eday$ 
+		order by y.yymmdd      
+		</select>  	
+		
+		
+  		<select id="getSlgroupRptDaily" resultClass="dayrpt" parameterClass="java.util.Map">
+		select y.yymmdd as rptday, weekday,  
+				<include refid="SALES_CTR.COLUMN" />
+		from ymd y
+		     left join 
+		     (select b.rptday, ifnull(sum(req),0) inv
+				from (
+						<include refid="SLOTGROUP.TABLE" />
+			  		) a join inventory b on b.rptday between $sday$ and $eday$ 
+					and a.slotid = b.slotid 
+		           group by b.rptday
+			 ) x on y.yymmdd = x.rptday
+     		left join 
+     		(select rptday, 
+    					<include refid="SALES_IMP.COLUMN" />
+        			from (
+        					<include refid="ADSSALES.TABLE" />
+					       ) a 
+					       left join rpt_ctrday r 
+					       on a.adsid = r.adsid
+					       and a.slotid = r.slotid
+					       and rptday between $sday$ and $eday$ 
+			       group by rptday				       
+			    ) z  on z.rptday = y.yymmdd      
+		where y.yymmdd between $sday$ and $eday$ 
+		order by y.yymmdd      
+		</select>  	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+   		<select id="getSiteRptTimely" resultClass="dayrpt" parameterClass="java.util.Map">
+		select y.tno, time_str as rpttime,  
+				ifnull(inv,0) inv, ifnull(inv-imp,0) remain, 
+				ifnull(imp,0) imp, ifnull(click,0) click, ifnull(round(click*100/imp,2),0) ctr,
+				ifnull(imp_d,0) imp_d, ifnull(click_d,0) click_d, ifnull(round(click_d*100/imp_d,2),0) ctr_d,
+				ifnull(imp_n,0) imp_n, ifnull(click_n,0) click_n, ifnull(round(click_n*100/imp_n,2),0) ctr_n,
+				ifnull(imp_n,0) imp_n, ifnull(click_h,0) click_h, ifnull(round(click_h*100/imp_h,2),0) ctr_h			
+		from times y
+		     left join 
+		     (select b.rpttime, ifnull(sum(req),0) inv
+				from (
+						<include refid="SITESLOT.TABLE"/>
+			  		) a 
+			  		join inventory b 
+			  		  on b.rptday between $sday$ and $eday$ 
+					 and a.siteid = b.siteid and a.slotid = b.slotid
+		           group by b.rpttime
+			 ) x on y.tno = x.rpttime
+    		left join 
+    		(select rpttime, 
+   					<include refid="SALES_IMP.COLUMN"/>
+       			from (<include refid="ADSSLOT.TABLE"/>   ) a 
+					       left join rpt_ctrday r 
+					       on a.adsid = r.adsid
+					       and a.slotid = r.slotid
+					       and rptday between $sday$ and $eday$ 
+				       group by rpttime				       
+				    ) z  on z.rpttime = y.tno      
+		order by y.tno      
+		</select>  	
+  	
+		<select id="getSiteRptCountry" resultClass="dayrpt" parameterClass="java.util.Map">
+	   select country as rpttime,  
+				   ifnull(imp,0) imp, ifnull(click,0) click, ifnull(round(click*100/imp,2),0) ctr
+			from(select b.country, ifnull(sum(imp),0) imp, ifnull(sum(click),0) click
+						from (
+								<include refid="SLOT.TABLE"/>
+			  				  ) a 
+			  				  join rpt_country b 
+			  				    on b.rptday between $sday$ and $eday$ 
+							   and a.slotid = b.slotid
+			           group by b.country
+			      ) x
+			order by country
+ 	
+		</select>  		
+ 		<select id="getSiteRptCountryDaily" resultClass="dayrpt" parameterClass="java.util.Map">
+	 	select y.yymmdd as rptday, weekday,  
+				   ifnull(imp,0) imp, ifnull(click,0) click, ifnull(round(click*100/imp,2),0) ctr
+		    from ymd y
+		    	 left join (select b.rptday, ifnull(sum(imp),0) imp, ifnull(sum(click),0) click
+						from (
+								<include refid="SLOT.TABLE"/>
+			  				  ) a 
+			  				  join rpt_country b 
+			  				    on b.rptday between $sday$ and $eday$ 
+							   and a.slotid = b.slotid
+						<isNotEmpty property="country"> 
+						where country = $country$
+						</isNotEmpty>	   
+			           group by b.rptday
+			      ) x
+			      on y.yymmdd = x.rptday
+			where y.yymmdd between $sday$ and $eday$
+			order by yymmdd
+ 	
+		</select>  		
+  		
+  	<select id="getPrismMasterMed" resultClass="siterpt" parameterClass="java.util.Map">
+  	select x.sitetype, x.siteid, x.sitename, 
+  	       ifnull(inv,0) as inv, ifnull(imp,0) as imp, ifnull(click,0) click, ifnull(views,0) as views, 
+  	       ifnull(skip,0) as skip, ifnull(hit,0) as hit, ifnull(voids,0) as voids, 
+  	       ifnull(round(click*100/imp,0),0) ctr,
+  	       ifnull(round(hit*100/imp,0),0) htr,
+  	       ifnull(round(views*100/imp,0),0) vtr,
+  	       ifnull(round(ifnull(imp,0)*100/inv,0),0) fillrate,
+  	       <isNotEmpty property="TotalIMP" >
+ 	       ifnull(round(ifnull(imp,0)*100/$TotalIMP$,0),0) 
+  	       </isNotEmpty><isEmpty property="TotalIMP" > 0 </isEmpty>
+  	       weight,
+   	       ifnull(x.inv-ifnull(imp,0),0) as remain
+     from (select sitetype, m.siteid, m.sitename, 
+     				sum(req) as inv, sum(imp) imp, sum(click) click, sum(voids) voids, sum(views) views, sum(views+click) hit, sum(skip) skip
+            from (select a.slotid, a.siteid, a.sitename, a.sitetype,
+                         sum(imp) imp, sum(click) click, sum(voids) voids, sum(views) views, sum(views+click) hit, sum(skip) skip   
+       				from (select a.adsid, d.sitetype, c.siteid, sitename, b.slotid, slotname, width, height
+				              from ads a, ads_slot b, slot c, site d
+							 where a.prtype = 2
+							   <isNotEmpty property="sitetype" prepend="and"> sitetype = $sitetype$</isNotEmpty>					   				
+							   <![CDATA[ and substr(startdate,1,8) <= $eday$ and substr(enddate,1,8) >= $sday$]]>
+							   and a.`adsid` = b.adsid
+							   and b.`slotid` = c.`slotid`
+							   and c.siteid = d.siteid
+							 group by a.adsid, c.slotid					 
+		                   ) a 
+		                   left join rpt_prism r
+		                on r.rptday between $sday$ and $eday$ 
+		               and a.adsid = r.adsid 
+		               and a.slotid = r.slotid
+		             group by a.slotid
+       				) m
+                   left join
+                   (select slotid, rptday, sum(req) req 
+                       from inventory
+  				      where rptday between $sday$ and $eday$
+                  	  group by slotid
+                 	) i
+                 on m.slotid = i.slotid
+		      group by m.siteid	  
+	      	) x
+	group by x.siteid
+	</select>
+	<select id="getPrismMasterMedTotal" resultClass="siterpt" parameterClass="java.util.Map">
+		  select sum(req) as inv, sum(imp) imp, sum(click) click, sum(voids) voids, 
+		  		 sum(views) views, sum(views+click) hit, sum(skip) skip,
+		  		 ifnull(round(ifnull(sum(imp),0)*100/sum(req),0),0) fillrate
+            from (select a.slotid, a.siteid, a.sitename, a.sitetype,
+                         sum(imp) imp, sum(click) click, sum(voids) voids, sum(views) views, sum(views+click) hit, sum(skip) skip   
+       				from (select a.adsid, d.sitetype, c.siteid, sitename, b.slotid, slotname, width, height
+				              from ads a, ads_slot b, slot c, site d
+							 where a.ads_state > 0
+							   and a.prtype = 2
+							   <isNotEmpty property="sitetype" prepend="and"> sitetype = $sitetype$</isNotEmpty>					   				
+							   <![CDATA[ and substr(startdate,1,8) <= $eday$ and substr(enddate,1,8) >= $sday$]]>
+							   and a.`adsid` = b.adsid
+							   and b.`slotid` = c.`slotid`
+							   and c.siteid = d.siteid
+							 group by a.adsid, c.slotid					 
+		                   ) a 
+		                   left join rpt_prism r
+		                on r.rptday between $sday$ and $eday$ 
+		               and a.adsid = r.adsid 
+		               and a.slotid = r.slotid
+		             group by a.slotid
+       				) m
+                   left join
+                   (select slotid, rptday, sum(req) req 
+                       from inventory
+  				      where rptday between $sday$ and $eday$
+                  	  group by slotid
+                 	) i
+                 on m.slotid = i.slotid
+	</select>
+   	<select id="getPrismMasterCp" resultClass="adsrpt" parameterClass="java.util.Map">
+   		select q.*, 
+   				round(remain/remaindays) as today_goal,
+   				ifnull(round(today_hit*100/round(remain/remaindays)),0) as today_rate <!-- today_hit/today_goal -->
+   		from (
+ 			  	select d.cpid, d.cpname, d.startdate, d.enddate, 
+ 			  	        (totaldays-(godays)) remaindays, totaldays, 
+ 			  	        round((godays)*100/totaldays) go_rate,
+		           		ifnull(book_total,0) book_total, ifnull(goal_total-total_hit, 0) as remain, 
+		           		ifnull(goal_total,0) goal_total,
+		            	ifnull(total_imp,0) total_imp, 
+		            	ifnull(total_hit,0) total_hit, 
+			           	ifnull(round(total_click*100/total_imp,2),0) total_ctr, 
+			           	ifnull(round(total_hit*100/total_imp,2),0) total_htr, 
+					   	ifnull(today_imp, 0)today_imp, 
+					   	ifnull(today_hit, 0)today_hit, 
+			        	ifnull(round(ifnull(total_hit,0)*100/book_total,2), 0) bookrate,
+		              	ifnull(round(ifnull(total_hit,0)*100/goal_total,2), 0) goalrate      
+		      from (select x.cpid, cpname, x.startdate, x.enddate, datediff(enddate, startdate)+1 as totaldays,
+		      				sum(goal_total) as goal_total, sum(book_total) as book_total,
+		                    datediff($today$, startdate)+1 as godays, sum(total_click) total_click, 
+		                    sum(total_imp) total_imp, sum(total_hit) total_hit, 
+		                    sum(today_imp) today_imp, sum(today_hit) today_hit					
+		               from (select a.cpid, cpname, a.adsid, adsname, substr(c.startdate,1,8) startdate, substr(c.enddate,1,8) enddate,  
+		          					goal_total, book_total, ads_state, 
+									sum(imp) as total_imp, sum(click) total_click, sum(views+click) as total_hit,
+									sum(if(rptday=$today$,imp,0)) today_imp, 					
+									sum(if(rptday=$today$,views+click,0)) as today_hit
+					               from campaign c, ads a
+					                    left join rpt_prism r on a.`adsid` = r.`adsid` 	
+					                     and r.rptday between $sday$ and $eday$              		
+				              where a.ads_state > 0		
+				                <![CDATA[and substr(a.startdate,1,8) <= $today$ and substr(a.enddate,1,8) >= $today$]]>
+				                and a.prtype = 2
+							    and a.cpid = c.cpid
+				                group by a.`adsid`
+				             ) x  
+				       group by x.cpid
+		             ) d   		
+		    ) q
+   		
+
+		 </select> 		
+		<select id="getPrismMasterCpTotal" resultClass="adsrpt" parameterClass="java.util.Map">
+   		select  count(distinct a.cpid) as livecnt,
+				sum(imp) as total_imp, sum(click) total_click, sum(views+click) as total_hit,
+				sum(if(rptday=$today$,imp,0)) today_imp, 					
+				sum(if(rptday=$today$,views+click,0)) as today_hit
+           from campaign c, ads a
+                left join rpt_prism r on a.`adsid` = r.`adsid` 	
+	             and r.rptday between $sday$ and $eday$              		
+	      where a.ads_state > 0		
+               <![CDATA[and substr(a.startdate,1,8) <= $today$ and substr(a.enddate,1,8) >= $today$]]>
+               and a.prtype = 2
+		    and a.cpid = c.cpid
+ 		 </select> 		  		
+   	<select id="getPrismCpList" resultClass="prismrpt" parameterClass="java.util.Map">
+ select q.*,
+        ifnull(round(click*100/imp,2),0) ctr,
+        ifnull(round(hit*100/imp,2),0) htr,
+        ifnull(round(views*100/imp,2),0) vtr,
+        ifnull(round(ifnull(hit,0)*100/book_total,2), 0) bookrate,
+        isname as state, c.text
+   from (select a.cpid as id, a.cpname as name, a.startdate, a.enddate,
+                (totaldays-(godays)) remaindays, totaldays,
+                round((godays)*100/totaldays) go_rate,
+                ifnull(book_total,0) book_total, ifnull(book_total-hit, 0) as remain,
+                ifnull(goal_total,0) goal_total, ifnull(cost_total,0) cost_total, 
+                ifnull(imp,0) as imp, ifnull(click,0) click, ifnull(views,0) as views, 
+                ifnull(skip,0) as skip, ifnull(hit,0) as hit, ifnull(voids,0) as voids, ifnull(avg_cost, 0) avg_cost,
+                <isNotEmpty property="sch_text">
+				a.clientid, c.corpname as clientname,
+                a.agencyid, g.corpname as agencyname,
+                a.medrepid, r.corpname as medrepname, 
+                t.username as tcname,
+                </isNotEmpty>
+                case
+                when ifnull(runcnt,0) > 0 then 3
+                when ifnull(bookcnt,0) > 0 then 2
+                when ifnull(readycnt,0) > 0 then 1
+                when ifnull(completecnt,0) > 0 then 5
+                when ifnull(pausecnt,0) > 0 then 0
+                when ifnull(stopcnt,0) > 0 then -1
+                when ifnull(cancelcnt,0) > 0 then -2
+                when ifnull(totcnt,0) = 0 then -3
+                else 0
+                end cp_state                             
+            from (select x.cpid, cpname, x.startdate, x.enddate, datediff(enddate, startdate)+1 as totaldays,
+                         clientid, agencyid, medrepid, tcid,
+                        sum(goal_total) as goal_total, sum(book_total) as book_total,
+                        if(startdate>curdate()+0, datediff(enddate, startdate)+1,  datediff(curdate()+0, startdate)+1) as godays,
+                        sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(hit) as hit, sum(skip) as skip,
+                        sum(cost_total) as cost_total,
+                        round(sum(cost_total)/sum(book_total)) as avg_cost,
+                        sum(if(ads_state=1 and enddate > curdate()+0,1,0)) readycnt,
+                        sum(if(ads_state=2,1,0 and substr(startdate, 1,8)>curdate()+0)) bookcnt,
+                        sum(if(ads_state=3,1,0)) runcnt,
+                        sum(if(ads_state=5,1,0)) completecnt,
+                        sum(if(ads_state=0,1,0)) pausecnt,
+                        sum(if(ads_state=-1,1,0)) stopcnt,
+    			        <![CDATA[sum(if(ads_state=-2 or (ads_state=1 and substr(enddate, 1,8)<=curdate()+0),1,0) )]]> cancelcnt,
+                        sum(1) totcnt
+			     from (select a.cpid, cpname, a.adsid, adsname, substr(c.startdate,1,8) startdate, substr(c.enddate,1,8) enddate,
+	                          clientid, agencyid, medrepid, tcid,  
+	                            goal_total, book_total, ads_state, cost,
+	                            sum(cost*book_total) cost_total,
+	                            sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+				      from campaign c, ads a
+	                        left join rpt_prism r on a.`adsid` = r.`adsid`
+	                     and r.rptday between substr(a.startdate,1,8) and substr(a.enddate,1,8)    
+				       where a.stat = 1
+	                   <isNotEmpty property="clientid"> c.clientid = $clientid$</isNotEmpty>		                    
+	                   <isNotEmpty property="agencyid"> c.agencyid = $agencyid$</isNotEmpty>		                    
+	                   <isNotEmpty property="medrepid"> c.medrepid = $medrepid$</isNotEmpty>		                    
+	                    <![CDATA[and substr(a.startdate,1,8) <= $eday$ and substr(a.enddate,1,8) >= $sday$]]>
+					    and a.prtype = 2 and goaltype = 4
+	                    and a.cpid = c.cpid
+	                 group by a.`adsid`
+	                ) x
+		      group by x.cpid
+       		) a
+       		<isNotEmpty property="sch_text">
+              left join corporation c on a.clientid = c.corpid and c.corptype = 1
+		      left join corporation g on a.agencyid = g.corpid and g.corptype = 2
+		      left join corporation r on a.medrepid = r.corpid and r.corptype = 3
+		      left join users t on a.tcid = t.userid
+      		</isNotEmpty>
+   ) q
+    left join code_instance c on c.code = 'ads_state' and c.isid = q.cp_state
+	<dynamic prepend="where">		 	  
+		<isNotEmpty property="ads_state" prepend="and"> cp_state = $ads_state$</isNotEmpty>
+		<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	</dynamic>	
+		 </select> 		
+  	
+  		<select id="getPrismAdsRpt" resultClass="prismrpt" parameterClass="java.util.Map">
+    select x.*
+      from (select cpid, a.adsid as id, a.adsname as name, a.startdate, a.enddate,
+                    ifnull(book_total,0) book_total, ifnull(book_total-hit, 0) as remain_hit,
+                    cost, hit*cost as paid,
+                    ifnull(imp,0) as imp, ifnull(click,0) click, ifnull(views,0) as views,
+                    ifnull(skip,0) as skip, ifnull(hit,0) as hit, ifnull(voids,0) as voids,
+                    ifnull(round(click*100/imp,2),0) ctr,
+                    ifnull(round(hit*100/imp,2),0) htr,
+                    ifnull(round(views*100/imp,2),0) vtr,
+                    datediff(enddate, startdate)+1 as totaldays,
+                    ifnull(round(ifnull(hit,0)*100/book_total,2), 0) bookrate,
+                    isname as state, c.text
+              from (select a.cpid, a.adsid, adsname, substr(startdate,1,8) startdate, substr(enddate,1,8) enddate,
+                            goal_total, book_total, ads_state, cost,
+                            sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+                      from ads a
+                            left join rpt_prism r
+                        on a.`adsid` = r.`adsid`
+                        <isNotEmpty property="sday"> and rptday between $sday$ and $eday$ </isNotEmpty>
+                    where a.stat = 1
+                        and a.cpid = $cpid$
+                        and a.prtype = 2
+                        and goaltype = 4
+                    group by a.`adsid`
+	            ) a
+	            left join code_instance c on c.code = 'ads_state' and c.isid = a.ads_state   
+	    ) x			      
+		</select>
+ 		<select id="getPrismCrRpt" resultClass="prismrpt" parameterClass="java.util.Map">
+			 select x.*,
+					ifnull(round(click*100/imp,2),0) ctr,
+                    ifnull(round(hit*100/imp,2),0) htr,
+                    ifnull(round(views*100/imp,2),0) vtr,
+                    isname as state, c.text
+			  from (select a.cpid, a.crid as id, crname as name, crurl, count(distinct rptday) days,  
+			               min(a.startdate) startdate, max(a.enddate) enddate,  max(cr_state) cr_state,
+			               sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+				   	  from (
+								<include refid="ADSCR.TABLE" />
+							  ) a join rpt_prism b 
+						on a.cpid = b.cpid 
+						and a.adsid = b.adsid 
+						and a.crid = b.crid
+						<isNotEmpty property="sday"> and rptday between $sday$ and $eday$ </isNotEmpty>
+					  group by a.cpid, a.crid	
+				  ) x				  
+	              left join code_instance c on c.code = 'cr_state' and c.isid = x.cr_state   
+		</select>		
+ 		<select id="getPrismCrTotal" resultClass="prismrpt" parameterClass="java.util.Map">
+			select x.*,
+					ifnull(round(click*100/imp,2),0) ctr,
+                    ifnull(round(hit*100/imp,2),0) htr,
+                    ifnull(round(views*100/imp,2),0) vtr
+			  from (select a.cpid, count(distinct rptday) days,  min(a.startdate) startdate, max(a.enddate) enddate, 
+				              sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+						from (
+								<include refid="ADSCR.TABLE" />
+							  ) a join rpt_prism b 
+							    on b.rptday between $sday$ and $eday$ 
+							   and a.cpid = b.cpid and a.adsid = b.adsid and a.crid = b.crid
+					         group by a.cpid
+							) x		
+		</select>	
+			
+ 		<select id="getPrismMedRpt" resultClass="prismrpt" parameterClass="java.util.Map">	
+		select a.siteid as id, sitename as name, cost_total, 
+					ifnull(imp,0) imp, ifnull(click,0) click, ifnull(voids,0) voids, 
+					ifnull(hit,0) hit, ifnull(views,0) views, ifnull(skip,0) skip,
+					sum(req) inv, 
+					ifnull(round(click*100/imp,2),0) ctr,
+                    ifnull(round(hit*100/imp,2),0) htr,
+                    ifnull(round(views*100/imp,2),0) vtr,
+				   ifnull(round(ifnull(imp,0)*100/sum(req),2),0) fillrate,
+				   <isNotEmpty property="cp_book_total"> ifnull(round(ifnull(hit,0)*100/$cp_book_total$,2), 0)</isNotEmpty><isEmpty property="cp_book_total"> 0 </isEmpty> bookrate,				   
+			       round(avg(cost_total/hit)) avg_cost
+		 from (select siteid, sitename, sum(cost*(views+click)) cost_total,
+		                sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+		          from (select  cpid, a.adsid, adsname, book_total, cost, c.slotid, d.sitename, d.siteid
+		                  from ads a, slot c, site d, ads_slot b					                    		
+		                  where a.prtype = 2
+		                    <isNotEmpty property="cpid"> and a.cpid = $cpid$</isNotEmpty>
+		                    <isNotEmpty property="sitetype"> and sitetype = $sitetype$</isNotEmpty>
+		                    <isNotEmpty property="mediaid"> and d.corpid = $mediaid$</isNotEmpty>
+		                    and a.adsid = b.adsid
+		                    and b.slotid = c.`slotid`
+		                    and c.siteid = d.siteid
+		                ) a
+		                left join rpt_prism r 
+		                    on a.`adsid` = r.`adsid` 
+		                    and a.slotid = r.slotid
+		                    and rptday between $sday$ and $eday$ 
+		            group by a.`siteid`
+		        ) a 
+		        left join inventory b on b.rptday between $sday$ and $eday$ 
+		        and a.siteid = b.siteid 
+	<dynamic prepend="where">
+<isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	</dynamic>
+		      group by a.siteid
+		</select>
+		<select id="getPrismMedTotal" resultClass="prismrpt" parameterClass="java.util.Map">	
+		    select x.*,
+		    		ifnull(round(click*100/imp,2),0) ctr,
+                    ifnull(round(hit*100/imp,2),0) htr,
+                    ifnull(round(views*100/imp,2),0) vtr,
+				   ifnull(round(ifnull(imp,0)*100/inv,2),0) fillrate,
+				   ifnull(round(ifnull(hit,0)*100/$cp_book_total$,2), 0) bookrate,
+			       round(avg(cost_total/hit)) avg_cost
+		    from ( select ifnull(sum(imp),0) imp, ifnull(sum(click),0) click, ifnull(sum(views),0) views, ifnull(sum(voids),0) voids, 
+							ifnull(sum(skip),0) skip, ifnull(sum(hit),0) as hit,
+							sum(inv) inv, ifnull(sum(cost_total),0) cost_total
+					 from (select siteid, sitename, sum(cost*(views+click)) cost_total,
+					                sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+					          from (select  cpid, a.adsid, adsname, book_total, cost, c.slotid, d.sitename, d.siteid
+					                  from ads a, slot c, site d, ads_slot b					                    		
+					                  where a.prtype = 2
+					                    and a.cpid = $cpid$
+					                    <isNotEmpty property="mediaid"> and d.corpid = $mediaid$</isNotEmpty>
+					                    and a.adsid = b.adsid
+					                    and b.slotid = c.`slotid`
+					                    and c.siteid = d.siteid
+					                ) a
+					                left join rpt_prism r 
+					                    on a.`adsid` = r.`adsid` 
+					                    and a.slotid = r.slotid
+					                    and rptday between $sday$ and $eday$ 
+					            group by a.`siteid`
+					        ) a 
+					        left join 
+					        (select siteid, sum(req) as inv
+					           from inventory
+					          where rptday between $sday$ and $eday$ 
+					          group by siteid
+					        ) b 
+					        on a.siteid = b.siteid 
+		    )x
+		</select>
+		<select id="getPrismMedDayRpt" resultClass="prismrpt" parameterClass="java.util.Map">	
+		select y.yymmdd as name, weekday, inv, total_imp,
+				ifnull(imp,0) imp, ifnull(click,0) click, ifnull(voids,0) voids,
+			        ifnull(hit,0) hit, ifnull(views,0) views, ifnull(skip,0) skip,
+			        ifnull(round(click*100/imp,2),0) ctr,
+			        ifnull(round(hit*100/imp,2),0) htr,
+			        ifnull(round(views*100/imp,2),0) vtr,
+			        ifnull(round(total_imp*100/inv,2),0) fillrate,			        
+			        ifnull(round(cost_total/hit),0) avg_cost,
+			        cost_total
+			   from (select yymmdd, weekday, ifnull(inv,0) inv, ifnull(total_imp,0) total_imp
+				      from  ymd x
+					        left join 
+                            (select rptday, sum(req) as inv
+                               from (select c.slotid, c.slotname, count(distinct a.adsid) adscnt
+                                         from ads a, ads_slot b, slot c
+                                    where a.cpid = $cpid$
+                                     <isNotEmpty property="adsid"> and a.adsid = $adsid$ </isNotEmpty>
+                                      <isNotEmpty property="siteid"> and c.siteid = $siteid$ </isNotEmpty>
+                                       and a.prtype = 2
+                                      and a.stat = 1
+                                      and a.adsid = b.adsid
+                                      and b.slotid = c.slotid 
+                                      group by slotid
+						            ) a
+                                    join inventory b 
+                                    on b.rptday between $sday$ and $eday$
+                                    and a.slotid = b.slotid
+                                  group by rptday		      
+					        ) y on x.yymmdd = y.rptday  
+					        left join  
+                             (select rptday, sum(imp) total_imp			              
+                             from (select c.siteid, b.slotid, slotname
+                                      from ads a, ads_slot b, slot c
+                                     where cpid = $cpid$
+                                     <isNotEmpty property="adsid"> and a.adsid = $adsid$ </isNotEmpty>
+                                      <isNotEmpty property="siteid"> and c.siteid = $siteid$ </isNotEmpty>
+                                       and b.slot_state = 1
+                                       and a.`adsid` = b.adsid
+                                       and b.`slotid` = c.`slotid`                                       
+                                     group by c.slotid
+                                ) a 
+				                join rpt_prism b on b.rptday between $sday$ and $eday$ and a.slotid = b.slotid 				    
+				          group by b.rptday
+				         ) z on x.yymmdd = z.rptday					 
+					  where yymmdd between $sday$ and $eday$
+				) y
+			    left join
+			    (select b.rptday, sum(cost*(views+click)) cost_total, book_total, 
+			              sum(b.imp) as imp, sum(b.click) click, sum(b.views) views, sum(b.voids) voids, sum(b.skip) skip, sum(b.views+b.click) as hit
+				     from (select cpid, d.sitetype, c.siteid, sitename, b.slotid, slotname, a.adsid, a.startdate, a.enddate, cost, book_total
+						      from ads a, ads_slot b, slot c, site d
+						     where cpid = $cpid$
+                              <isNotEmpty property="adsid"> and a.adsid = $adsid$ </isNotEmpty>
+                               <isNotEmpty property="siteid"> and c.siteid = $siteid$ </isNotEmpty>
+ 						       and b.slot_state = 1
+						       and a.`adsid` = b.adsid
+						       and b.`slotid` = c.`slotid`
+						       and c.siteid = d.siteid
+						     group by adsid, c.slotid	
+						) a 
+				      join rpt_prism b on b.rptday between $sday$ and $eday$ and a.cpid = b.cpid and a.adsid = b.adsid and a.slotid = b.slotid
+				    group by b.rptday
+			     ) x on y.yymmdd = x.rptday
+			  order by y.yymmdd
+	</select>	
+	<select id="getPrismMedDayTotal" resultClass="prismrpt" parameterClass="java.util.Map">	
+select total_imp, inv, ifnull(round(total_imp*100/inv,2),0) fillrate,	
+        ifnull(imp,0) imp, ifnull(click,0) click, ifnull(voids,0) voids,
+        ifnull(hit,0) hit, ifnull(views,0) views, ifnull(skip,0) skip,
+        ifnull(round(click*100/imp,2),0) ctr,
+        ifnull(round(hit*100/imp,2),0) htr,
+        ifnull(round(views*100/imp,2),0) vtr,
+        ifnull(round(cost_total/hit),0) avg_cost,
+        cost_total
+    from  ( select sum(imp) as total_imp
+             from (select  cpid, a.adsid, adsname, book_total, cost, c.slotid, d.sitename, d.siteid
+                 from ads a, slot c, site d, ads_slot b
+                where a.prtype = 2
+                and a.cpid = $cpid$
+               <isNotEmpty property="adsid"> and a.adsid = $adsid$ </isNotEmpty>
+                <isNotEmpty property="siteid"> and c.siteid = $siteid$ </isNotEmpty>
+                   and a.adsid = b.adsid
+                   and b.slotid = c.`slotid`
+                   and c.siteid = d.siteid
+                   group by slotid
+               ) a
+	       left join rpt_prism r on a.slotid = r.slotid and rptday between $sday$ and $eday$	       
+	      ) x,
+	      (select sum(req) as inv
+	        from (select  cpid, a.adsid, adsname, book_total, cost, c.slotid, d.sitename, d.siteid
+                     from ads a, slot c, site d, ads_slot b
+                    where a.prtype = 2
+                    and a.cpid = $cpid$
+                    <isNotEmpty property="adsid"> and a.adsid = $adsid$ </isNotEmpty>
+                    <isNotEmpty property="siteid"> and c.siteid = $siteid$ </isNotEmpty>
+                       and a.adsid = b.adsid
+                       and b.slotid = c.`slotid`
+                       and c.siteid = d.siteid
+                       group by slotid
+               ) a
+               left join inventory r on a.slotid = r.slotid and rptday between $sday$ and $eday$
+	    ) y
+	    ,
+	    (select sum(cost*(views+click)) cost_total,
+			    sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+	     from (select  cpid, a.adsid, adsname, book_total, cost, c.slotid, d.sitename, d.siteid
+		     from ads a, slot c, site d, ads_slot b
+		    where a.prtype = 2
+		    and a.cpid = $cpid$
+               <isNotEmpty property="adsid"> and a.adsid = $adsid$ </isNotEmpty>
+                <isNotEmpty property="siteid"> and c.siteid = $siteid$ </isNotEmpty>
+		       and a.adsid = b.adsid
+		       and b.slotid = c.`slotid`
+		       and c.siteid = d.siteid
+	       ) a
+	       left join rpt_prism r on a.`adsid` = r.`adsid` and a.slotid = r.slotid and rptday between $sday$ and $eday$
+	    ) z
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+ 		<select id="getPrismAdsTotal" resultClass="prismrpt" parameterClass="java.util.Map">
+		select x.*, ifnull(round(click*100/imp,2),0) ctr,
+		        ifnull(round(hit*100/imp,2),0) htr,
+		        ifnull(round(views*100/imp,2),0) vtr,
+		        ifnull(round(ifnull(hit,0)*100/book_total,2), 0) bookrate
+		   from (select cpid, 
+		                sum(book_total) book_total, ifnull(sum(book_total)-sum(hit), 0) as remain_hit,
+		                round(sum(cost_total)/sum(hit)) as avg_cost, sum(round(hit*cost)) as paid,
+		                sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(hit) as hit
+		            from (select a.cpid, a.adsid, adsname, substr(startdate,1,8) startdate, substr(enddate,1,8) enddate,		   
+		                        goal_total, book_total, ads_state, cost,
+		                        (cost*book_total) cost_total,
+		                        sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+				           from ads a
+				                left join rpt_prism r on a.`adsid` = r.`adsid`
+                       			<isNotEmpty property="sday"> and rptday between $sday$ and $eday$ </isNotEmpty>
+				        where a.stat = 1
+				         and a.prtype = 2
+					     and a.cpid = $cpid$
+				       group by a.`adsid`
+		                ) a
+		        group by cpid
+		      ) x
+      </select> 		
+      
+      
+  		<select id="getPrismDayRpt" resultClass="prismrpt" parameterClass="java.util.Map">
+			 select y.yymmdd as name, weekday, 
+			        ifnull(imp,0) imp, ifnull(click,0) click, ifnull(voids,0) voids,
+			        ifnull(hit,0) hit, ifnull(views,0) views, ifnull(skip,0) skip,
+			        ifnull(round(ifnull(hit,0)*100/guarantee), 0) as bookrate,
+			        guarantee,
+			        ifnull(round(click*100/imp,2),0) ctr,
+			        ifnull(round(hit*100/imp,2),0) htr,
+			        ifnull(round(views*100/imp,2),0) vtr,
+			        ifnull(round(cost_total/hit),0) avg_cost,
+			        cost_total
+			   from (select yymmdd, weekday, sum(day_guarantee) as guarantee
+			          from (select cpid, adsid, adsname, startdate, enddate, yymmdd,weekday,
+			                      datediff(substr(a.enddate,1,8), substr(a.startdate,1,8))+1 as totaldays,
+			                      book_total,
+			                      round(book_total/(datediff(substr(a.enddate,1,8), substr(a.startdate,1,8))+1)) day_guarantee
+			                 from ads a
+			                      join ymd y on yymmdd between substr(startdate,1,8) and substr(enddate,1,8) 
+			                where prtype = 2
+			                  and a.stat = 1
+			                   	<isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+							  	<isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+			              ) x
+			          group by yymmdd
+			     ) y
+			     left join
+			     (select b.rptday, sum(cost*(views+click)) cost_total, book_total,
+			              sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+				     from (<include refid="ADSCR.TABLE" />) a 
+				     join rpt_prism b on b.rptday between substr(startdate,1,8) and substr(enddate,1,8)
+				      and a.cpid = b.cpid and a.adsid = b.adsid and a.crid = b.crid
+				    group by b.rptday
+			     ) x on y.yymmdd = x.rptday
+			  where y.yymmdd between $sday$ and $eday$
+			  order by y.yymmdd
+  		</select>      
+  		<select id="getPrismDayTotal" resultClass="prismrpt" parameterClass="java.util.Map">
+		 select sum(guarantee) guarantee, ifnull(round(ifnull( sum(hit),0)*100/sum(guarantee)), 0) as bookrate,
+		        sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(hit) as hit,
+		        ifnull(round(sum(click)*100/sum(imp),2),0) ctr,
+		        ifnull(round(sum(hit)*100/sum(imp),2),0) htr,
+		        ifnull(round(sum(views)*100/sum(imp),2),0) vtr,
+		        ifnull(round(sum(cost_total)/sum(hit)),0) avg_cost
+		 from (select y.yymmdd as name, weekday, 
+				        ifnull(imp,0) imp, ifnull(click,0) click, ifnull(voids,0) voids,
+				        ifnull(hit,0) hit, ifnull(views,0) views, ifnull(skip,0) skip,
+				        guarantee, cost_total		        
+				   from (select yymmdd, weekday, sum(day_guarantee) as guarantee
+				          from (select cpid, adsid, adsname, startdate, enddate, yymmdd,weekday,
+				                      datediff(substr(enddate,1,8), substr(startdate,1,8))+1 as totaldays,
+				                      book_total,
+				                      round(book_total/(datediff(substr(enddate,1,8), substr(startdate,1,8))+1)) day_guarantee
+				                 from ads a
+				                      join ymd y on yymmdd between substr(startdate,1,8) and substr(enddate,1,8) 
+				                where prtype = 2
+				                  and a.stat = 1
+                  				<isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+							  	<isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+				              ) x
+				          group by yymmdd
+				     ) y
+		     		left join
+				     (select b.rptday, sum(cost*(views+click)) cost_total, book_total,
+				              sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+				     from (<include refid="ADSCR.TABLE" />) a 
+				     join rpt_prism b on b.rptday between substr(startdate,1,8) and substr(enddate,1,8)
+					      and a.cpid = b.cpid and a.adsid = b.adsid and a.crid = b.crid
+					    group by b.rptday
+				     ) x on y.yymmdd = x.rptday
+			  where y.yymmdd between $sday$ and $eday$
+  		) x
+ 		</select>
+ 		<select id="getPrismTimeRpt" resultClass="prismrpt" parameterClass="java.util.Map">
+			select y.time_str as name,  
+					ifnull(imp,0) imp, ifnull(click,0) click, ifnull(voids,0) voids,
+				    ifnull(hit,0) hit, ifnull(views,0) views, ifnull(skip,0) skip,
+				    ifnull(round(click*100/imp,2),0) ctr,
+			        ifnull(round(hit*100/imp,2),0) htr,
+			        ifnull(round(views*100/imp,2),0) vtr
+		from times y
+			     left join 
+			     (select b.rpttime, sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+						from (
+								<include refid="ADSCR.TABLE" />
+							  ) a join rpt_prism b on b.rptday between $sday$ and $eday$ 
+								and a.cpid = b.cpid and a.adsid = b.adsid and a.crid = b.crid
+					           group by b.rpttime
+							) x 
+				  on y.tno = x.rpttime
+			order by y.tno
+  		</select>
+  		
+  	
+
+
+  	<select id="getSitePrismTimely" resultClass="prismrpt" parameterClass="java.util.Map">
+		select y.time_str as name,  
+				ifnull(inv,0) inv, ifnull(imp,0) imp, ifnull(click,0) click, ifnull(voids,0) voids,
+			    ifnull(hit,0) hit, ifnull(views,0) views, ifnull(skip,0) skip,
+			    ifnull(round(imp*100/inv,2),0) fillrate,
+		        ifnull(round(click*100/imp,2),0) ctr,
+		        ifnull(round(hit*100/imp,2),0) htr,
+		        ifnull(round(views*100/imp,2),0) vtr,
+		        ifnull(round(cost_total/hit),0) avg_cost,
+		        ifnull(cost_total,0) as cost			
+		from times y
+		     left join 
+		     (select b.rpttime, ifnull(sum(req),0) inv
+				from (<include refid="SITESLOT.TABLE" />) a 
+			  		join inventory b on b.rptday between $sday$ and $eday$ 
+					and a.siteid = b.siteid and a.slotid = b.slotid 
+		           group by b.rpttime
+			 ) x on y.tno = x.rpttime
+     		left join 
+     		(select rpttime, sum(cost*(views+click)) cost_total,
+    					sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+        			from (<include refid="ADSSLOT.TABLE" />) a, rpt_prism r 
+			       where a.adsid = r.adsid
+			       and a.slotid = r.slotid
+			       and rptday between $sday$ and $eday$ 
+			       group by rpttime				       
+			    ) z  on z.rpttime = y.tno      
+			order by y.tno
+ 		</select>	
+  		
+  		
+  		
+  		
+  		
+  		
+  		
+  		
+  	<select id="getSitePrismDailyTotal" resultClass="prismrpt" parameterClass="java.util.Map">
+		select  ifnull(inv,0) inv, ifnull(imp,0) imp, ifnull(click,0) click, ifnull(voids,0) voids,
+			    ifnull(hit,0) hit, ifnull(views,0) views, ifnull(skip,0) skip,
+			    ifnull(round(imp*100/inv,2),0) fillrate,
+		        ifnull(round(click*100/imp,2),0) ctr,
+		        ifnull(round(hit*100/imp,2),0) htr,
+		        ifnull(round(views*100/imp,2),0) vtr,
+		        ifnull(round(cost_total/hit),0) avg_cost,
+		        ifnull(cost_total,0) as cost			
+		from (select ifnull(sum(req),0) inv
+				from (select c.siteid, a.slotid
+						  from slot a, section b, site c
+						  where c.siteid = $siteid$
+			   				and a.prtype = 2
+			   				<isNotEmpty property="slotid" prepend="and"> slotid = $slotid$</isNotEmpty>
+						    and a.secid = b.secid
+						    and b.siteid = c.siteid
+			  		) a join inventory b on b.rptday between $sday$ and $eday$ 
+					and a.siteid = b.siteid and a.slotid = b.slotid 
+			 ) x,
+     		(select sum(cost*(views+click)) cost_total,
+    					sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+        			from (
+        					<include refid="ADSSLOT.TABLE" />
+        				 ) a, rpt_prism r 
+			       where a.adsid = r.adsid
+			       and a.slotid = r.slotid
+			       and rptday between $sday$ and $eday$ 
+			    ) z     
+		</select>
+ 
+ 	<select id="getSitePrismDaily" resultClass="prismrpt" parameterClass="java.util.Map">
+		select y.yymmdd as name, weekday,  
+				ifnull(inv,0) inv, ifnull(imp,0) imp, ifnull(click,0) click, ifnull(voids,0) voids,
+			    ifnull(hit,0) hit, ifnull(views,0) views, ifnull(skip,0) skip,
+			    ifnull(round(imp*100/inv,2),0) fillrate,
+		        ifnull(round(click*100/imp,2),0) ctr,
+		        ifnull(round(hit*100/imp,2),0) htr,
+		        ifnull(round(views*100/imp,2),0) vtr,
+		        ifnull(round(cost_total/hit),0) avg_cost,
+		        ifnull(cost_total,0) as cost			
+		from ymd y
+		     left join 
+		     (select b.rptday, ifnull(sum(req),0) inv
+				from (
+						<include refid="SITESLOT.TABLE" />
+			  		  ) a 
+			  		  join inventory b 
+			  		    on b.rptday between $sday$ and $eday$ 
+					   and a.siteid = b.siteid 
+					   and a.slotid = b.slotid 
+		             group by b.rptday
+			 ) x on y.yymmdd = x.rptday
+     		left join 
+     		(select rptday, sum(cost*(views+click)) cost_total,
+    					sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit
+        			from (
+        					<include refid="ADSSLOT.TABLE" />
+        				  ) a, rpt_prism r 
+			        where a.adsid = r.adsid
+			          and a.slotid = r.slotid
+			          and rptday between $sday$ and $eday$ 
+			       group by rptday				       
+			    ) z  on z.rptday = y.yymmdd      
+		where y.yymmdd between $sday$ and $eday$ 
+		order by y.yymmdd      
+		</select>
+ <select id="getSitePrismCampaign" resultClass="prismrpt" parameterClass="java.util.Map">
+ select q.*,
+        ifnull(round(click*100/imp,2),0) ctr,
+        ifnull(round(hit*100/imp,2),0) htr,
+        ifnull(round(views*100/imp,2),0) vtr,
+        ifnull(round(cost_total/hit),0) avg_cost,
+        ifnull(cost_total,0) as cost,
+        isname as state, c.text
+   from (select siteid, a.slotid, a.cpid as id, cpname as name, a.startdate, a.enddate, sum(cost*(views+click)) cost_total,
+      			sum(imp) as imp, sum(click) click, sum(views) views, sum(voids) voids, sum(skip) skip, sum(views+click) as hit,
+          		<![CDATA[if(startdate <= curdate()+0 and enddate >= curdate()+0 ,3, 5) cp_state]]>
+		    from (
+		    	select a.cpid, d.cpname, c.siteid, a.`adsid`, a.`cost`, b.slotid,  
+		    			substring(d.startdate,1,8) startdate, substring(d.enddate,1,8) enddate 
+			     from ads a, ads_slot b, slot c, campaign d
+			     where c.siteid = $siteid$
+			       and a.cpid = d.cpid
+			       and a.`adsid` = b.`adsid`
+			     and b.`slotid` = c.`slotid`
+			     
+			     
+			     ) a, rpt_prism r
+		    where a.adsid = r.adsid
+		       and a.slotid = r.slotid
+		       and rptday between $sday$ and $eday$
+		    group by siteid, a.cpid  
+		   ) q
+		    left join code_instance c on c.code = 'ads_state' and c.isid = q.cp_state	
+		 </select> 	
+		 
+	
+				<sql id="ADS">
+			    select a.adsid, adsname, a.startdate, a.enddate
+			       from ads a
+			       where a.cpid = $cpid$
+			         and a.stat = 1
+			         and a.prtype = 2 		       	
+  				</sql>
+  				
+  				<sql id="CLICK_TIME">			
+				ifnull(sum(click1),0) as click1,
+				ifnull(sum(click2),0) as click2,
+				ifnull(sum(click3),0) as click3,
+				ifnull(sum(click4),0) as click4,
+				ifnull(sum(click5),0) as click5,
+				ifnull(sum(click6),0) as click6,
+				ifnull(sum(click7),0) as click7
+	      from (<include refid="ADS" />) a 	      					
+	     		</sql>		
+  				
+  				
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+		 	
+		<select id="getAdsClickTime" resultClass="ckrpt" parameterClass="java.util.Map">
+ 		select a.adsid, adsname, 
+				<include refid="CLICK_TIME" />
+				 left join rpt_prism_clicktime b on b.rptday between $sday$ and $eday$
+	     and a.adsid = b.adsid 
+	     group by a.adsid
+		 </select>  
+		 
+			<select id="getAdsSkipTime" resultClass="ckrpt" parameterClass="java.util.Map">
+ 		select a.adsid, adsname, 
+				<include refid="CLICK_TIME" />
+				 left join rpt_prism_skiptime b on b.rptday between $sday$ and $eday$
+	     and a.adsid = b.adsid 
+	     group by a.adsid
+		 </select>  
+		  		
+ 		<select id="getAdsClickTimeTotal" resultClass="ckrpt" parameterClass="java.util.Map">
+ 		select <include refid="CLICK_TIME" />
+				 left join rpt_prism_clicktime b on b.rptday between $sday$ and $eday$
+	     and a.adsid = b.adsid 
+		 </select>  
+		 
+			<select id="getAdsSkipTimeTotal" resultClass="ckrpt" parameterClass="java.util.Map">
+ 		select <include refid="CLICK_TIME" />
+				 left join rpt_prism_skiptime b on b.rptday between $sday$ and $eday$
+	     and a.adsid = b.adsid 
+		 </select>  
+  		
+		
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		
+ 
+	
+  		
+	</sqlMap>

@@ -1,0 +1,246 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@page import="java.text.DecimalFormat"%>
+<%@page import="java.util.Calendar"%>
+<%@page import="net.sf.json.JSONArray"%>
+<%@page import="tv.pandora.adsrv.common.util.StringUtil"%>
+<%@page import="tv.pandora.adsrv.common.util.DateUtil"%>      
+<%@page import="tv.pandora.adsrv.domain.User"%> 
+<%@page import="tv.pandora.adsrv.common.util.IPUtil"%>   
+<%
+	String member_id = "";
+	String member_password = "";
+	if(request.getCookies() != null)
+	{
+		for(Cookie cookie : request.getCookies()){
+			if(cookie != null){
+				if(cookie.getName().equals("member_id")){
+					member_id = cookie.getValue();
+					
+				}
+				if(cookie.getName().equals("member_password")){
+					member_password = cookie.getValue();
+				}
+			}
+				
+		}
+	}
+%><!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prism Ad Network</title>
+<!-- css start -->
+<link rel="stylesheet" href="./css/bootstrap.css">
+<link rel="stylesheet" href="./css/bootstrap-theme.css">
+<link rel="stylesheet" href="./css/login.css">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+<!-- css end -->
+<link rel="stylesheet"
+	href="//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
+
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
+<script src="./js/bootstrap.js"></script>
+<script src="./js/basic.js"></script>
+<script src="./js/common.js"></script>
+<script type="text/javascript">
+    
+    $(function() {	
+    	<%if(!member_id.equals("")){%>
+    		$("[name=chksaveid]").prop("checked",true);
+    		$("#loginid").val("<%=member_id%>");
+    	<%}%>
+    	<%if(!member_password.equals("")){%>
+		$("[name=chksavepwd]").prop("checked",true);
+  		$("#passwd").val("<%=member_password%>");
+  	  		<%}%>
+    	//getid();
+    }); 
+    
+    function login(evt,val) 
+    {
+    	
+        var code;
+        if(val =="1"){
+         code = evt.keyCode;
+        }
+        if(code =="13" || val=="2"){
+            if (document.loginfrm.loginid.value == "" ) {
+                alert("사용자 아이디를 입력하십시요.");
+                document.loginfrm.loginid.focus();
+            }
+            else if (document.loginfrm.passwd.value == "" ) 
+            {
+                alert("비밀번호를 입력하십시요.");
+                document.loginfrm.passwd.focus();
+            }
+            else
+            {
+            	
+            	document.loginfrm.submit();
+            }
+        }
+    }
+    function setCookie (name, value, expires) {
+    	  document.cookie = name + "=" + escape (value) +
+    	    "; path=/; expires=" + expires.toGMTString();
+    	}
+
+    	function getCookie(Name) {
+    	  var search = Name + "="
+    	  if (document.cookie.length > 0) {
+    	    offset = document.cookie.indexOf(search)
+    	    if (offset != -1) {
+    	      offset += search.length
+    	      end = document.cookie.indexOf(";", offset)
+    	      if (end == -1)
+    	        end = document.cookie.length
+    	      return unescape(document.cookie.substring(offset, end))
+    	    }
+    	  }
+    	  return "";
+    	}
+
+    	function saveid() {
+    	  var expdate = new Date();
+    	  var savedate = new Date();
+    	  var deldate = new Date();
+
+    	  savedate.setTime(expdate.getTime() + 1000 * 3600 * 24 * 365); // 30일
+    	  deldate.setTime(expdate.getTime() - 1); // 쿠키 삭제조건
+    	  
+    	  // 기본적으로 30일동안 기억하게 함. 일수를 조절하려면 * 30에서 숫자를 조절하면 됨
+    	  if (loginfrm.chksaveid.checked) {
+    		  setCookie("saveid", loginfrm.loginid.value, savedate);
+    	  } else {
+    		  setCookie("saveid", loginfrm.loginid.value, deldate);
+    	  }
+
+    	  if (loginfrm.chksavepwd.checked) {
+    	      setCookie("savepwd", loginfrm.passwd.value, savedate);
+    	  } else {
+    	      setCookie("savepwd", loginfrm.passwd.value, deldate);
+    	  }
+
+    	  
+    	}
+
+    	function urlparam(name) {
+    	  name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+    	  var regexS = "[\\?&]"+name+"=([^&#]*)";
+    	  var regex = new RegExp( regexS );
+    	  var results = regex.exec( window.location.href );
+    	  if( results == null )
+    	    return "";
+    	  else
+    	    return results[1];
+    	}
+
+    	function getid() {
+    		
+    		loginfrm.chksaveid.checked = ((loginfrm.loginid.value = getCookie("saveid")) != "");
+    		loginfrm.chksavepwd.checked = ((loginfrm.passwd.value = getCookie("savepwd")) != "");
+
+    		var preurl =  urlparam('preurl');
+    	    if (preurl!='' && preurl!='logout') {
+    	        loginfrm.preurl.value = preurl;
+    	    }
+    	}       
+    
+    
+    </script>
+</head>
+<%
+String ipAddress = request.getHeader("X-FORWARDED-FOR");  
+if (ipAddress == null) {  
+	   ipAddress = request.getRemoteAddr();  
+}
+
+String clientIp = request.getHeader("HTTP_X_FORWARDED_FOR");
+if(null == clientIp || clientIp.length() == 0 
+   || clientIp.toLowerCase().equals("unknown")){
+  clientIp = request.getHeader("REMOTE_ADDR");
+}
+ 
+if(null == clientIp || clientIp.length() == 0 
+   || clientIp.toLowerCase().equals("unknown")){
+	clientIp = request.getRemoteAddr();
+}
+String ip2 = IPUtil.getLocalServerIp();
+
+%>
+
+<body onload="loginfrm.loginid.focus()">
+
+	<div class="container-fluid loginBg">
+		<div class="loginBox">
+			<h1>
+				<img src="img/login_logo.gif" alt="prism ad network">
+			</h1>
+			<div class="textBox">
+				<h1>Login</h1>
+				<p>프리즘에 오신것을 환영합니다. <%=ipAddress %></p>
+			</div>
+			<div class="formBox">
+				<img src="img/login-symbol.gif" alt="login-symbol Icon">
+				<div class="formCon">
+					<form class="form-horizontal" id="frmLogin" name="loginfrm" method="post" action="/adsrv/login.do?a=login" method="post" onsubmit="return false;">
+						<!-- input start -->
+						<div class="form-group">
+							<label for="login_id" class="col-lg-3 control-label">아이디</label>
+							<div class="col-lg-9">
+								<div class="input-group">
+									<div class="input-group-addon">
+										<span class="glyphicon glyphicon-user iconColor"></span>
+									</div>
+									<input type="text" class="form-control" id="loginid" name="loginid">
+									
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="login_password" class="col-lg-3 control-label">비밀번호</label>
+							<div class="col-lg-9">
+								<div class="input-group">
+									<div class="input-group-addon">
+										<span class="glyphicon glyphicon-lock iconColor"></span>
+									</div>
+									<input type="password" class="form-control" id="passwd" name="passwd">
+								</div>
+							</div>
+						</div>
+						
+						<div class="form-group">
+							<div class="col-sm-offset-3 col-sm-9 control-label2">
+								<div class="checkbox">
+									<label> <input type="checkbox" name="chksaveid" value="1"/> ID</label> 
+									<label> <input type="checkbox" name="chksavepwd" value="1"/> PASSWORD</label>
+								</div>
+							</div>
+						</div>
+
+						<!-- input end -->
+						<div class="form-group">
+							<div class="col-lg-offset-3 col-lg-9">
+								<button type="submit" class="btn btn-danger btn-block"
+									onclick="javascript:login(event,2)">로그인</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
