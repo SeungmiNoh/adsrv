@@ -138,7 +138,9 @@ $(function(){
 		$.ajax({		    
 	    	url : "rptmgr.do?a=crClickRpt&cpid="+cpid+"&adsid="+adsid+"&crid="+crid+"&sday="+sday+"&eday="+eday,
 	    	dataType: "json",
-            success: function (data) {               	
+            success: function (data) {       
+            	
+            	$("#tbodyClick").html("");
                 $.each(data, function (index, item) {
                 	var htmlStr = "";
 	               	htmlStr +='<tr>';
@@ -153,7 +155,7 @@ $(function(){
 	               	htmlStr +='<td class="textRight">'+item.ctr+'%</td>';
 	               	htmlStr +='<td class="textRight">'+item.cpr+'%</td>';
 	               	htmlStr +='</tr>'; 
-	               	$("#tbodyClick").html(htmlStr);
+	               	$("#tbodyClick").append(htmlStr);
 	            });
             },
             error: function () {

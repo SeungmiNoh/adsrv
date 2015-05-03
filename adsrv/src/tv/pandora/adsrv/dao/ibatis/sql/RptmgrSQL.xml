@@ -9,16 +9,15 @@
    <typeAlias alias="ckrpt" type="tv.pandora.adsrv.domain.ClickTime" />
    <typeAlias alias="prismrpt" type="tv.pandora.adsrv.domain.PrismReport" />
 		<sql id="ADSCR.TABLE">
-			select a.cpid, a.`adsid`, adsname, b.`crid`, crurl, crname, a.startdate, a.enddate, cr_state, a.cost, a.book_total
-			   from ads a, ads_creative b, creative c 
-			  <dynamic prepend="where">
-				  	<isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
-				  	<isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
-				  	<isNotEmpty property="crid" prepend="and"> b.crid = $crid$</isNotEmpty>
-				  	<isNotEmpty property="prtype" prepend="and"> a.prtype = $prtype$</isNotEmpty>
-			   	     and b.crid = c.crid
-			   	     and a.adsid = b.adsid
-			  </dynamic>
+	select a.cpid, a.`adsid`, adsname, b.`crid`, crurl, crname, a.startdate, a.enddate, cr_state, a.cost, a.book_total
+       from ads a
+       		join ads_creative b on  a.adsid = b.adsid and b.stat = 1
+       		join creative c on b.crid = c.crid and b.stat = 1
+       where a.stat = 1
+			<isNotEmpty property="cpid" prepend="and"> a.cpid = $cpid$</isNotEmpty>
+		  	<isNotEmpty property="adsid" prepend="and"> a.adsid = $adsid$</isNotEmpty>
+		  	<isNotEmpty property="crid" prepend="and"> b.crid = $crid$</isNotEmpty>
+		  	<isNotEmpty property="prtype" prepend="and"> a.prtype = $prtype$</isNotEmpty>
 	   	</sql>
 	 <sql id="SITESLOT.TABLE">
   	select c.siteid, sitename, a.slotid, slotname, secname, width, height,
@@ -202,7 +201,7 @@
 			    ifnull(round(uc*100/imp,2),0) cpr
 		   from (select x.crid, crname, clickcnt,
 		                sum(r.imp) imp, sum(r.views) views, sum(r.uv) uv
-		           from (select b.crid, c.crname, count(d.`ckid`) clickcnt
+		           from (select a.cpid, a.adsid, b.crid, c.crname, count(d.`ckid`) clickcnt
 		                  from ads a
 		                      join ads_creative b on a.`adsid` = b.`adsid` and b.stat = 1
 		                      join creative c on b.`crid` = c.`crid` and c.stat = 1
@@ -214,7 +213,7 @@
 		                  group by b.crid
 		                  ) x
 		                  left join rpt_ctrday r 
-		                  on x.crid = r.`crid` 
+		                  on x.crid = r.`crid` and x.cpid = r.`cpid` and x.adsid = r.`adsid` 
 		                group by x.crid
 		           ) i
 		           join
