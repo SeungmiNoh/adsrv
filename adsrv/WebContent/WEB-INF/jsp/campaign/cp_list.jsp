@@ -18,8 +18,8 @@ try
 	sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
 
 	Map<String,Object> map = (Map)request.getAttribute("response");
-	String sday = DateUtil.getYMD((String)map.get("sday"));
-	String eday = DateUtil.getYMD((String)map.get("eday"));
+	String sday = StringUtil.isNull(request.getParameter("sday"));	
+	String eday = StringUtil.isNull(request.getParameter("eday"));	
 
 	List<Campaign> cplist = (List<Campaign>)map.get("cplist");   
 	List<User> tclist = (List<User>)map.get("tclist");
@@ -309,14 +309,13 @@ for(int k=0; k<cplist.size(); k++){
                         <tr>
                             <td><%=skip+(k+1) %></td>
                             <td class="textLeft">
-                            <span name="cpmod" cpid="<%=cp.getCpid()%>" class="label label-<%=cp.getIstarget().equals("Y")?"info":"default"%>">T</span> 
                             <span name="cpmod" cpid="<%=cp.getCpid()%>" class="label label-<%=cp.getIsprism().equals("Y")?"warning":"default"%>" style="margin-right:6px">P</span> 
-                            <a href="cpmgr.do?a=cpAdsList&cpid=<%=cp.getCpid()%>" class="<%=cp.getText()%>"><%=cp.getCpname() %></a>
+                            <a href="cpmgr.do?a=cpAdsList&cpid=<%=cp.getCpid()%>" class="<%=cp.getText()%>"><%=cp.getCpname() %><%=cp.getIstarget().equals("Y")?"<span class='txtRed' style='font-size:8pt;margin:4px'>targeting</span>":""%></a>
                             </td>
-                            <td><%=cp.getClientname() %></td>
-                            <td><%=StringUtil.isNull(cp.getMedrepname()) %></td>
-                            <td><%=DateUtil.getYMD(cp.getStartdate(),".") %></td>
-                            <td><%=DateUtil.getYMD(cp.getEnddate(), ".") %></td>
+                            <td class="<%=cp.getText()%>"><%=cp.getClientname() %></td>
+                            <td class="<%=cp.getText()%>"><%=StringUtil.isNull(cp.getMedrepname()) %></td>
+                            <td class="<%=cp.getText()%>"><%=DateUtil.getYMD(cp.getStartdate(),".") %></td>
+                            <td class="<%=cp.getText()%>"><%=DateUtil.getYMD(cp.getEnddate(), ".") %></td>
                             <td class="textRight"><%=StringUtil.addComma(cp.getBudget()) %></td>
                              
                             <td class="textRight"><%=StringUtil.addComma(cp.getGoal_total()) %></td>
@@ -325,8 +324,8 @@ for(int k=0; k<cplist.size(); k++){
                             <td class="textRight">33,333</td>
                             <td class="textRight">0.24%</td>
                             -->
-                            <td><%=DateUtil.getYMD(cp.getInsertdate(),".") %></td>
-                            <td><%=cp.getTcname()%></td>
+                            <td class="<%=cp.getText()%>"><%=DateUtil.getYMD(cp.getInsertdate(),".") %></td>
+                            <td class="<%=cp.getText()%>"><%=cp.getTcname()%></td>
                             <td><span class="<%=cp.getText()%>"><%=StringUtil.isNull(cp.getCp_statename()) %></span></td>
                         </tr>
 <%} %>                        

@@ -695,8 +695,16 @@ $('#btnEday').click(function(){
         $("#end").datepicker().focus();
     });
 });
-});
 
+
+});
+$(document).on("click", "a[name=rptMenu]", function(e){
+	var alink = $(this).attr("alink");
+
+	$("#frmRpt input[name=a]").val(alink);
+	$("#frmRpt").submit();
+		
+});
 
 $(document).ready( function(){
 	$('input').focus(function(e) {

@@ -3,9 +3,10 @@
     "http://ibatis.apache.org/dtd/sql-map-2.dtd">
     <sqlMap namespace="UsermgrSQL">
    <typeAlias alias="user" type="tv.pandora.adsrv.domain.User" />
+   <typeAlias alias="menu" type="tv.pandora.adsrv.domain.Menu" />
 	
 	<select id="getUserLogin" resultClass="user"  >
-		select userid, username, p.usertype, u.perid, p.pername, u.corpid, c.corpname, c.ismain, u.allowip 
+		select userid, username, c.corptype as usertype, u.perid, p.pername, u.corpid, c.corpname, c.ismain, u.allowip 
 		  from users u
 				inner join permission p on u.perid = p.perid
 				inner join corporation c on u.corpid = c.corpid
@@ -49,6 +50,32 @@
 			  <isNotEmpty property="perid"> and a.perid = $perid$ </isNotEmpty> 
 			  <isNotEmpty property="ismgr"> and a.ismgr = $ismgr$ </isNotEmpty> 
 		      <isNotEmpty property="sch_text" prepend="and"> $sch_column$ like '%$sch_text$%' </isNotEmpty>
+	</select>	
+	
+	
+	<select id="getUserMenuList" resultClass="menu" parameterClass="java.util.Map">
+	select a.menu_id, a.menu_name, webdir, b.menu_sid, b.menu_sname, b.stat,
+			concat(a.controller, '?a=', b.link) link, 
+			concat(a.controller, '?a=', min(b.link)) mainlink
+		 from (select x.perid, pername, x.menu_id, menu_name, webdir, controller, x.idx, sum(svalue) svalue
+				from (select b.perid, b.pername, a.menu_id, a.menu_name, webdir, controller, isname, a.idx, c.isid as svalue, c.idx as idx2
+					from permission b, web_menu a
+						 left join code_instance c on c.code = 'menu_schema' and <![CDATA[(a.menu_schema & c.isid)]]>
+				 where b.stat = 1
+				 and b.perid =  #perid#
+				 ) x
+				 left join permission_menu y on x.menu_id = y.menu_id and x.perid =  y.perid
+				 where <![CDATA[(ifnull(y.menu_val,0) & svalue)  > 0 ]]>				   
+				 group by x.perid, x.menu_id
+			) a
+			left join web_menu_sub b on a.`menu_id` = b.menu_id
+			left join corporation c on c.corpid = #corpid#
+			<dynamic prepend="where">
+				<isNotEqual property="ismain" compareValue="1" prepend="and"> b.ismain != 1</isNotEqual>
+				<isNotEqual property="ismain" compareValue="1" prepend="and"> if(corptype=4,1,0) = ifnull(ismedia,0)</isNotEqual>
+			</dynamic>
+	  group by a.menu_id, b.`menu_sid`
+	  order by a.perid, a.idx, b.idx
 	</select>	
 	<select id="getUserPerList" resultClass="java.util.HashMap" parameterClass="java.util.Map">
 		select perid, pername 
@@ -234,7 +261,7 @@
 		        #perid#,
 		        #corpid#,
 		        1,
-		        #allowIp#,
+		        #allowip#,
 		        #insertdate#,
 		        #insertuser#,
 		        #insertdate#,
@@ -249,7 +276,7 @@
               <isNotEmpty property="perid">perid         = #perid#,   </isNotEmpty>          
               <isNotEmpty property="corpid">corpid        = #corpid#, </isNotEmpty>           
               <isNotEmpty property="stat">stat          = #stat#,   </isNotEmpty>                
-              <isNotEmpty property="allowip">allowip       = #allowIp#,  </isNotEmpty>       
+              <isNotEmpty property="allowip">allowip       = #allowip#,  </isNotEmpty>       
               updatedate    = #updatedate#,
               updateuser    = #updateuser#
             where userid = #userid#

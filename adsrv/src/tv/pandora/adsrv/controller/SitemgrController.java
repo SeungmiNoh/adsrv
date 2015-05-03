@@ -53,6 +53,7 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("max", String.valueOf(max))	;
 		map.put("sch_text", sch_text);
 		map.put("sch_column", "sitename");
+		map.put("page","Y");
 		Integer totalCount = sitemgrFacade.getSiteCnt(map);
 		List<Map<String, String>> sitelist = sitemgrFacade.getSiteList(map);
 		
@@ -84,9 +85,10 @@ public class SitemgrController extends AdsrvMultiActionController
 		String sitetag = StringUtil.isNull(request.getParameter("sitetag"));
 		String siteurl= StringUtil.isNull(request.getParameter("siteurl"));
 		String memo= StringUtil.isNull(request.getParameter("memo"));
-		
+		System.out.println("memo="+memo);
 		String userID = (String)SessionUtil.getAttribute("userID");
-		
+		System.out.println("StringUtil.htmlEncode(memo)="+StringUtil.htmlEncode(memo));
+	
 		Map<String, String> map = new HashMap<String, String>();
 	    
 		map.put("corpid", corpid);
@@ -100,14 +102,15 @@ public class SitemgrController extends AdsrvMultiActionController
 			map.put("insertdate", DateUtil.simpleDate2());
 			map.put("insertuser", userID);
 			siteid = String.valueOf(sitemgrFacade.addSite(map));
+			return new ModelAndView("redirect:sitemgr.do?a=secList&s_siteid="+siteid, null);
 		} else {
 			map.put("siteid", siteid);
 			map.put("updatedate", DateUtil.simpleDate2());
 			map.put("updateuser", userID);
 			sitemgrFacade.modSite(map);
+			return new ModelAndView("redirect:sitemgr.do?a=siteList&s_siteid="+siteid, null);
 		}
 		
-		return new ModelAndView("redirect:sitemgr.do?a=secList&s_siteid="+siteid, null);
 	}
 	public ModelAndView secList(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
@@ -131,6 +134,8 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("max", String.valueOf(max))	;
 		map.put("sch_text", sch_text);
 		map.put("sch_column", "secname");
+		map.put("page","Y");
+
 		Integer totalCount = sitemgrFacade.getSectionCnt(map);
 		List<Map<String, String>> seclist = sitemgrFacade.getSectionList(map);
 
@@ -173,13 +178,14 @@ public class SitemgrController extends AdsrvMultiActionController
 			map.put("insertdate", DateUtil.simpleDate2());
 			map.put("insertuser", userID);
 			secid = String.valueOf(sitemgrFacade.addSection(map));
+			return new ModelAndView("redirect:sitemgr.do?a=slotList&s_siteid="+siteid+"&s_secid="+secid, null);
 		} else {
 			map.put("secid", secid);
 			map.put("updatedate", DateUtil.simpleDate2());
 			map.put("updateuser", userID);
 			sitemgrFacade.modSection(map);
+			return new ModelAndView("redirect:sitemgr.do?a=secList&s_siteid="+siteid+"&s_secid="+secid, null);
 		}
-		return new ModelAndView("redirect:sitemgr.do?a=secList&s_siteid="+siteid+"&s_secid="+secid, null);
 	}
 	public ModelAndView slotList(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
@@ -205,6 +211,8 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("max", String.valueOf(max))	;
 		map.put("sch_text", sch_text);
 		map.put("sch_column", "slotname");
+		map.put("page","Y");
+
 		Integer totalCount = sitemgrFacade.getSlotCnt(map);
 		List<Slot> slotlist = sitemgrFacade.getSlotList(map);
 
@@ -235,6 +243,43 @@ public class SitemgrController extends AdsrvMultiActionController
 		resultMap.put("nowPage", page);		
 		return new ModelAndView("site/slot_list", "response", resultMap);
 	}
+	public ModelAndView siteView(HttpServletRequest request, HttpServletResponse response) throws Exception {	
+		
+		String siteid = StringUtil.isNull(request.getParameter("siteid"));
+		
+		
+		Map<String, String> map = new HashMap<String, String>();
+	    
+		map.put("siteid", siteid)	;
+		Map<String,String> site = sitemgrFacade.getSite(map);
+		map.put("siteid", siteid)	;
+		map.put("page","Y");
+		List<Slot> slotlist = sitemgrFacade.getSlotList(map);
+
+		map.clear();
+		map.put("order_str", "sitename");
+		List<Map<String, String>> sitelist = sitemgrFacade.getSiteList(map);
+		map.clear();
+		map.put("siteid", siteid)	;
+		map.put("order_str", "secname");
+		List<Map<String, String>> seclist = sitemgrFacade.getSectionList(map);
+		
+		//광고상품 목록
+		map.clear();
+		map.put("code", "prtype");
+		List<Map<String, String>> codelist = cpmgrFacade.getCodeList(map);	
+			
+	
+		
+
+		Map<String, Object> resultMap = new HashMap<String, Object>();		
+		resultMap.put("site", site);
+		resultMap.put("slotlist", slotlist);
+		resultMap.put("codelist", codelist);
+		resultMap.put("seclist", seclist);
+		
+		return new ModelAndView("site/site_view", "response", resultMap);
+	}
 	public ModelAndView slotRegist(HttpServletRequest request, HttpServletResponse response) throws Exception {	
 		
 		String slotid = StringUtil.isNull(request.getParameter("slotid"));
@@ -246,7 +291,9 @@ public class SitemgrController extends AdsrvMultiActionController
 		String height = StringUtil.isNull(request.getParameter("height"));
 		String prtype = StringUtil.isNull(request.getParameter("prtype"));
 		String memo= StringUtil.isNull(request.getParameter("memo"));
-		
+		System.out.println("memo="+memo);
+		System.out.println("StringUtil.htmlEncode(memo)="+StringUtil.htmlEncode(memo));
+	
 		String userID = (String)SessionUtil.getAttribute("userID");
 		
 		Map<String, String> map = new HashMap<String, String>();
@@ -299,6 +346,7 @@ public class SitemgrController extends AdsrvMultiActionController
 		map.put("max", String.valueOf(max))	;
 		map.put("sch_text", sch_text);
 		map.put("sch_column", sch_column);
+		map.put("page","Y");
 		Integer totalCount = sitemgrFacade.getSlgroupCnt(map);
 		List<Map<String, String>> grouplist = sitemgrFacade.getSlgroupList(map);
 

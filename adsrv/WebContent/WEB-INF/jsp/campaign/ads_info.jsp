@@ -88,68 +88,45 @@ $(document).ready(function() {
             <section class="sectionBox">
                 <div class="boxTitle">
                     <!-- title Start -->
-                    <div class="title">애즈 상세 정보</div>
-                    <div class="breadcrumbs"><span class="glyIcon"><img src="<%=web%>/img/navIcon.png" alt=""></span> 현재위치 : 캠페인 > 캠페인 정보</div>
-                    <!-- title End -->
+                    <div class="title">캠페인 <!--  span style="font-size:10pt;margin-right:4px" class="glyphicon glyphicon-menu-right"></span-->애즈 정보
+                    <span class="txtBlue" style="margin-left:10px;font-size:9pt"><span class="glyphicon glyphicon-play-circle"></span> <%=cp.getCpname() %> </span>  
+                    
+                    <span class="txtBlue" style="font-size:9pt"><span class="glyphicon glyphicon-menu-right"></span> <%=ads.getAdsname() %> </span>  
+                    </div>
+                      <div class="breadcrumbs"><span class="glyIcon"><img src="<%=web%>/img/navIcon.png" alt=""></span> 현재위치 : 캠페인  > 캠페인 정보 > 애즈 정보</div>
+                   <!-- title End -->
                 </div>      
-                <table class="viewTable" style="width:900px">
-				<colgroup>
-				<col width="10%">
-				<col width="23%">
-				<col width="10%">
-				<col width="23%">
-				<col width="10%">
-				<col width="">
-				</colgroup>
-                    <tr>
-                        <th>캠페인명</th>
-                        <td colspan="3"><%=cp.getCpname() %></td>
-                        <th>담당자</th>
-                        <td><%=cp.getTcname() %></td>
-                    </tr>
-                    <tr>
-                        <th>광고주</th>
-                        <td><%=cp.getClientname() %></td>
-                        <th>대행사</th>
-                        <td><%=StringUtil.isNull(cp.getAgencyname()) %></td>
-                        <th>미디어렙</th>
-                        <td><%=StringUtil.isNull(cp.getMedrepname()) %></td>
-                    </tr>
-                    <tr>
-                        <th>보장량</th>
-                        <td><%=StringUtil.addComma(cp.getBook_total()) %></td>
-                        <th>목표량</th>
-                        <td><%=StringUtil.addComma(cp.getGoal_total()) %></td>
-                        <th>집행금액</th>
-                        <td><%=StringUtil.addComma(cp.getBudget()) %></td>
-                    </tr>
-                    <tr>
-                        <th>시작일</th>
-                        <td><%=DateUtil.getYMD(cp.getStartdate(), "-") %></td>
-                        <th>종료일</th>
-                        <td><%=DateUtil.getYMD(cp.getEnddate(), "-") %></td>
-                        <th>상태</th>
-                        <td><span class="<%=cp.getText()%>"><%=StringUtil.isNull(cp.getCp_statename()) %></span></td>
-                    </tr>
-                </table>
-                <br>
-                <!-- view Table End -->
-                <!-- campaign view End -->
-
-                <!-- ads add title Start -->
+             	<%-- **************** 캠페인 정보 ********************* --%>
+ 				<%@ include file="./com_cpinfo.jsp" %>
+              	<%-- ************************************************ --%>                
+              	<br>
                 <div class="boxtitle2">
                      <!-- title Start -->
-                    <div class="title3">애즈</div>
-                    <!-- title End -->
-                    
-                    <div class="tapBox">
-                    
-                        <nav class="tapMenu">
+                    <div class="taptitle">애즈 
+                    <a class="btn btn-danger btn-xs" href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>" role="button" style="float:right;margin-left:300px;">애즈등록</a>
+                    </div>
+                     <div class="tapBox">
+                         <nav class="tapMenu">
                             <ul>
-                            <li class="adsBox">
- <form id="frmAds" method="get" action="cpmgr.do">
-	                <input type="hidden" name="a" value="<%=a %>"/>
-	                <input type="hidden" name="adsid"/>
+                                <li><a href="cpmgr.do?a=cpAdsList&cpid=<%=ads.getCpid()%>">애즈 목록 <span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>
+                                <li><a href="cpmgr.do?a=adsInfo&adsid=<%=ads.getAdsid()%>" class="active">애즈 상세 <span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>
+                                <li><a href="cpmgr.do?a=adsEditTarget&adsid=<%=ads.getAdsid()%>">타겟팅<span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>
+                                <li><a href="cpmgr.do?a=adsEditCreative&adsid=<%=ads.getAdsid()%>">광고물 <span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>                               
+                                <li><a href="cpmgr.do?a=adsEditSlot&adsid=<%=ads.getAdsid()%>">광고 위치<span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>
+                                </ul>
+                        </nav>
+                    </div>
+                    <div class="tapBox_ads">                   	
+	 					<form id="frmAds" method="get" action="cpmgr.do">
+		                <input type="hidden" name="a" value="<%=a %>"/>
+		                <input type="hidden" name="adsid" value="<%=ads.getAdsid()%>"/>
+		                <input type="hidden" name="cp_startdate" value="<%=cp.getStartdate() %>"/>
+		                <input type="hidden" name="cp_enddate" value="<%=cp.getEnddate() %>"/>		                
 	                    <select id="moveid" class="form-control input-sm" style="width:300px;">
 <%
 
@@ -161,19 +138,9 @@ for(int k=0; k<adslist.size(); k++){
  %>                     
                         <option value="<%=mads.getAdsid()%>" <%=ads.getAdsid().equals(mads.getAdsid())?"selected":"" %>><%=mads.getAdsname() %></option>
  <%} %>                 </select>
-                	</form>                    
-                	</li>
-                                <li><a href="cpmgr.do?a=cpAdsList&cpid=<%=ads.getCpid()%>">애즈 목록 <span class="glyphicon glyphicon-menu-right"></span></a>
-                                </li>
-                           	    <li><a href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>">애즈등록<span class="glyphicon glyphicon-menu-right"></span></a>
-                                </li>
-                                 <li><a href="cpmgr.do?a=adsInfo&adsid=<%=ads.getAdsid()%>" class="active">애즈 정보 <span class="glyphicon glyphicon-menu-right"></span></a>
-                                </li>
-                                <li><a href="cpmgr.do?a=adsEdit&adsid=<%=ads.getAdsid()%>">애즈 수정 <span class="glyphicon glyphicon-menu-right"></span></a>
-                                </li>                               
-                               </ul>
-                        </nav>
-                    </div>
+                		</form> 
+                		</div>     
+                		  
                 </div>
                 <!-- ads add title End -->
                 <!-- ads add Table Start -->
@@ -191,7 +158,8 @@ for(int k=0; k<adslist.size(); k++){
                         <tr>
                             <th>애즈명</th>
                             <td colspan="3">
-                                <%=ads.getAdsname()%>
+                                <%=ads.getAdsname()%>                               
+                                
                                 <input type="hidden" id="adsid" value="<%=ads.getAdsid()%>"/>
                                 <%--
                     <select id="moveid" style="width:300px;">
@@ -207,8 +175,13 @@ for(int k=0; k<adslist.size(); k++){
  <%} %>                       
                     </select>                   
                                 <a class="btn btn-danger btn-xs" href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>" role="button" style="float:right;margin-left:5px;">애즈등록</a>
-                                <a class="btn btn-success btn-xs" href="cpmgr.do?a=adsEdit&adsid=<%=ads.getAdsid() %>" role="button" style="float:right;margin-left:5px;">수정</a>
-                            --%></td>
+                                <a class="btn btn-success btn-xs" href="cpmgr.do?a=adsEditFrame&adsid=<%=ads.getAdsid() %>" role="button" style="float:right;margin-left:5px;">수정</a>
+                            <a class="btn btn-success btn-xs" href="cpmgr.do?a=adsEdit&adsid=<%=ads.getAdsid() %>" role="button" style="float:right;margin-left:5px;">수정</a>
+                            --%>
+                            
+                         
+                            
+                            </td>
                             <th>판매방식</th>
                             <td>
                                 <%=ads.getSalestypename() %>
@@ -285,7 +258,7 @@ for(int k=0; k<adslist.size(); k++){
                         <a class="btn btn-success btn-xs" href="cpmgr.do?a=adsTargetForm&adsid=<%=ads.getAdsid()%>" role="button" >타겟팅등록</a>
                     </div>
                      saveBtn End -->
-                    <h1 class="title4"><span class="glyphicon glyphicon-ok"></span> 타겟팅</h1>
+                    <h1 class="title4"><span class="glyphicon glyphicon-menu-down"></span> 타겟팅</h1>
                     <!-- title End -->
                 </div>
 
@@ -331,7 +304,7 @@ for(int k=0; k<adslist.size(); k++){
                 <!-- creative title -->
                 <!-- title Start -->
                 <div class="boxtitle3">
-                    <h1 class="title4"><span class="glyphicon glyphicon-ok"></span> 광고물</h1>
+                    <h1 class="title4"><span class="glyphicon glyphicon-menu-down"></span> 광고물</h1>
                 </div>
                 <!-- title End -->
                 <!-- creative Table Start -->
@@ -404,7 +377,7 @@ for(int k=0; k<crlist.size(); k++){
                 <!-- creative title -->
                 <!-- title Start -->
                 <div class="boxtitle3">
-                    <h1 class="title4"><span class="glyphicon glyphicon-ok"></span> 광고 지면</h1>
+                    <h1 class="title4"><span class="glyphicon glyphicon-menu-down"></span> 광고 지면</h1>
                 </div>
                 <!-- title End -->
                 <!-- creative Table Start -->
@@ -441,9 +414,9 @@ for(int k=0; k<crlist.size(); k++){
                             <td>
                                <%=k+1 %> 
                             </td>
-                            <td class="textLeft"><%=slot.getSlottag()%></td>
+                            <td class="textLeft"><a href="javascript:newTab('<%=Constant.ADTAG_SERVER%>/<%=slot.getSlottag()%>/')"><%=slot.getSlottag()%></a></td>
                             <td><%=slot.getWidth() %> x <%= slot.getHeight()%></td>
-                            <td class="textLeft"><%=slot.getSlottag() %></td>
+                            <td class="textLeft"><%=slot.getSitename() %> > <%=slot.getSecname() %> > <%=slot.getSlotname() %></td>
                             <td class="<%=slot.getSlot_state().equals("1")?"txtRed":"txtBlue"%>"><%=slot.getSlot_state().equals("1")?"진행":"중지"%></span>
                             <td><%=DateUtil.getYMDHM(slot.getUpdatedate(),"-") %></td>
                            

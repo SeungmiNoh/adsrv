@@ -186,30 +186,53 @@ public class MasDwrService {
 		return resultmap;
 	}
 	
-	public List<Map<String,String>> getSlgroupInSlotList(String groupid){
-System.out.println("---------------getSlgroupInSlotList");		
+	public List<Map<String,String>> getSlgroupInSlotList(String adsid, String groupid){
 		Map<String, String> map = new HashMap<String, String>();	
+		map.put("adsid", adsid);		
 		map.put("groupid", groupid);		
-		System.out.println("---------------map"+map);		
 		List<Map<String,String>> resultmap = sitemgrModel.getSlgroupInSlotList(map);
 		return resultmap;
 	}
+	public List<Slot> getSlotSearchList(String adsid, String prtype, String siteid, String secid, String slotid){
+		Map<String, String> map = new HashMap<String, String>();	
+		map.put("adsid", adsid);		
+		map.put("prtype", "");
+		if(!siteid.equals("0")) map.put("siteid", siteid);
+		if(!secid.equals("0")) map.put("secid", secid);
+		if(!slotid.equals("0")) map.put("slotid", slotid);
+		map.put("search", "Y");
+		List<Slot> resultmap = sitemgrModel.getSlotList(map);
+		return resultmap;
+	}
+	public List<Map<String,String>> getSlotRunAdsList(String slotid, String ads_startdate, String ads_enddate){
+		Map<String, String> map = new HashMap<String, String>();	
+		map.put("slotid", slotid);
+		map.put("ads_startdate", ads_startdate);
+		map.put("ads_enddate", ads_enddate);		
+		return sitemgrModel.getSlotRunAdsList(map);
+		
+	}
 	public List<Slot> getSlotList(String prtype, String width, String height,  String siteid){
-System.out.println("prtype----------"+prtype);		
-System.out.println("width----------"+width);		
-System.out.println("height----------"+height);		
-System.out.println("siteid----------"+siteid);		
-
 		Map<String, String> map = new HashMap<String, String>();	
 		map.put("prtype", prtype);
 		map.put("siteid", siteid);
 		map.put("width", width);
 		map.put("height", height);
-		
-System.out.println("map----------"+map);		
-		
+				
 		List<Slot> resultmap = sitemgrModel.getSlotList(map);
 		return resultmap;
+	}
+	public Integer addAdsNewCreative(String adsid, String new_crstr){
+		try
+		{
+			Map<String, String> map = new HashMap<String, String>();	
+			map.put("adsid", adsid);
+			map.put("new_crstr", new_crstr);
+			cpmgrModel.addAdsNewCreative(map);
+			return 1;
+		} catch(Exception e) {
+			return 0;
+		}
 	}
 	public List<Creative> getCrList(String start, String end,  String clientid,  String adsid){
 		Map<String, String> map = new HashMap<String, String>();	
@@ -221,7 +244,7 @@ System.out.println("map----------"+map);
 		List<Creative> resultmap = cpmgrModel.getCreativeList(map);
 		return resultmap;
 	}
-	 
+	 /*
 	public Integer addAdsSlot(String adsid, String slotid, String userid){
 		try
 		{
@@ -235,7 +258,7 @@ System.out.println("map----------"+map);
 		} catch(Exception e) {
 			return 0;
 		}
-	}
+	}*/
 	public Integer modAdsSlot(String adsid, String slotid, String slot_state, String userid){
 		try
 		{

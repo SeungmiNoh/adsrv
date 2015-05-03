@@ -63,6 +63,12 @@ try
 
 
 $(function(){
+	formReset = function(){
+		$("form").each(function() {  
+            if(this.id == "frmRegist") this.reset();  
+         }); 
+	}
+	
 	$(".debug").css("display","none");
 	$.ajax({		    
 		url : "cpmgr.do?a=auto_corp&corptype=4",
@@ -77,6 +83,7 @@ $(function(){
 	
 	$("#btnPopup").click(function(e){
 		$("#frmRegist input, #frmRegist select").css("border-color", "#ccc");
+		formReset();
 		e.preventDefault();
 		$('#myModal').modal();
 		$(".modify").css("display", "none");
@@ -135,32 +142,37 @@ $(function(){
 			$("input:radio[name='sitetype']").css("border-color","red").focus();
 			$("#warningMsg").text("스크린을 선택해주세요.");
 			return;
-		} else if(($("#siteurl").val()).length > 0){
-			var chk_url = checkURL("http://"+$("#siteurl").val());
+		}
+		else
+		{	
+			var chk_url = true;
 			
+			if(($("#siteurl").val()).length > 0){
+				chk_url = checkURL("http://"+$("#siteurl").val());
+			}
 			if(!chk_url) {
-				console.log("잉?"+chk_url);
 				$("#siteurl").css("border-color","red").focus();
 				var maxleng = $("#siteurl").attr("maxlength");
 				$("#warningMsg").text("URL 형식이 맞지 않습니다.");
-				return;
-			}
-		} 
-		else{	
-			var cname = $('#sitetag').val();			
-			console.log("cname="+cname);
-			MasDwrService.getSiteCnt(cname, 0, 
-		   		function(data) {				
-					if(data>0) {
-						$("#sitetag").css("border-color","red").select();
-						$("#warningMsg").text("중복된 태그 아이디가 있습니다.");
-						return;				
-					} else {
-						if(confirm("사이트를 등록 하시겠습니까?")) {
-							$("#frmRegist").submit();	
+				
+			} else {
+				var cname = $('#sitetag').val();			
+				console.log("cname="+cname);
+				MasDwrService.getSiteCnt(cname, 0, 
+			   		function(data) {				
+						if(data>0) {
+							$("#sitetag").css("border-color","red").select();
+							$("#warningMsg").text("중복된 태그 아이디가 있습니다.");
+							return;				
+						} else {
+							if(confirm("사이트를 등록 하시겠습니까?")) {
+								$("#frmRegist").submit();	
+							}
 						}
-					}
-			});
+				});				
+			}	
+			
+
 		}
 		
 	});
@@ -184,31 +196,34 @@ $(function(){
 			$("input:radio[name='sitetype']").css("border-color","red").focus();
 			$("#warningMsg").text("스크린을 선택해주세요.");
 			return;
-		} else if(($("#siteurl").val()).length > 0){
+		}  
+		else{	
+			var chk_url = true;
 			
-			var chk_url = checkURL("http://"+$("#siteurl").val());
+			if(($("#siteurl").val()).length > 0){
+				chk_url = checkURL("http://"+$("#siteurl").val());
+			}
 			if(!chk_url) {
 				$("#siteurl").css("border-color","red").focus();
 				var maxleng = $("#siteurl").attr("maxlength");
 				$("#warningMsg").text("URL 형식이 맞지 않습니다.");
-				return;
-			}
-		} 
-		else{	
-			var cname = $('#sitetag').val();			
-			var cid = $('#siteid').val();			
-			MasDwrService.getSiteCnt(cname, cid, 
-		   		function(data) {
-					if(data>0) {
-						$("#sitetag").css("border-color","red").select();
-						$("#warningMsg").text("중복된 태그 아이디가 있습니다.");
-						return;				
-					} else {
-						if(confirm("사이트 정보를 수정 하시겠습니까?")) {
-							$("#frmRegist").submit();	
+				
+			} else {
+				var cname = $('#sitetag').val();			
+				var cid = $('#siteid').val();			
+				MasDwrService.getSiteCnt(cname, cid, 
+			   		function(data) {
+						if(data>0) {
+							$("#sitetag").css("border-color","red").select();
+							$("#warningMsg").text("중복된 태그 아이디가 있습니다.");
+							return;				
+						} else {
+							if(confirm("사이트 정보를 수정 하시겠습니까?")) {
+								$("#frmRegist").submit();	
+							}
 						}
-					}
-			});
+				});
+			}
 		}
 		
 	});
@@ -259,12 +274,12 @@ $(function(){
                 <!-- saveBtn End -->
                 <br>
                 <!-- list Table Start -->
-                <table class="listTable">
+                <table class="listTable  table-striped">
 				<colgroup>
 				<col width="40">
-				<col width="160"><!-- 업체명 -->
 				<col width="80"><!-- 스크린 -->
 				<col width="160"><!-- 사이트명 -->
+				<col width="160"><!-- 업체명 -->
 				<col width="160"><!-- 태그 -->
 				<col width="220"><!-- URL -->
 			    <col width="100"><!-- 등록일 -->
@@ -273,9 +288,9 @@ $(function(){
 				<thead>
                         <tr>
                             <th>No</th>
-                            <th>업체</th>  
-                            <th>스크린</th>
+                            <th>사이트구분</th>
                             <th>사이트명</th>  
+                            <th>업체</th>  
                             <th>태그</th>  
                             <th>URL</th>  
                             <th>등록일</th>
@@ -296,11 +311,17 @@ for(int k=0; k<sitelist.size(); k++){
                     
                         <tr>
                             <td><%=skip+(k+1) %></td>
-                            <td class="textLeft"><span class="modify label label-warning" style="margin-right:10px">미디어</span><%=site.get("corpname") %></td>
                             <td><%=site.get("sitetypename") %></td>
+                            <%--
                             <td class="textLeft"><a href="#none" name="sitemod" siteid="<%=String.valueOf(site.get("siteid"))%>"><%=site.get("sitename") %></a></td>                           
-                            <td class="textLeft"><a href="sitemgr.do?a=secList&s_siteid=<%=String.valueOf(site.get("siteid"))%>"><%=site.get("sitetag") %></a></td>                           
-                            <td class="textLeft"><%=StringUtil.isNotNull(site.get("siteurl"),"http://") %></td>
+                           <td class="textLeft"><a href="sitemgr.do?a=secList&s_siteid=<%=String.valueOf(site.get("siteid"))%>"><%=site.get("sitetag") %></a></td>                           
+                            --%>
+                           <td class="textLeft"><a href="sitemgr.do?a=siteView&siteid=<%=String.valueOf(site.get("siteid"))%>"><%=site.get("sitename") %></a></td>                           
+                             <td class="textLeft"><%=site.get("corpname") %></td>
+                            
+                             <td class="textLeft"><a href="#none" name="sitemod" siteid="<%=String.valueOf(site.get("siteid"))%>"><%=site.get("sitetag") %></a></td>                           
+                            
+                           <td class="textLeft"><%=StringUtil.isNotNull(site.get("siteurl"),"http://") %></td>
                            <td><%=DateUtil.getYMD(String.valueOf(site.get("insertdate"))) %></td>
                             <td><%=site.get("insertusername") %></td>                            
                         </tr>
@@ -347,7 +368,7 @@ for(int k=0; k<sitelist.size(); k++){
                                   <col width="">
                           </colgroup>
                           <tr>
-                              <th>미디어<span style="color:red"> * </span></th>
+                              <th>업체<span style="color:red"> * </span></th>
                               <td>                              
                               	<select id="media" name="corpid" class="new form-control input-sm" style="width:220px">
                               	<option value="0"></option>
@@ -387,7 +408,7 @@ for(int k=0; k<sitelist.size(); k++){
   					<tr>
                               <th>설명</th>
                               <td class="textLeft">
-                                  <textarea name="memo" id="memo" class="form-control" rows="6"  maxlength="100" style="width:360px"></textarea>
+                                 <textarea name="memo" id="memo" class="form-control" rows="6"  maxlength="100" style="width:360px"></textarea>
                               </td>
                           </tr>
 						<tr class="new">                           

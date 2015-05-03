@@ -38,6 +38,7 @@ public interface SitemgrDao {
 	public Map<String,String> getSection(Map<String, String> map);
 	public Slot getSlot(Map<String, String> map);
 	public Map<String,String> getSlgroup(Map<String, String> map);
+	public List<Map<String,String>> getSlotRunAdsList(Map<String, String> map);
 	
 
 }

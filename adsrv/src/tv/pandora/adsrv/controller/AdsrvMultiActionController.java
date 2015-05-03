@@ -10,6 +10,7 @@ import tv.pandora.adsrv.common.Constant;
 import tv.pandora.adsrv.common.util.StringUtil;
 import tv.pandora.adsrv.common.exception.AppException;
 import tv.pandora.adsrv.common.handler.MessageHandler;
+import tv.pandora.adsrv.logic.RptmgrFacade;
 import tv.pandora.adsrv.logic.SitemgrFacade;
 import tv.pandora.adsrv.logic.UsermgrFacade;
 import tv.pandora.adsrv.logic.CpmgrFacade;
@@ -21,6 +22,9 @@ public class AdsrvMultiActionController extends MultiActionController{
 	protected UsermgrFacade usermgrFacade;
 	protected SitemgrFacade sitemgrFacade;
 	protected CpmgrFacade cpmgrFacade;
+	protected RptmgrFacade rptmgrFacade;
+	
+
 	protected MessageHandler messageHandler;
 	
 	public void setUsermgrFacade(UsermgrFacade usermgrFacade) {
@@ -32,6 +36,9 @@ public class AdsrvMultiActionController extends MultiActionController{
 	public void setCpmgrFacade(CpmgrFacade cpmgrFacade) {
 		this.cpmgrFacade = cpmgrFacade;
 	}	
+	public void setRptmgrFacade(RptmgrFacade rptmgrFacade) {
+		this.rptmgrFacade = rptmgrFacade;
+	}
 	public void setMessageHandler(MessageHandler messageHandler) {
 		this.messageHandler = messageHandler;
 	}

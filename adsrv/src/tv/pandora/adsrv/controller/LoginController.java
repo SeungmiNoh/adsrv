@@ -1,8 +1,11 @@
 package tv.pandora.adsrv.controller;
 
+import java.io.Writer;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
@@ -15,9 +18,11 @@ import tv.pandora.adsrv.common.util.CookieUtil;
 import tv.pandora.adsrv.common.session.SessionUtil;
 import tv.pandora.adsrv.common.util.StringUtil;
 import tv.pandora.adsrv.controller.AdsrvMultiActionController;
+import tv.pandora.adsrv.domain.Menu;
 import tv.pandora.adsrv.domain.User;
 import tv.pandora.adsrv.common.exception.AppException;
 
+import org.apache.commons.dbcp.SQLNestedException;
 import org.springframework.web.servlet.ModelAndView;
 
 public class LoginController  extends AdsrvMultiActionController {
@@ -26,115 +31,107 @@ public class LoginController  extends AdsrvMultiActionController {
 
 	public ModelAndView login(HttpServletRequest request, HttpServletResponse response) throws Exception {
 			
-		InetAddress inetaddr = InetAddress.getLocalHost();
-		
-		String hostaddr = inetaddr.getHostAddress();
-		String loginid = request.getParameter("loginid");
-		String passwd = request.getParameter("passwd");		
-		/*
-		String ipAddress = request.getHeader("X-FORWARDED-FOR");
-		System.out.println("ipAddress 11============"+ipAddress);
-		if(ipAddress == null) {
-			ipAddress = request.getRemoteAddr();
-		}*/
-		
-
-		if (loginid==null || passwd == null) {
-			return new ModelAndView("common/login", "", "");
-		}		
-		if (StringUtil.isEmptyOrWhitespace(loginid) || StringUtil.isEmptyOrWhitespace(passwd)) {
-			return this.makeSimpleMAV("common/loginfail", messageHandler.getErrMessage("error.required.user.email"),"message");
-		}		
-		
-		if((String)request.getParameter("chksaveid") != null)
+		try
 		{
-			Cookie cookie = new Cookie("member_id", loginid);
-			cookie.setMaxAge(60 * 60); // 3600 sec의 수명을 지정
-			cookie.setPath("/"); // '/' 이하 모든 디렉터리에서 유효
-			response.addCookie(cookie); // response 객체에 쿠키 추가
-		} else {
-			eraseCookie("member_id", request,response);
-		}
-
-		if((String)request.getParameter("chksavepwd") != null)
-		{
-			Cookie cookie =  new Cookie("member_password", passwd);
-			cookie.setMaxAge(60 * 60);
-			cookie.setPath("/");
-			response.addCookie(cookie);
-		} else {
-			eraseCookie("member_password", request,response);
-		}			
-		
-		User user = null;
-		try {
-			
-			System.out.println("------------getUserLogin = ");
-					
-			
-			Map<String, String> map = new HashMap<String, String>();
-			map.put("loginid", loginid);
-			map.put("passwd", passwd);
-			map.put("stat", "1");
-
-			user = usermgrFacade.getUserLogin(map);
-			
-			System.out.println("------------user = "+user);
-			boolean allow = true;
-			if (user != null) 
-			{
-				System.out.println("user.getAllowIp()============"+user.getAllowIp());
+				//InetAddress inetaddr = InetAddress.getLocalHost();		
+				//String hostaddr = inetaddr.getHostAddress();
+				String loginid = request.getParameter("loginid");
+				String passwd = request.getParameter("passwd");		
 				
-				if(!StringUtil.isNull(user.getAllowIp()).equals("")){
-					allow = StringUtil.like(hostaddr,user.getAllowIp());
-				}
-				if(!allow){
-					return new ModelAndView("redirect:/");//return new ModelAndView("common/login", "response", null);						
-
+				String ipAddress = request.getHeader("X-FORWARDED-FOR");
+				System.out.println("ipAddress 11============"+ipAddress);
+				if(ipAddress == null) {
+					ipAddress = request.getRemoteAddr();
+				}		
+		
+				if (loginid==null || passwd == null) {
+					return new ModelAndView("common/login", "", "");
+				}		
+				if (StringUtil.isEmptyOrWhitespace(loginid) || StringUtil.isEmptyOrWhitespace(passwd)) {
+					return this.makeSimpleMAV("common/loginfail", messageHandler.getErrMessage("error.required.user.email"),"message");
+				}		
+				/************************* 쿠키 저장 & 삭제 ****************************/
+				if((String)request.getParameter("chksaveid") != null){		
+					setingCookie("member_id", loginid, response);
 				} else {
+					eraseCookie("member_id", request,response);
+				}
+				if((String)request.getParameter("chksavepwd") != null){
+					setingCookie("member_password", passwd, response);
+				} else {
+					eraseCookie("member_password", request,response);
+				}			
 				
-					Map<String, String> usermap = new HashMap<String, String>();
-					usermap.put("userid", user.getUserid());
-					usermap.put("username", user.getUsername());				
-					usermap.put("perid", user.getUsertype());
+				User user = null;
+				try {
 					
-					response.addCookie(CookieUtil.setCookie("auth", usermap, Constant.COOKIEDOMAIN, null));
+					System.out.println("------------getUserLogin = ");
+							
 					
-						
-					SessionUtil.setAttribute("userID", user.getUserid());
-					SessionUtil.setAttribute("userName", user.getUsername());
-					SessionUtil.setAttribute("userType", user.getUsertype());			
-					SessionUtil.setAttribute("isMain", user.getIsmain());	
+					Map<String, String> map = new HashMap<String, String>();
+					map.put("loginid", loginid);
+					map.put("passwd", passwd);
+					map.put("stat", "1");
+					try{
+						user = usermgrFacade.getUserLogin(map);			
 					
-	
-				}
-			} 
-			else 
-			{
-				return new ModelAndView("redirect:/");//return new ModelAndView("common/login", "response", null);						
-			}		
+					} catch (UndeclaredThrowableException ex) {
+						System.out.println(ex.getMessage());
+						response.setCharacterEncoding("EUC-KR"); 
+						Writer w = response.getWriter();
+						w.write("<script>"); 
+						w.write("alert('서버 접속에 문제가 있습니다\r\n관리자에게 문의해 주시기 바랍니다.');"); 
+						w.write("</script>"); 
+						return new ModelAndView("redirect:/");//return new ModelAndView("common/login", "response", null);												
+					}
+					//System.out.println("------------user = "+user);
+					
+					boolean allow = true;
+					String mainLink = "cpmgr.do?a=cpList";
+					if (user != null) 
+					{
+						/************************* 허용아이피 체크 ****************************/	
+						System.out.println("StringUtil.isNull(user.getAllowip())--------------"+StringUtil.isNull(user.getAllowip()));
+						if(!StringUtil.isNull(user.getAllowip()).equals("")){
+							allow = StringUtil.like(ipAddress,user.getAllowip());
+							System.out.println("allow-------------"+allow);
+						}
+						if(!allow){
+							return new ModelAndView("redirect:/");//return new ModelAndView("common/login", "response", null);						
+						} else {
+							/************************ 유저 권한 별 메뉴리스트 **************************/
+							map.put("perid", user.getPerid());
+							map.put("corpid", user.getCorpid());
+							map.put("ismain", user.getIsmain());
+							List<Menu> menulist = usermgrFacade.getUserMenuList(map);
+							mainLink = menulist.get(0).getMainlink();
+							/*************************************************************************/
+								
+							SessionUtil.setAttribute("userID", user.getUserid());
+							SessionUtil.setAttribute("userName", user.getUsername());
+							SessionUtil.setAttribute("userType", user.getUsertype());			
+							SessionUtil.setAttribute("userCorpid", user.getCorpid());			
+							SessionUtil.setAttribute("userPername", user.getPername());			
+							SessionUtil.setAttribute("isMain", user.getIsmain());
+							SessionUtil.setAttributeList("menuList", menulist);
+							
 			
-			/*
-			String preurl = request.getParameter("preurl");
-			String url = "redirect:cpmgr.do?a=cplist";
-			
-			if (preurl==null) {
-				preurl = request.getHeader("referer");
-			}
-			if (preurl != "") {
-				url = "redirect:"+URLDecoder.decode(preurl);
-				if(url.indexOf(Constant.WEB_ROOT)>0){
-					String  url1 = url.substring(0, url.indexOf(Constant.WEB_ROOT));
-					String url2 = url.substring(url.indexOf(Constant.WEB_ROOT)+Constant.WEB_ROOT.length());
+						}
+					} 
+					else 
+					{
+						return new ModelAndView("redirect:/");//return new ModelAndView("common/login", "response", null);						
+					}		
 					
-					url = url1+url2;
+					
+					return new ModelAndView("redirect:"+mainLink);
+				} catch(AppException e) {
+					return new ModelAndView("redirect:" + Constant.LOGIN_URL + request.getParameter("preurl"));
 				}
-			}	*/	
-			return new ModelAndView("redirect:cpmgr.do?a=cpList");
-		} catch(AppException e) {
-			return new ModelAndView("redirect:" + Constant.LOGIN_URL + request.getParameter("preurl"));
-		}
-		
+		} catch(SQLNestedException e) {
+			System.out.println(e.getMessage());
+			return new ModelAndView("redirect:/");//return new ModelAndView("common/login", "response", null);						
+		}			
 	}
 	public ModelAndView logout(HttpServletRequest request, 
 			HttpServletResponse response) throws Exception {
@@ -142,7 +139,7 @@ public class LoginController  extends AdsrvMultiActionController {
 		Cookie[] cookies = request.getCookies();
 		
 		request.getSession().invalidate();
-		
+		/*
 		for (Cookie cookie : cookies) {
 			if (cookie.getName().equals("auth") || cookie.getName().equals("autol")) {
 				Cookie ncookie = new Cookie(cookie.getName(), null);
@@ -152,7 +149,7 @@ public class LoginController  extends AdsrvMultiActionController {
 				//System.out.println(ncookie.getName() + " delete");
 				response.addCookie(ncookie);				
 			}
-		}
+		}*/
 		
 	    return new ModelAndView("redirect:/");
 	}
@@ -168,5 +165,14 @@ public class LoginController  extends AdsrvMultiActionController {
 		            resp.addCookie(cookies[i]);
 	        	}
 	        }
+	}
+	
+	private void setingCookie(String name, String value, HttpServletResponse resp) {
+		
+			Cookie cookie = new Cookie(name, value);
+			cookie.setMaxAge(60 * 60 * 24 * 15); // 15일의 수명을 지정
+			cookie.setPath("/"); // '/' 이하 모든 디렉터리에서 유효
+			resp.addCookie(cookie); // response 객체에 쿠키 추가
+		
 	}
 }

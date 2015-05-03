@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import tv.pandora.adsrv.logic.UsermgrFacade;
+import tv.pandora.adsrv.domain.Menu;
 import tv.pandora.adsrv.domain.User;
 import tv.pandora.adsrv.model.UsermgrModel;
 
@@ -27,6 +28,9 @@ public class UsermgrImpl implements UsermgrFacade{
 	}
 	public List<User> getUserList(Map<String, String> map) {
 		return usermgrModel.getUserList(map);
+	}
+	public List<Menu> getUserMenuList(Map<String, String> map){
+		return usermgrModel.getUserMenuList(map);
 	}
 	public List<Map<String,String>> getUserPerList(Map<String, String> map){
 		return usermgrModel.getUserPerList(map);

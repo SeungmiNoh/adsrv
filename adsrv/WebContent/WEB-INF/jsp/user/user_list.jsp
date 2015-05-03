@@ -84,7 +84,7 @@ $(function(){
 					$("#username").val(data.username);
 					$("#loginid").val(data.loginid);
 					$("#passwd").val(data.passwd);
-					$("#ipstr").val(data.ipstr);
+					$("#allowip").val(data.allowip);
 					$("#perid").val(data.perid);
 					$("#updatedate").html(getYMDHM(data.updatedate,'-'));
 					$("#updateusername").html(data.updateusername);
@@ -287,8 +287,8 @@ for(int k=0; k<userlist.size(); k++){
                     <!-- search form Start -->
                     <form id="frmRegist" name="frmRegist" method="post" action="usermgr.do?a=userRegist">
                     <input type="hidden" name="a" value="userRegist"/>
-                    <input type="text" id="change" name="change" value="" class="debug"/>
-                    <input type="text" id="userid" name="userid" value="" class="debug"/>				
+                    <input type="hidden" id="change" name="change" value="" class="debug"/>
+                    <input type="hidden" id="userid" name="userid" value="" class="debug"/>				
                         <table class="addTable">
                             <colgroup>
                                 <col width="20%">
@@ -337,7 +337,7 @@ for(int k=0; k<userlist.size(); k++){
                 			<tr>
                                 <th>허용아이피</th>
                                 <td class="form-inline">
-                                    <input type="text" name="ipstr" id="ipstr" class="form-control input-sm" mexlength=200 style="width:360px">
+                                    <input type="text" name="allowip" id="allowip" class="form-control input-sm" mexlength=200 style="width:360px">
                                     <br/>
                                     <span style="color:green;font-size:8pt;margin-left:0px">
                                      * 허용 아이피는 , 구분자로 복수 입력 가능하며 아이피 대역은 %로 구분합니다.(최대 200byte 입력가능). 
@@ -367,7 +367,7 @@ for(int k=0; k<userlist.size(); k++){
                  </div>
                 <div class="modal-footer">
                 	<span id="warningMsg" style="color:#a00"></span>
-                    <button type="button" class="btn btn-danger btn-sm" id="btnRegist">등록</button>                    
+                    <button type="button" class="btn btn-danger btn-sm" id="btnRegist">수정</button>                    
                     <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
                 </div>
             </div>

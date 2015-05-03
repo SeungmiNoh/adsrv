@@ -3,6 +3,8 @@ package tv.pandora.adsrv.model;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.dao.EmptyResultDataAccessException;
+
 import tv.pandora.adsrv.common.handler.MessageHandler;
 import tv.pandora.adsrv.dao.CpmgrDao;
 import tv.pandora.adsrv.domain.Ads;
@@ -23,10 +25,14 @@ public class CpmgrModel {
 	
 	public List<Campaign> getCpList(Map<String, String> map){
     	return cpmgrDaoMaster.getCpList(map);
-    }
+    }	
 	public Campaign getCampaign(Map<String, String> map){
     	return cpmgrDaoMaster.getCampaign(map);
     }
+	
+	public List<Ads> getAvailableAdsList(Map<String, String> map){
+	  	return cpmgrDaoMaster.getAvailableAdsList(map);	  	 
+	}
 	
 	public List<Map<String,String>> getAutoCorpList(Map<String, String> map){
 	  	return cpmgrDaoMaster.getAutoCorpList(map);	  	 
@@ -72,6 +78,9 @@ public class CpmgrModel {
     }
 	public Integer addTargetSystem(Map<String, String> map){
     	return cpmgrDaoMaster.addTargetSystem(map);
+    }
+	public void addAdsCrNew(Map<String, String> map){
+    	cpmgrDaoMaster.addAdsCrNew(map);
     }
 	public void addTargetIP(List<Map<String, String>> ipList){
     	cpmgrDaoMaster.addTargetIP(ipList);
@@ -158,6 +167,9 @@ public class CpmgrModel {
 	public Integer addCreative(Creative cr){
 		return cpmgrDaoMaster.addCreative(cr);
 	}
+	public Integer modDelCreative(Map<String, String> map){
+		return cpmgrDaoMaster.modDelCreative(map);
+	}
 	public void addCreativeClick(List<Map<String, String>> list){
 		cpmgrDaoMaster.addCreativeClick(list);
 	}
@@ -173,15 +185,28 @@ public class CpmgrModel {
 	public void modDelAdsTargeting(Map<String, String> map){
 		cpmgrDaoMaster.modDelAdsTargeting(map);
 	}
+	public void modDelAdsSlot(Map<String, String> map){
+		cpmgrDaoMaster.modDelAdsSlot(map);
+	}
+	public void modDelCampaign(Map<String, String> map){
+		cpmgrDaoMaster.modDelCampaign(map);
+	}
+	
 	public void addAdsCreative(List<Map<String, String>> list){
 		cpmgrDaoMaster.addAdsCreative(list);
 	}
+	public void addAdsNewCreative(Map<String, String> map){
+		cpmgrDaoMaster.addAdsNewCreative(map);
+	}
+	
 	public void modDelAdsCreative(Map<String, String> map){
 		cpmgrDaoMaster.modDelAdsCreative(map);
 	}
-	
-	public void addAdsSlot(Map<String, String> map){
-		cpmgrDaoMaster.addAdsSlot(map);
+	public void modDelAds(Map<String, String> map) {
+		cpmgrDaoMaster.modDelAds(map);
+	}
+	public void addAdsSlot(List<Map<String, String>> list){
+		cpmgrDaoMaster.addAdsSlot(list);
 	}
 	public void addAdsSlotByGroup(Map<String, String> map){
 		cpmgrDaoMaster.addAdsSlotByGroup(map);
@@ -200,6 +225,10 @@ public class CpmgrModel {
 	}
 	public void copyCreativeClick(Map<String, String> map){
 		cpmgrDaoMaster.copyCreativeClick(map);
+	}
+	
+	public Integer copyCampaign(Map<String, String> map){
+		return cpmgrDaoMaster.copyCampaign(map);
 	}
 	public Integer copyAds(Map<String, String> map){
 		return cpmgrDaoMaster.copyAds(map);

@@ -23,7 +23,7 @@ public interface CpmgrDao {
 	public Ads getAds(Map<String, String> map);
 	
 	public Integer getCpCnt(Map<String, String> map);
-	
+	public void addAdsCrNew(Map<String, String> map);
 	
 	
 	
@@ -68,7 +68,10 @@ public interface CpmgrDao {
 	public Integer getCreativeCnt(Map<String, String> map);
 	public Creative getCreative(Map<String, String> map);
 	public List<Map<String,String>> getCrClickList(Map<String, String> map);
-	public List<Map<String,String>> getCrFileList(Map<String, String> map);
+	public List<Map<String,String>> getCrFileList(Map<String, String> map);	
+	public Integer modDelCreative(Map<String, String> map);
+	
+	
 	
 	public Integer addCreative(Creative cr);
 	public void addCreativeClick(List<Map<String, String>> list);
@@ -79,8 +82,15 @@ public interface CpmgrDao {
 	public void modDelAdsTargeting(Map<String, String> map);
 	public void addAdsCreative(List<Map<String, String>> list);
 	public void modDelAdsCreative(Map<String, String> map);
+	public void modDelAds(Map<String, String> map);
+	public void addAdsNewCreative(Map<String, String> map);
+	public void modDelAdsSlot(Map<String, String> map);
+	public void modDelCampaign(Map<String, String> map);
 	
-	public void addAdsSlot(Map<String, String> map);
+	public List<Ads> getAvailableAdsList(Map<String, String> map);
+	
+	
+	public void addAdsSlot(List<Map<String, String>> list);
 	public void addAdsSlotByGroup(Map<String, String> map);
 	public void modAdsSlot(Map<String, String> map);
 	
@@ -90,6 +100,7 @@ public interface CpmgrDao {
 	public Integer copyCreative(Map<String, String> map);
 	public void copyCreativeClick(Map<String, String> map);
 	
+	public Integer copyCampaign(Map<String, String> map);
 	public Integer copyAds(Map<String, String> map);
 	public void copyAdsTargeting(Map<String, String> map);
 	public void copyAdsCreative(Map<String, String> map);

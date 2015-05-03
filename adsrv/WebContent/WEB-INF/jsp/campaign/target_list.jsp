@@ -139,7 +139,7 @@ for(int k=0; k<targetlist.size(); k++){
                             <td><%=skip+(k+1) %></td>
                             <td><%=target.get("targettypename") %></td>
                             <td class="textLeft"><a href="cpmgr.do?a=targetView&tid=<%=String.valueOf(target.get("tid"))%>"><%=target.get("targetname") %></a></td>                           
-                            <td><%=String.valueOf(target.get("updatedate")) %></td>
+                            <td><%=DateUtil.getYMDHM(String.valueOf(target.get("updatedate")),"-") %></td>
                             <td><%=target.get("updateusername") %></td>                            
                         </tr>
 <%} %>                        

@@ -3,6 +3,7 @@ package tv.pandora.adsrv.logic;
 import java.util.List;
 import java.util.Map;
 
+import tv.pandora.adsrv.domain.Menu;
 import tv.pandora.adsrv.domain.User;
 
 
@@ -14,6 +15,8 @@ public interface UsermgrFacade {
 	public Integer getUserCnt(Map<String, String> map);
 	public Integer addUser(User user);
 	public Integer modUser(User user);
+	
+	public List<Menu> getUserMenuList(Map<String, String> map);
 	
 	public List<Map<String,String>> getUserPerList(Map<String, String> map);
 	public Integer getUserPerCnt(Map<String, String> map);

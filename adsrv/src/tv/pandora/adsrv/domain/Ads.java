@@ -9,6 +9,7 @@ public class Ads implements Serializable{
 	
 		private String cpid        ;
 		private String cpname      ;
+		private String clientid     ;
 		private String clientname      ;
 		private String adsid        ;
 		private String adsname      ;
@@ -44,6 +45,10 @@ public class Ads implements Serializable{
 		private String target;
 		private String istarget;
 		private String isprism;
+		private String cost;
+		private long stime;
+		private long etime;
+		
 		
 		public String getCpid() {
 			return cpid;
@@ -246,6 +251,12 @@ public class Ads implements Serializable{
 			this.memo = memo;
 		}
 		
+		public String getClientid() {
+			return clientid;
+		}
+		public void setClientid(String clientid) {
+			this.clientid = clientid;
+		}
 		public String getClientname() {
 			return clientname;
 		}
@@ -278,6 +289,25 @@ public class Ads implements Serializable{
 		}
 		public void setTarget(String target) {
 			this.target = target;
+		}
+		
+		public String getCost() {
+			return cost;
+		}
+		public void setCost(String cost) {
+			this.cost = cost;
+		}
+		public long getStime() {
+			return stime;
+		}
+		public void setStime(long stime) {
+			this.stime = stime;
+		}
+		public long getEtime() {
+			return etime;
+		}
+		public void setEtime(long etime) {
+			this.etime = etime;
 		}
 		public static long getSerialversionuid() {
 			return serialVersionUID;

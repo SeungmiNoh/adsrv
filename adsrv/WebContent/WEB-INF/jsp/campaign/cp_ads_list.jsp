@@ -68,116 +68,44 @@ try
             <section class="sectionBox">
                 <div class="boxTitle">
                     <!-- title Start -->
-                    <div class="title">캠페인 상세 정보</div>
-                    <div class="breadcrumbs"><span class="glyIcon"><img src="<%=web%>/img/navIcon.png" alt=""></span> 현재위치 : 캠페인 > 캠페인 애즈 목록</div>
+                          <div class="title">캠페인 애즈 목록 <span class="txtBlue" style="margin-left:10px;font-size:9pt"><span class="glyphicon glyphicon-play-circle"></span> <%=cp.getCpname() %> </span></div>
+                    <div class="breadcrumbs"><span class="glyIcon"><img src="<%=web%>/img/navIcon.png" alt=""></span> 현재위치 : 캠페인  > 캠페인 정보</div>
                     <!-- title End -->
                 </div>      
-                <table class="viewTable" style="width:900px">
-				<colgroup>
-				<col width="10%">
-				<col width="23%">
-				<col width="10%">
-				<col width="23%">
-				<col width="10%">
-				<col width="">
-				</colgroup>
-                    <tr>
-                        <th>캠페인명</th>
-                        <td colspan="3"><%=cp.getCpname() %></td>
-                        <th>담당자</th>
-                        <td><%=cp.getTcname() %></td>
-                    </tr>
-                    <tr>
-                        <th>광고주</th>
-                        <td><%=cp.getClientname() %></td>
-                        <th>대행사</th>
-                        <td><%=StringUtil.isNull(cp.getAgencyname()) %></td>
-                        <th>미디어렙</th>
-                        <td><%=StringUtil.isNull(cp.getMedrepname()) %></td>
-                    </tr>
-                    <tr>
-                        <th>보장량</th>
-                        <td><%=StringUtil.addComma(cp.getBook_total()) %></td>
-                        <th>목표량</th>
-                        <td><%=StringUtil.addComma(cp.getGoal_total()) %></td>
-                        <th>집행금액</th>
-                        <td><%=StringUtil.addComma(cp.getBudget()) %></td>
-                    </tr>
-                    <tr>
-                        <th>시작일</th>
-                        <td><%=DateUtil.getYMD(cp.getStartdate(), "-") %></td>
-                        <th>종료일</th>
-                        <td><%=DateUtil.getYMD(cp.getEnddate(), "-") %></td>
-                        <th>상태</th>
-                        <td><span class="<%=cp.getText()%>"><%=StringUtil.isNull(cp.getCp_statename()) %></span></td>
-                    </tr>
-                </table>
+             	<%-- **************** 캠페인 정보 ********************* --%>
+ 				<%@ include file="./com_cpinfo.jsp" %>
+              	<%-- ************************************************ --%>
+ 
                 <div class="buttonGroup" style="width:900px">
                                          
                 </div>
-               
-                <!-- view Table End -->
-                <!-- campaign view End -->
-                <!-- ads add Table Start -->
-
-                
-                <%--
-                <!-- ads add title Start -->
-                <div class="boxtitle2">
-                     <!-- title Start -->
-                    <div class="title3">애즈</div>
-                    <!-- title End -->
-                    <div class="tapBox">
-                        <nav class="tapMenu">
-                            <ul>
-                               <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsInfo&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>" class="active">캠페인 상세<span class="glyphicon glyphicon-menu-right"></span></a>
-                                </li>
-                                <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsInfo&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>">애즈 정보 <span class="glyphicon glyphicon-menu-right"></span></a>
-                                </li>
-                                <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsTarget&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>">타겟팅 <span class="glyphicon glyphicon-menu-right"></span></a>
-                                </li>
-                                <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsCreative&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>">광고물 <span class="glyphicon glyphicon-menu-right"></span></a>
-                                </li>
-                                <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsSlot&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>">광고지면 <span class="glyphicon glyphicon-menu-right"></span></a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                </div> --%>
-                <!--                        <a class="btn btn-danger" href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>" role="button">애즈등록</a>
-  -->
-                <!-- ads add title End -->
-                
-                
-                
-                
                   <div class="boxtitle2">
                      <!-- title Start -->
-                    <div class="title3">애즈</div>
-                    <!-- title End -->
-                    
-                    <div class="tapBox">
-                    
-                        <nav class="tapMenu">
+                    <div class="taptitle">애즈</div>
+                    <!-- title End -->                   
+                    <div class="tapBox">                   
+                       <nav class="tapMenu">
                             <ul>  
                                 <li><a href="#none" class="active">애즈 목록<span class="glyphicon glyphicon-menu-right"></span></a>
-                               </li>
-                                <li><a href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>">애즈등록<span class="glyphicon glyphicon-menu-right"></span></a>
                                 </li>
+                                <li style="background-color:red"><a href="cpmgr.do?a=adsAddForm&cpid=<%=cp.getCpid() %>">애즈등록<span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>                                
+                                <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsEditTarget&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>">타겟팅<span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>
+                                <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsEditCreative&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>">광고물 <span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>                               
+                                <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsEditSlot&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>">광고 위치<span class="glyphicon glyphicon-menu-right"></span></a>
+                                </li>
+                                <!-- 
                                <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsInfo&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>">애즈 정보 <span class="glyphicon glyphicon-menu-right"></span></a>
                                 </li>
                                 <li><a href="<%if(!cp.getMax_adsid().equals("0")){%>cpmgr.do?a=adsEdit&adsid=<%=cp.getMax_adsid() %><%}else{ %>#none<%} %>">애즈 수정 <span class="glyphicon glyphicon-menu-right"></span></a>
-                                </li>                               
+                                </li>  -->                              
                             </ul>
                         </nav>
                     </div>
                 </div>
-                
-                
-                
-                
-                
-                <table class="listTable" style="width:1200px">
+                 <table class="listTable" style="width:1200px">
  				<colgroup>
 				<col width="40">
 				<col width="80"><!-- 광고상품 -->
@@ -202,7 +130,7 @@ try
                             <th>No</th>
                             <th>광고상품</th>
                             <th>애즈명</th>
-                            <th>종료일</th>
+                            <th>기간</th>
                             <th>집행금액</th>
                             <th>목표타입</th>
                             <th>보장량</th>
@@ -225,12 +153,29 @@ for(int k=0; k<adslist.size(); k++){
 	 
  %>                        <tr>
                             <td><%=k+1 %></td>
-                            <td><%=ads.getPrtypename() %></td>
-                            <td class="textLeft">
-                            <span name="cpmod" adsid="<%=ads.getAdsid()%>" class="label label-<%=ads.getIstarget().equals("Y")?"info":"default"%>">T</span> 
-                            <span name="cpmod" adsid="<%=ads.getAdsid()%>" class="label label-<%=ads.getIsprism().equals("Y")?"warning":"default"%>" style="margin-right:6px">P</span> 
+                            <td>
+                            <%--
+                            if(ads.getGoaltype().equals("2")){%>
+                            <span class="label label-primary" style="margin-right:6px">I</span> 
+                            <%}else if(ads.getGoaltype().equals("3")){%>
+                            <span class="label label-success" style="margin-right:6px">C</span> 
+                            <%}else if(ads.getGoaltype().equals("4")){%>
+                            <span class="label label-warning" style="margin-right:6px">P</span> 
+                            <%}else {%>
+                            <span class="label label-default" style="margin-right:6px">-</span> 
+                            <%} --%>
                             
-                            <span style="width=60px"></span><a href="cpmgr.do?a=adsInfo&adsid=<%=ads.getAdsid()%>" class="<%=ads.getText()%>"><%=ads.getAdsname() %></a></td>
+                            <%=ads.getPrtypename() %></td>
+                            <td class="textLeft">
+                            <!-- 
+                            <span name="cpmod" adsid="<%=ads.getAdsid()%>" class="label label-<%=ads.getIstarget().equals("Y")?"info":"default"%>">T</span> 
+                             --><span name="cpmod" adsid="<%=ads.getAdsid()%>" class="label label-<%=ads.getIsprism().equals("Y")?"warning":"default"%>" style="margin-right:6px">P</span> 
+                            
+                            
+                            
+                            
+                            
+                            <a href="cpmgr.do?a=adsInfo&adsid=<%=ads.getAdsid()%>" class="<%=ads.getText()%>"><%=ads.getAdsname() %><%=ads.getIstarget().equals("Y")?"<span class='txtRed' style='font-size:8pt;margin:4px'>targeting</span>":""%></a></td>
                             <td><span class="txtBlack mr4"><%=DateUtil.getYMD(ads.getStartdate()) %></span> <%=ads.getStart_hour() %>:<%=ads.getStart_min()%>
                             ~ <span class="txtBlack mr4"><%=DateUtil.getYMD(ads.getEnddate()) %></span> <%=ads.getEnd_hour() %>:<%=ads.getEnd_min()%></td>
                             <td class="textRight"><%=StringUtil.addComma(ads.getBudget()) %></td>
@@ -286,7 +231,7 @@ for(int k=0; k<targetlist.size(); k++){
 	 
  %>                        	<tr>
                             <td><%=k+1 %></td>
-                            <td><a href="cpmgr.do?a=adsInfo&adsid=<%=String.valueOf(target.get("adsid"))%>"><%=target.get("adsname")%></a></td>
+                            <td class="textLeft"><a href="cpmgr.do?a=adsEditTarget&adsid=<%=String.valueOf(target.get("adsid"))%>"><%=target.get("adsname")%></a></td>
                             <td class="textLeft"><%=target.get("targettypename") %></td>
                             <td class="textLeft"><a href="cpmgr.do?a=targetView&tid=<%=String.valueOf(target.get("tid"))%>"><%=target.get("targetname") %></a></td>
                             <td><%=DateUtil.getYMDHM(String.valueOf(target.get("updatedate")),"-")%></td>
@@ -318,8 +263,8 @@ for(int k=0; k<targetlist.size(); k++){
 	                    <thead>
                         <tr>
                             <th>No</th>
-                            <th>광고물명</th>
                             <th>광고상품</th>
+                            <th>광고물명</th>
                             <th>애즈명</th>
                             <th>사이즈</th>
                             <th>기간</th>
@@ -342,7 +287,7 @@ for(int k=0; k<crlist.size(); k++){
                             <td class="textLeft">
                             <%if(!StringUtil.isNull(cr.getCrurl()).equals("")){ %><a href='<%=cr.getCrurl()%>' target='_new'><span class='glyphicon glyphicon-download'></span></a><%} %>
                             <a href="cpmgr.do?a=crInfo&crid=<%=cr.getCrid()%>"><%=cr.getCrname() %></a></td>
-                            <td class="textLeft"><a href="cpmgr.do?a=adsInfo&adsid=<%=cr.getAdsid()%>"><%=cr.getAdsname() %></a></td>
+                            <td class="textLeft"><a href="cpmgr.do?a=adsEditCreative&adsid=<%=cr.getAdsid()%>"><%=cr.getAdsname() %></a></td>
                             <td><%=cr.getWidth()%> x <%=cr.getHeight() %></td>
                             <td><span class="txtBlack mr10"><%=DateUtil.getYMD(cr.getStartdate(),"-") %></span>
                                  <%=DateUtil.getCutHH(cr.getStartdate())%>:<%=DateUtil.getCutMM(cr.getStartdate())%>
@@ -398,8 +343,8 @@ for(int k=0; k<crlist.size(); k++){
   %>                    
  						<tr id="adsSlot<%=slot.getSlotid()%>">
                             <td><%=k+1 %></td>
-                             <td class="textLeft"><%=slot.getSlottag() %></td>
-                            <td class="textLeft"><a href="cpmgr.do?a=adsInfo&adsid=<%=slot.getAdsid()%>"><%=slot.getAdsname()%></a></td>
+                             <td class="textLeft"><a href="javascript:newTab('<%=Constant.ADTAG_SERVER%>/<%=slot.getSlottag()%>/')"><%=slot.getSlottag()%></a></td>
+                            <td class="textLeft"><a href="cpmgr.do?a=adsEditSlot&adsid=<%=slot.getAdsid()%>"><%=slot.getAdsname()%></a></td>
                              <td><%=slot.getWidth() %> x <%= slot.getHeight()%></td>
                             <td class="textLeft"><%=slot.getSitename() %> > <%=slot.getSecname() %> > <%=slot.getSlotname() %></td>
                             <td class="<%=slot.getSlot_state().equals("1")?"txtRed":"txtBlue"%>"><%=slot.getSlot_state().equals("1")?"진행":"중지"%></span>

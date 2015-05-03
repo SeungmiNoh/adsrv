@@ -33,6 +33,8 @@ public class Slot implements Serializable{
 	private String sitetag;
 	private String sectag;
 	private String slot_state;
+	private String selected;
+	private String memo;
 	
 	public String getSlotid() {
 		return slotid;
@@ -183,6 +185,19 @@ public class Slot implements Serializable{
 	}
 	public void setSectag(String sectag) {
 		this.sectag = sectag;
+	}
+	
+	public String getMemo() {
+		return memo;
+	}
+	public void setMemo(String memo) {
+		this.memo = memo;
+	}
+	public String getSelected() {
+		return selected;
+	}
+	public void setSelected(String selected) {
+		this.selected = selected;
 	}
 	public static long getSerialversionuid() {
 		return serialVersionUID;

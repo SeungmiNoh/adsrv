@@ -28,11 +28,13 @@ public class LoginCheckInterceptor extends HandlerInterceptorAdapter {
 	  // session검사
 	  HttpSession session = request.getSession(false);
 	  
-	  //System.out.println("request.getRequestURI() = "+request.getRequestURI());
+	  System.out.println("request.getRequestURI() = "+request.getRequestURI());
 	  //System.out.println("request.getParameterMap() = "+request.getParameterMap());
 	  
-	  setLogHistory(request);
+	 
 	  
+	  setLogHistory(request);
+
 	  
 	  if(request.getRequestURI().indexOf("login.do")>0) 
 	  {
@@ -49,7 +51,9 @@ public class LoginCheckInterceptor extends HandlerInterceptorAdapter {
 	  else 
  	  {
  		  String userName = (String)session.getAttribute("userName");
-			 System.out.println("userName : "+userName);
+		  
+		  
+		 
 			 	  
  		  if (userName == null) 
  		  { 
@@ -76,7 +80,7 @@ public class LoginCheckInterceptor extends HandlerInterceptorAdapter {
 		
 		// get request parameter map
 		Map<String, String[]> requestParams = request.getParameterMap();
- 
+		
 		// retrieve parameter name - values pair from parameter map
 		StringBuilder sb = new StringBuilder();
 		for (Map.Entry<String, String[]> entry : requestParams.entrySet()) {

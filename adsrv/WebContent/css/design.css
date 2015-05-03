@@ -206,8 +206,16 @@
      width: 100%;
      vertical-align: middle;
      border-bottom: 1px solid #999999;
-     margin-bottom: 20px;
+     margin-bottom: 14px;
  }
+  .boxtitle2 > .taptitle {
+     font-size: 12px !important;
+     line-height: 20px;
+     float: left;
+     color: #555555;
+ 	 height:32px !important;
+   }
+
  .boxtitle2 > .title3 {
      font-size: 12px !important;
      line-height: 20px;
@@ -231,12 +239,12 @@
      font-size: 12px !important;
      line-height: 8px;
      float: left;
-     color: #777;
+     /*color: #777;*/
  }
  .boxtitle3 > .saveBtn4 {
      float: right;
      position: relative;
-     bottom: -18px;
+     bottom: -10px;
  }
  .outsaveBtn1 {
      text-align: right;
@@ -260,6 +268,7 @@
  .blockBox {
      display: block;
  }
+ 
  /* list table Start */
  
  .listTable {
@@ -286,8 +295,9 @@
  .listTable td {
      color: #666666;
      padding: 4px;
+     padding-right:10px;
  }
- .listTable tbody.sum tr td {
+ .rptTable tbody.sum tr td {
      background-color: #e5f4ff !important;
  }
   .listTable tfoot.footbg tr td {
@@ -309,18 +319,18 @@
      max-width: 1200px;
      display: table;
  }
- /*  .listTable2 tr:hover {
+   .listTable3 tr:hover {
     background-color: #fff5f5;
     cursor: pointer;
 }
-.listTable2 .nohover tr:hover {
+.listTable3 .nohover tr:hover {
     background-color: none !important;
     cursor: default !important;
 }
-.listTable2 th:hover {
+.listTable3 th:hover {
     background-color: none;
     cursor: default !important;
-} */
+} 
  
  .listTable2 th, .listTable2 td {
      border-left: 1px solid #d3d2d2;
@@ -339,7 +349,7 @@
  .listTable2 td {
      color: #666666;
      padding: 5px;
-     text-align: right;
+     
  }
  .listTable3 {
      border-top: 1px solid #d3d2d2;
@@ -361,7 +371,7 @@
  }
  .listTable3 th {
      color: #555555;
-     padding: 2px !important;
+     padding: 6px !important;
      background-color: #fcf8e3 !important;
      text-align: center !important;
      border-left: 1px solid #d3d2d2;
@@ -370,7 +380,9 @@
  }
  .listTable3 td {
      color: #666666;
+     background-color: #fff;
      padding-left: 4px !important;
+     height:28px;
      text-align: center;border-left: 1px solid #d3d2d2;
      border-bottom: 1px solid #d3d2d2;
      font-size: 9pt !important;
@@ -387,9 +399,10 @@
      border-left: 1px solid #d3d2d2;
      border-bottom: 1px solid #d3d2d2;
      text-align: center;
+     color:#555 !important;
      /* 폰트 사이즈 수정 */
      
-     font-size: 9pt;
+     font-size: 8pt;
  }
  .rptTable th:first-child, .rptTable td:first-child {
      border-left: none;
@@ -400,7 +413,7 @@
      background-color: #ebebeb;
  }
  .rptTable td {
-     color: #666666;
+     color: #555;
      padding: 4px;
  }
  .listTable tbody.sum tr td {
@@ -429,12 +442,21 @@
  }
  .addTable td {
      color: #666666;
+     background-color: #fff;
+     
      padding: 2px 4px 2px 6px;
      text-align: left;
      border-right: 1px solid #d3d2d2;
      border-bottom: 1px solid #d3d2d2;
      font-size: 9pt;
  }
+  .addTable .comment{
+	  color:green;
+	  font-size:9pt;
+	  margin:10px;
+	  line-height:24px;
+  }
+ 
  .viewTable th {
      color: #555555;
      padding: 5px 10px;
@@ -451,6 +473,7 @@
      border-right: 1px solid #d3d2d2;
      border-bottom: 1px solid #d3d2d2;
      font-size: 9pt;
+     background-color: #fff;
  }
  .opacityTable {
      width: 100%;
@@ -469,7 +492,7 @@
      background-color: #fff;
      padding: 3px;
  }
- /* hide Table Start */
+  /* hide Table Start */
  
  .hideBg {
      background-color: #eeeeee;
@@ -482,7 +505,7 @@
      width: 100%;
      max-width: 1200px;
      display: table;
-     margin: 5px 0 5px 0;
+     margin: 0px 0 0px 0;
      border-bottom: 2px solid #d3d2d2;
  }
  .hideTable th,  .hideTable td {
@@ -497,6 +520,7 @@
      background-color: #6d956d;
      border-left: 1px solid #fff;
      border-bottom: 1px solid #fff;
+     text-align:center;
  }
  .hideTable td {
      color: #666666;
@@ -509,7 +533,11 @@
      background-color: #577757 !important;
  }
  .greenTD {
-     background-color: #e2eae2 !important;
+     background-color: #eefff7 !important;
+     text-align:right !important;
+ }
+  .bgIvory {
+     background-color: #ffffff!important;
  }
  /* button Group Start */
  
@@ -533,7 +561,7 @@
  }
  .tapBox3 {
      display: block;
-     height: 28px;
+     height: 32px;
      padding-left: 1px;
      border-bottom: 1px solid #999999;
  }
@@ -547,11 +575,18 @@
  .tapMenu > ul {
      padding: 0;
      margin: 0;
+     margin-bottom:-10px;
  }
  .tapMenu > ul > li {
      display: inline-block;
-     vertical-align: top;
+     vertical-align: bottom;
      margin: -1px;
+     margin-bottom:-12px;
+ }
+ .tapBox_ads {
+ 	float:right;
+ 	margin-right:6px;
+ 	margin-bottom:1px;
  }
  .tapMenu > ul > li > a {
      width: 90px;
@@ -567,6 +602,24 @@
  .tapMenu > ul > li > a:hover, .tapMenu > ul > li > a.active {
      /*background-color: #d9534f;*/
      background-color:#2d6ca2;
+ }
+ 
+ .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+  background-color: #e4f9b9!important;
+}
+
+ 
+ 
+  .tapBox3 > .tapMenu > ul > li > a{
+     width: 110px !important;
+ }
+  .tapBox3 > .tapMenu > ul > li > a:hover, .tapBox3 > .tapMenu > ul > li > a.active {
+     background-color: #d9534f;
+     width: 110px;
+ }
+.tapMenu > ul > li > a.none {
+     /*background-color: #d9534f;*/
+     background-color: #454545;
  }
  .adsBox {
  background-color: #454545;

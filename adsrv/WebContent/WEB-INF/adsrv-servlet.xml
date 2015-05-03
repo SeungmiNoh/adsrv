@@ -44,7 +44,14 @@
         <property name="messageHandler" ref="messageHandler" />
         <property name="methodNameResolver" ref="methodNameResolver" />
     </bean> 
-
+    <bean name="rptmgrController" class="tv.pandora.adsrv.controller.RptmgrController">      
+        <property name="rptmgrFacade" ref="rptmgrFacade" />
+        <property name="cpmgrFacade" ref="cpmgrFacade" />
+        <property name="usermgrFacade" ref="usermgrFacade" />
+        <property name="sitemgrFacade" ref="sitemgrFacade" />
+        <property name="messageHandler" ref="messageHandler" />
+        <property name="methodNameResolver" ref="methodNameResolver" />
+    </bean>
     <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
    	   	<property name="interceptors">
 	       <list>
@@ -58,6 +65,7 @@
                  <prop key="/sitemgr.do">sitemgrController</prop>
                  <prop key="/login.do">loginController</prop>
                  <prop key="/cpmgr.do">cpmgrController</prop>
+                 <prop key="/rptmgr.do">rptmgrController</prop>
                  
                                      
              </props>
@@ -75,7 +83,10 @@
          <property name="cpmgrDaoMaster" ref="cpmgrDaoMaster"/>
          <property name="messageHandler" ref="messageHandler" />
      </bean>
-         
+      <bean name="rptmgrModel" class="tv.pandora.adsrv.model.RptmgrModel">
+         <property name="rptmgrDaoMaster" ref="rptmgrDaoMaster"/>
+         <property name="messageHandler" ref="messageHandler" />
+     </bean>        
            <!-- ========================= FACADE ========================-->
  	<bean id="usermgrFacade" class="tv.pandora.adsrv.logic.UsermgrImpl">
  		<property name="usermgrModel" ref="usermgrModel"/>
@@ -85,6 +96,9 @@
  	</bean>
  	<bean id="cpmgrFacade" class="tv.pandora.adsrv.logic.CpmgrImpl">
  		<property name="cpmgrModel" ref="cpmgrModel"/>
+ 	</bean> 
+ 	<bean id="rptmgrFacade" class="tv.pandora.adsrv.logic.RptmgrImpl">
+ 		<property name="rptmgrModel" ref="rptmgrModel"/>
  	</bean> 
      <bean id="masDwrService" class="tv.pandora.adsrv.dwr.MasDwrService">
  		<property name="usermgrModel" ref="usermgrModel"/>

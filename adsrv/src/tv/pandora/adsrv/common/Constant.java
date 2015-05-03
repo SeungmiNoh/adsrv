@@ -15,8 +15,8 @@ public class Constant {
 	/**
 	 * 서버 URL
 	 */
-	public static final String COOKIEDOMAIN = ".mable-inc.com";
-	public static final String WEB_SERVER_URL = "http://mobile.mable-inc.com/";
+	public static final String COOKIEDOMAIN = ".pandora.tv";
+	public static final String WEB_SERVER_URL = "/";
 	public static final String WEB_ROOT = "/adsrv";	
 	public static final String WEB_SERVER_INDEX = WEB_SERVER_URL + "/";
 		
@@ -24,6 +24,7 @@ public class Constant {
 	public static final String REMOTE_HOST_NAME = "img.pandora.tv";
 	public static final String FTP_REMOTE_PATH = "/home/prismadv/prism_ad/";	// 이어서 /201503
 	public static final String IMG_WEB_URL = "http://cdn.pandora.tv/_adv_img/prism_ad"; // 이어서 /201503
+	public static final String ADTAG_SERVER = "http://prism.pandora.tv";
 	
 	/*************************  테스트용 로컬 PC ************************
 	public static final String REMOTE_HOST_NAME = "127.0.0.1";

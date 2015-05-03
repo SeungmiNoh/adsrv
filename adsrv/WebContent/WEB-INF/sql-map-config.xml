@@ -11,4 +11,5 @@ PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"
  	<sqlMap resource="tv/pandora/adsrv/dao/ibatis/sql/UsermgrSQL.xml"/>
  	<sqlMap resource="tv/pandora/adsrv/dao/ibatis/sql/SitemgrSQL.xml"/>
  	<sqlMap resource="tv/pandora/adsrv/dao/ibatis/sql/CpmgrSQL.xml"/>
+ 	<sqlMap resource="tv/pandora/adsrv/dao/ibatis/sql/RptmgrSQL.xml"/>
 </sqlMapConfig>

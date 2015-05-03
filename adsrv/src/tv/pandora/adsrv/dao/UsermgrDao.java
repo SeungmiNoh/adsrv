@@ -6,6 +6,7 @@ package tv.pandora.adsrv.dao;
 import java.util.List;
 import java.util.Map;
 
+import tv.pandora.adsrv.domain.Menu;
 import tv.pandora.adsrv.domain.User;
 
 public interface UsermgrDao {
@@ -32,4 +33,6 @@ public interface UsermgrDao {
 	public void modPermission(Map<String, String> map);
 	public void modPermissionMenu(Map<String, String> map);
 	public void delPermissionMenu(Map<String, String> map);
+	
+	public List<Menu> getUserMenuList(Map<String, String> map);
 }

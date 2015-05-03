@@ -155,10 +155,10 @@ $(function(){
                     <!-- saveBtn Start -->
                     <div class="saveBtn4">
                         <!--  a class="btn btn-default btn-xs" href="#" id="btnPopup" data-toggle="modal" data-target="#myModal">업체수정</a-->
-                        <a class="btn btn-danger btn-xs" href="#"  data-target="#myModal" id="btnPopup">사용자 등록</a>
+                        <a class="btn btn-danger btn-sm" href="#"  data-target="#myModal" id="btnPopup">사용자 등록</a>
                     </div>
                     <!-- saveBtn End -->
-                    <h1 class="title4"><span class="glyphicon glyphicon-ok"></span> 사용자 목록</h1>
+                    <h1 class="title4"><span class="glyphicon glyphicon-menu-down"></span> 사용자 목록</h1>
                 </div>
                 
                             
@@ -205,7 +205,7 @@ for(int k=0; k<userlist.size(); k++){
                             <td><%=user.getCorptypename() %></td>
                             <td class="textLeft"><%=user.getCorpname() %></td>                           
                             <td class="textLeft"><%=user.getPername() %></td>                           
-                            <td><%=user.getUpdatedate() %></td>
+                            <td><%=DateUtil.getYMDHM(user.getUpdatedate(),"-") %></td>
                             <td><%=user.getUpdateusername() %></td>                            
                         </tr>
 <%} %>                        
@@ -245,26 +245,26 @@ for(int k=0; k<userlist.size(); k++){
                                 </td>
                             </tr>
                				<tr>
-                                <th>사용자 이름</th>
+                                <th>사용자 이름<span style="color:red"> * </span></th>
                                 <td class="form-inline">
                                     <input type="text" name="username" id="username" class="form-control input-sm" style="width:160px">
                                 </td>
                             </tr>               				
                             <tr>
-                                <th>로그인아이디</th>
+                                <th>로그인아이디<span style="color:red"> * </span></th>
                                 <td class="form-inline">
                                     <input type="text" name="loginid" id="loginid" class="form-control input-sm" style="width:160px">
                                 </td>
                             </tr>
                				<tr>
-                                <th>비밀번호</th>
+                                <th>비밀번호<span style="color:red"> * </span></th>
                                 <td class="form-inline">
-                                    <input type="text" name="passwd" id="passwd" class="form-control input-sm" style="width:160px">
-                                    <span style="color:green;font-size:8pt;margin-left:20px">* 최소 1개의 숫자 혹은 특수 문자를 포함하여 6~20자로 입력해주세요.</span>
+                                    <input type="text" name="passwd" id="passwd" class="form-control input-sm" style="margin-bottom:6px;width:160px">
+                                    <br/><span class="comment">* 최소 1개의 숫자 혹은 특수 문자를 포함하여 6~20자로 입력해주세요.</span>
                                 </td>
                             </tr>
                 			<tr>
-                                <th>권한</th>
+                                <th>권한<span style="color:red"> * </span></th>
                                 <td class="form-inline">
                                     <select id="perid" name="perid" class="form-control input-sm" style="width:140px">
                                     </select>
@@ -276,9 +276,9 @@ for(int k=0; k<userlist.size(); k++){
                                 <td class="form-inline">
                                     <input type="text" name="allowip" id="allowip" class="form-control input-sm" mexlength=200 style="width:360px">
                                     <br/>
-                                    <span style="color:green;font-size:8pt;margin-left:0px">
-                                     * 허용 아이피는 , 구분자로 복수 입력 가능하며 아이피 대역은 %로 구분합니다.(최대 200byte 입력가능). 
-                                    <br/>ex)192.168.0.1,192.168.0.%</span>
+                                    <span class="comment"> * 허용 아이피는 , 구분자로 복수 입력 가능하며 아이피 대역은 %로 구분합니다.(최대 200byte 입력가능)</span>
+                                     
+                                    <br/><span class="comment">ex)192.168.0.1,192.168.0.%</span>
                                 </td>
                             </tr>
                 			<tr>
@@ -290,7 +290,7 @@ for(int k=0; k<userlist.size(); k++){
                             <tr>                           
                         <th>등록일</th>
                             <td class="form-inline">
-                                <%=DateUtil.getYMDHM(String.valueOf(corp.get("insertdate")), "-") %>
+                                <%=DateUtil.getYMD(DateUtil.curDate()) %>
                             </td>
                         </tr> 
                         <tr>                       

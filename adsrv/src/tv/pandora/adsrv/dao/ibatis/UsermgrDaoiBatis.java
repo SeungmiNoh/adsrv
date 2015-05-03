@@ -23,7 +23,9 @@ import org.springframework.orm.ibatis.SqlMapClientTemplate;
 
 
 
+
 import tv.pandora.adsrv.dao.UsermgrDao;
+import tv.pandora.adsrv.domain.Menu;
 import tv.pandora.adsrv.domain.User;
 
 /**
@@ -59,6 +61,13 @@ public class UsermgrDaoiBatis implements UsermgrDao {
 	public Integer getUserCnt(Map<String, String> map){
 		try {
 			return (Integer) sqlMapClientTemplateMaster.queryForObject("getUserCnt", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+	public List<Menu> getUserMenuList(Map<String, String> map){
+		try {
+			return (List<Menu>) sqlMapClientTemplateMaster.queryForList("getUserMenuList", map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}

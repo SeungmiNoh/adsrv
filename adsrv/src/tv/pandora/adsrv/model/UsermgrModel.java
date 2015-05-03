@@ -5,6 +5,7 @@ import java.util.Map;
 
 import tv.pandora.adsrv.common.handler.MessageHandler;
 import tv.pandora.adsrv.dao.UsermgrDao;
+import tv.pandora.adsrv.domain.Menu;
 import tv.pandora.adsrv.domain.User;
 
 public class UsermgrModel {
@@ -27,6 +28,9 @@ public class UsermgrModel {
 	}
 	public Integer getUserCnt(Map<String, String> map){
 	   	return usermgrDaoMaster.getUserCnt(map);
+	}
+	public List<Menu> getUserMenuList(Map<String, String> map){
+	   	return usermgrDaoMaster.getUserMenuList(map);
 	}
 	public Integer addUser(User user){
 	   	return usermgrDaoMaster.addUser(user);

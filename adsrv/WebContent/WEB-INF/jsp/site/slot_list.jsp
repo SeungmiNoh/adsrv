@@ -13,6 +13,10 @@ try
 {
 	String s_siteid = StringUtil.isNull(request.getParameter("s_siteid"));
 	String s_secid = StringUtil.isNull(request.getParameter("s_secid"));
+	String s_prtype = StringUtil.isNull(request.getParameter("s_prtype"));
+	
+	
+	if(s_prtype.equals("")) s_prtype = "1";
 	String secid = StringUtil.isNull(request.getParameter("secid"));
 	String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
 	String s_type = StringUtil.isNull(request.getParameter("s_type"));
@@ -67,7 +71,8 @@ try
   <script src="<%=web%>/js/basic.js"></script>
  <script src="<%=web%>/js/common.js"></script>
 <script type="text/javascript">
-
+var s_siteid = '<%=s_siteid%>';
+var s_secid = '<%=s_secid%>';
 var arrSection = <%=sec_data%>;
 
 $(document).ready(function() {
@@ -79,10 +84,7 @@ $(document).ready(function() {
 		$("#tagstr").text("");
 	}
 	tagStr = function(){
-		var tag_str = "";
-		if($("#prtag").val() != "") {
-			tag_str += $("#prtag").val()+"/";
-        }
+		var tag_str = "";		
 		if($("#sitetag").val() != "") {
 			tag_str += $("#sitetag").val()+"/";
         }		
@@ -91,20 +93,24 @@ $(document).ready(function() {
         }
 		$("#tagstr").text(tag_str);
      }	
-	 
  });
 $(function(){
 	
-	$(".debug").css("display","none");
+	//$(".debug").css("display","none");
 
 	$("#btnPopup").click(function(e){
-		
 		formReset();
-		
-		if($("#s_siteid").val()!=0){
-			$("#siteid").val($("#s_siteid").val());			
-			$("#secid").html($("#s_secid").html());			
+	
+		if(s_secid !="" && s_siteid!=""){
+			var siteid = $("select[name='siteid']").val();
+			var sitetag = $("select[name='siteid'] option[value="+siteid+"]:selected").attr("sitetag");
+			$("#sitetag").val(sitetag);
+			var secid = $("select[name='secid']").val();
+			var sectag = $("select[name='secid'] option[value="+secid+"]:selected").attr("sectag");
+			$("#sectag").val(sectag);
+			tagStr();
 		}
+		
 		
 		e.preventDefault();
 		$('#myModal').modal();
@@ -112,8 +118,6 @@ $(function(){
 		$(".new").css("display", "");			
 		$('#sitename').focus();
 		$("input:radio[name='sitetype']:radio[value=1]").prop('checked',true);
-		
-		console.log("btnPopup prtag==="+$("#prtag").val());
 		
 	});
 	
@@ -139,16 +143,14 @@ $(function(){
 					$("#sitename").text(data.sitename);
 					$("#secid").val(data.secid);
 					$("#secname").text(data.secname);
-					$("#prtype").val(data.prtype);
-					$("#prtag").val(data.prtag);
 					$("#sitetag").val(data.sitetag);
 					$("#sectag").val(data.sectag);
-					$("#tagstr").text(data.prtag+"/"+data.sitetag+"/"+data.sectag+"/");
+					$("#tagstr").text(data.sitetag+"/"+data.sectag+"/");
 					$("#slotname").val(data.slotname);
 					$("#slottag").val(data.slottag);
 					$("#width").val(data.width);
 					$("#height").val(data.height);
-					$("#memo").val(data.memo);
+					$("#memo").text(data.memo);
 					$("#updatedate").html(getYMDHM(data.updatedate, '-'));
 					$("#updateuser").html(data.updateusername);
 				});
@@ -164,12 +166,14 @@ $(function(){
 			}			
 		}		
 	});
-	$("#siteid").change(function(e){		
-		var siteid = $(this).val();
-		var sitetag = $("select[name='siteid'] option[value="+siteid+"]:selected").attr("sitetag");
-		console.log("sitetag="+sitetag);
-		$("#sitetag").val(sitetag);
+	$("#siteid").change(function(e){	
+		
 
+		var siteid = $("select[name='siteid']").val();
+		var sitetag = $("select[name='siteid'] option[value="+siteid+"]:selected").attr("sitetag");
+		
+		
+		$("#sitetag").val(sitetag);
 		$("#secid").html('<option value="">섹션 선택</option>');
 		$("#sectag").val("");
 		tagStr();
@@ -180,7 +184,7 @@ $(function(){
 					$("#secid").append('<option value="'+arrSection[i].secid+'" sectag="'+arrSection[i].sectag+'">'+arrSection[i].secname+'</option>');
 				}
 			}			
-		}		
+		}	
 	});
 	
 	$('#secid').change(function(e){	
@@ -203,26 +207,13 @@ $(function(){
 		tagStr();
 	});	
 	
-	$('#prtype').change(function(e){	
-		var prtype = $(this).val();
-		var prtag = "";
 		
-		if(prtype!="0"){
-			prtag = $("select[name='prtype'] option[value="+prtype+"]:selected").attr("prtag");
-		}
-		$("#prtag").val(prtag);
-		tagStr();
-	});	
 	
 	
 	$("#btnUpdate").on("click", function(e){		
 		e.preventDefault();
 		if($("#change").val() != "change"){
 			alert("변경된 내용이 없습니다.");
-			return;
-		}else if($("#prtype").val()==""){
-			$("#prtype").css("border-color","red").focus();
-			$("#warningMsg").text("광고상품을 선택해주세요.");
 			return;
 		} else if($.trim($("#slotname").val()).length==0){
 			$("#slotname").css("border-color","red").focus();
@@ -273,10 +264,6 @@ $(function(){
 		} else if($("#secid").val()==0){
 			$("#secid").css("border-color","red").focus();
 			$("#warningMsg").text("섹션을 선택해주세요.");
-			return;
-		} else if($("#prtype").val()==""){
-			$("#prtype").css("border-color","red").focus();
-			$("#warningMsg").text("광고상품을 선택해주세요.");
 			return;
 		} else if($.trim($("#slottag").val()).length==0){
 			$("#slottag").css("border-color","red").focus();
@@ -358,17 +345,7 @@ $(function(){
 	                                  <%} 
                                 } %>
                             </select>
-                        </div>
-                        <div class="form-group formGroupPadd">
-                            <select name="s_type" class="form-control input-sm">
-                             <option value="">광고상품</option>
-                                <%for(int i=0;i<codelist.size();i++){ 
-                                	Map<String,String> code = codelist.get(i);
-                                %>
-                                <option value="<%=String.valueOf(code.get("isid")) %>" <%=s_type.equals(String.valueOf(code.get("isid")))?"selected":"" %>><%=code.get("isname") %></option>                               
-                                <%} %>
-                            </select>
-                        </div>
+                        </div>                      
                         <div class="form-group formGroupPadd">
                             <input type="text" class="form-control input-sm" name="sch_text" value="<%=sch_text%>">
                          </div>
@@ -391,7 +368,6 @@ $(function(){
 				<col width="40">
 				<col width="80"><!-- 사이트 -->
 				<col width="80"><!-- 섹션 -->
-				<col width="80"><!-- 광고상품 -->
 				<col width="200"><!-- 위치 -->
 				<col width="100"><!-- 이름 -->
 			    <col width="60"><!-- 사이즈 -->
@@ -403,8 +379,7 @@ $(function(){
                             <th>No</th>
                             <th>사이트</th>  
                             <th>섹션</th>  
-                            <th>광고상품</th>  
-                           <th>이름</th>  
+                            <th>이름</th>  
                             <th>위치태그</th>  
                             <th>사이즈</th>  
                              <th>등록자</th>
@@ -423,11 +398,10 @@ for(int k=0; k<slotlist.size(); k++){
                     
                         <tr>
                             <td><%=skip+(k+1) %></td>
-                            <td><%=slot.getSitename() %></td>
-                            <td><%=slot.getSecname() %></td>
-                            <td><%=slot.getPrtypename() %></td>
-                            <td class="textLeft"><a href="#none" name="slotmod" slotid="<%=slot.getSlotid()%>"><%=slot.getSlotname() %></a></td>                           
-                            <td class="textLeft"><%=slot.getSlottag()%></td>
+                            <td class="textLeft"><%=slot.getSitename() %></td>
+                            <td class="textLeft"><%=slot.getSecname() %></td>
+                             <td class="textLeft"><a href="#none" name="slotmod" slotid="<%=slot.getSlotid()%>"><%=slot.getSlotname() %></a></td>                           
+                            <td class="textLeft"><a href="javascript:newTab('<%=Constant.ADTAG_SERVER%>/<%=slot.getSlottag()%>/')"><%=slot.getSlottag()%></a></td>
                             <td><%=slot.getWidth() %> x <%= slot.getHeight()%></td>
                            <td><%=DateUtil.getYMD(slot.getUpdatedate()) %></td>
                             <td><%=slot.getUpdateusername() %></td>
@@ -467,8 +441,8 @@ for(int k=0; k<slotlist.size(); k++){
                     <!-- search form Start -->
                    <form id="frmRegist" name="frmRegist" method="post" action="sitemgr.do?a=slotRegist">
                    		<input type="hidden" name="a" value="slotRegist">
-                     	<input type="text" id="slotid" name="slotid" class="debug">
-                    	<input type="text" id="change" name="change" value="" class="debug">
+                     	<input type="hidden" id="slotid" name="slotid" class="debug">
+                    	<input type="hidden" id="change" name="change" value="" class="debug">
                        <table class="addTable" style="width:560px">
                             <colgroup>
                                 <col width="20%">
@@ -482,7 +456,7 @@ for(int k=0; k<slotlist.size(); k++){
 	                                <%for(int i=0;i<sitelist.size();i++){ 
 	                                	Map<String,String> site = sitelist.get(i);
 	                                %>
-	                                <option value="<%=String.valueOf(site.get("siteid")) %>" sitetag="<%=site.get("sitetag")%>"><%=site.get("sitename") %></option>                               
+	                                <option value="<%=String.valueOf(site.get("siteid")) %>" sitetag="<%=site.get("sitetag")%>"  <%=s_siteid.equals(String.valueOf(site.get("siteid")))?"selected":"" %>><%=site.get("sitename") %></option>                               
 	                                <%} %>
                                 	</select>
                                		<span id="sitename" class="modify"></span>
@@ -493,36 +467,30 @@ for(int k=0; k<slotlist.size(); k++){
                                 <td>                              
                                 	<select id="secid" name="secid" class="new form-control input-sm" style="width:160px">
                                 	<option value="0"></option>	                                
+                               <%
+                                if(!s_siteid.equals("")){
+	                                for(int i=0;i<seclist.size();i++){ 
+	                                	Map<String,String> sec = seclist.get(i);
+	                                %>
+	                               <option value="<%=String.valueOf(sec.get("secid")) %>" sectag="<%=sec.get("sectag") %>" <%=s_secid.equals(String.valueOf(sec.get("secid")))?"selected":"" %>><%=sec.get("secname") %></option>                               
+	                                  <%} 
+                                } %>
                                 	</select>
                                 	<span id="secname" class="modify"></span>
                                 	
 	 					         </td>
                             </tr>
                            <tr>
-                            <th>광고상품<span style="color:red"> * </span></th>
-                            <td>
-	                            <select id="prtype" name="prtype" class="form-control input-sm" style="width:100px">
-	                             <option value="0">선택</option>
-	                                <%for(int i=0;i<codelist.size();i++){ 
-	                                	Map<String,String> code = codelist.get(i);
-	                                %>
-	                                <option value="<%=String.valueOf(code.get("isid")) %>" prtag="<%=code.get("text")%>"><%=code.get("isname") %></option>                               
-	                                <%} %>
-	                            </select>
-	                        </td>
-	                        </tr>                            
-                           <tr>
                                 <th>위치명<span style="color:red"> * </span></th>
                                 <td class="form-inline">
-                                     <input type="text" name="slotname" id="slotname" class="form-control input-sm" style="width:280px">                                    
+                                     <input type="text" name="slotname" id="slotname" class="form-control input-sm" style="width:180px">                                    
                                </td>
                             </tr>
                              <tr>
                                 <th>태그 아이디<span style="color:red"> * unique</span></th>
                                 <td class="form-inline"><span id="tagstr" style="padding:5px;font-size:11pt"></span>
-                                	<input type="text" size=4 id="prtag" class="debug"/>
-                                    <input type="text" size=4 id="sitetag" class="debug"/>
-                                    <input type="text" size=4 id="sectag" class="debug"/>
+                                     <input type="hidden" size=4 id="sitetag" class="debug"/>
+                                    <input type="hidden" size=4 id="sectag" class="debug"/>
                                     <input type="text" name="slottag" id="slottag" class="form-control input-sm" width="240px" placeholder="">
                                 </td>
                             </tr>
@@ -536,7 +504,7 @@ for(int k=0; k<slotlist.size(); k++){
                             <tr>
                                  <th>설명</th>
                                 <td class="textLeft">
-                                    <textarea name="memo" class="form-control" rows="6"  maxlength="100" style="width:360px"></textarea>
+                                    <textarea name="memo" id="memo"  class="form-control" rows="6"  maxlength="100" style="width:360px"></textarea>
                                 </td>
                             </tr>
                          

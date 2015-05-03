@@ -67,9 +67,24 @@ try
 $(function(){
 	$(".debug").css("display","none");
 	
+	
+	
+	
+	
+	
+		
+	
+	
+	
+	
+	
+	
+	
+	
 	$("#btnPopup").click(function(e){
 		
 		$("#frmRegist input, #frmRegist select").val("");
+	
 		if($("#s_siteid").val()!=0){
 			var siteid = $("#s_siteid").val();
 			$("#siteid").val(siteid);
@@ -279,9 +294,9 @@ for(int k=0; k<seclist.size(); k++){
                         <tr>
                             <td><%=skip+(k+1) %></td>
                             <td><%=sec.get("sitetypename") %></td>
-                            <td class="textLeft"><a href="sitemgr.do?a=siteView"><%=sec.get("sitename") %></a></td>                           
+                            <td class="textLeft"><%=sec.get("sitename") %></td>                           
                             <td class="textLeft"><a href="#none" name="secmod" secid="<%=String.valueOf(sec.get("secid"))%>"><%=sec.get("secname") %></a></td>
-                            <td class="textLeft"><a href="sitemgr.do?a=slotList&secid=<%=String.valueOf(sec.get("secid"))%>"><%=sec.get("sectag") %></td>
+                            <td class="textLeft"><a href="sitemgr.do?a=slotList&s_siteid=<%=String.valueOf(sec.get("siteid"))%>&s_secid=<%=String.valueOf(sec.get("secid"))%>&secid=<%=String.valueOf(sec.get("secid"))%>"><%=sec.get("sectag") %></td>
                             <td><%=DateUtil.getYMD(String.valueOf(sec.get("insertdate"))) %></td>
                             <td><%=sec.get("insertusername") %></td>                            
                         </tr>
@@ -358,7 +373,7 @@ for(int k=0; k<seclist.size(); k++){
                         <tr>
                                 <th>설명</th>
                                 <td class="textLeft">
-                                    <textarea name="memo" class="form-control" rows="6"  maxlength="100" style="width:360px"></textarea>
+                                    <textarea name="memo" id="memo" class="form-control" rows="6"  maxlength="100" style="width:360px"></textarea>
                                 </td>
                             </tr>
                          

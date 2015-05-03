@@ -13,9 +13,6 @@
 String userID = StringUtil.isNull((String)SessionUtil.getAttribute("userID") );
 String userName = StringUtil.isNull((String)SessionUtil.getAttribute("userName") );
 String userType = StringUtil.isNull((String)SessionUtil.getAttribute("userType") );
-String isMain = StringUtil.isNull((String)SessionUtil.getAttribute("isMain") );
-
-
 String userPername = StringUtil.isNull((String)SessionUtil.getAttribute("userPername") );
 
 List<Menu> menuList = (List<Menu>)SessionUtil.getAttribute("menuList");

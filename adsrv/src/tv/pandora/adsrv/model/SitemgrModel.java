@@ -97,4 +97,8 @@ public class SitemgrModel {
 	public Map<String,String> getSlgroup(Map<String, String> map){
 		return sitemgrDaoMaster.getSlgroup(map);
 	}
+	public List<Map<String,String>> getSlotRunAdsList(Map<String, String> map){
+		return sitemgrDaoMaster.getSlotRunAdsList(map);
+	}
+	
 }

@@ -1,10 +1,15 @@
 package tv.pandora.adsrv.common.session;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import tv.pandora.adsrv.domain.Menu;
  
 /**
  * session Util
@@ -26,6 +31,9 @@ public class SessionUtil {
  
  public static void setAttribute(String key, String name) throws Exception {
 	 RequestContextHolder.getRequestAttributes().setAttribute(key, name,1);
+ }
+ public static void setAttributeList(String key, List<Menu> list) throws Exception {
+	 RequestContextHolder.getRequestAttributes().setAttribute(key, list,1);
  }
  /**
   * 설정한 attribute 삭제 

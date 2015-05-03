@@ -32,6 +32,11 @@ import java.util.Map;
 
 
 
+
+
+
+
+
 import tv.pandora.adsrv.domain.Ads;
 import tv.pandora.adsrv.domain.Campaign;
 import tv.pandora.adsrv.domain.Creative;
@@ -71,7 +76,9 @@ public class CpmgrImpl implements CpmgrFacade{
 	public Integer getCpCnt(Map<String, String> map) {
 		return cpmgrModel.getCpCnt(map);
 	}
-	
+	public List<Ads> getAvailableAdsList(Map<String, String> map){
+		return cpmgrModel.getAvailableAdsList(map);
+	}
 	public Integer addCampaign(Campaign cp){
 		return cpmgrModel.addCampaign(cp);
 	}
@@ -148,6 +155,9 @@ public class CpmgrImpl implements CpmgrFacade{
 	public void delTargetIP(Map<String, String> map){
 		cpmgrModel.delTargetIP(map);
 	}
+	public void addAdsCrNew(Map<String, String> map){
+		cpmgrModel.addAdsCrNew(map);
+	}
 	public Integer modTargetCategory(Map<String, String> map){
 		return cpmgrModel.modTargetCategory(map);
 	}
@@ -198,6 +208,9 @@ public class CpmgrImpl implements CpmgrFacade{
 	public Integer addCreative(Creative cr){
 		return cpmgrModel.addCreative(cr);
 	}
+	public Integer modDelCreative(Map<String, String> map){
+		return cpmgrModel.modDelCreative(map);
+	}
 	public void addCreativeClick(List<Map<String, String>> list){
 		cpmgrModel.addCreativeClick(list);
 	}
@@ -214,12 +227,25 @@ public class CpmgrImpl implements CpmgrFacade{
 	public void modDelAdsTargeting(Map<String, String> map){
 		cpmgrModel.modDelAdsTargeting(map);
 	}
+	public void modDelAdsSlot(Map<String,String> map){
+		cpmgrModel.modDelAdsSlot(map);
+	}
+	public void modDelCampaign(Map<String,String> map){
+		cpmgrModel.modDelCampaign(map);
+	}
+	
 	@Override
 	public void addAdsCreative(List<Map<String, String>> list) {
 		cpmgrModel.addAdsCreative(list);
 	}
+	public void modDelAds(Map<String, String> map){
+		cpmgrModel.modDelAds(map);
+	}
 	public void modDelAdsCreative(Map<String, String> map){
 		cpmgrModel.modDelAdsCreative(map);
+	}
+	public void addAdsSlot(List<Map<String, String>> list){
+		cpmgrModel.addAdsSlot(list);
 	}
 	public void modAdsSlot(Map<String, String> map){
 		cpmgrModel.modAdsSlot(map);
@@ -229,6 +255,10 @@ public class CpmgrImpl implements CpmgrFacade{
 	}
 	public void copyCreativeClick(Map<String, String> map){
 		cpmgrModel.copyCreativeClick(map);
+	}
+	
+	public Integer copyCampaign(Map<String, String> map){
+		return cpmgrModel.copyCampaign(map);
 	}
 	public Integer copyAds(Map<String, String> map){
 		return cpmgrModel.copyAds(map);

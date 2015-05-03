@@ -1,6 +1,7 @@
 
 package tv.pandora.adsrv.common.util;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -8,6 +9,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * kr.mapps.common.util.DateUtil.java - Creation date: 2010. 3. 16. <br>
@@ -58,7 +60,25 @@ public class DateUtil {
 			return newdate;
     	}
 	}
-	public static String getYMD(String str, String delimeter) {
+	public static String getYMDKor(String str) {
+		if((str == null) || str.equals("")) {
+    		return "";
+    	} else {
+			String newdate = "";
+			
+			if(str.length()<8){
+				newdate = str;
+			} else {
+				try{
+					newdate = str.substring(0, 4) + "년 "+ String.valueOf(str.substring(4, 6)) + "월 " + str.substring(6, 8)+"일";
+				
+				}catch(Exception e){
+					 e.printStackTrace();
+				}
+			}
+			return newdate;
+    	}
+	}	public static String getYMD(String str, String delimeter) {
 		if((str == null) || str.equals("")) {
     		return "";
     	} else {
@@ -636,6 +656,15 @@ public class DateUtil {
 		cal.set( yy, mm, dd, hh, mi, ss);
 		return cal.getTime().getTime() / 1000;
 	}
+	
+
+    public static long getUnixTime(String time) throws ParseException
+    {
+        Date date = dateParse(time, "yyyyMMddHHmm");
+        long unixTime = (long) date.getTime()/1000;
+        return unixTime;
+    }
+
 	
 	public static void main(String[] arg){
 		//System.out.println(simpleDateD());

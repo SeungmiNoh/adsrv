@@ -15,6 +15,7 @@ try
 	String s_secid = StringUtil.isNull(request.getParameter("s_secid"));
 	String secid = StringUtil.isNull(request.getParameter("secid"));
 	String sch_text = StringUtil.isNull(request.getParameter("sch_text"));
+	sch_text = new String (sch_text.getBytes("8859_1"),"UTF-8");
 	String s_type = StringUtil.isNull(request.getParameter("s_type"));
 	   
 	Map<String,Object> map = (Map)request.getAttribute("response");
@@ -156,11 +157,11 @@ $(function(){
 					$("#groupname").val(data.groupname);
 					$("#width").val(data.width);
 					$("#height").val(data.height);
-					$("#memo").val(data.memo);
+					$("#memo").text(data.memo);
 					$("#updatedate").html(getYMDHM(data.updatedate, '-'));
 					$("#updateuser").html(data.updateusername);
 				});
-		MasDwrService.getSlgroupInSlotList(groupid,
+		MasDwrService.getSlgroupInSlotList('', groupid,
 		   		function(data) {
 					for(var k=0; k<data.length; k++){
 						
@@ -198,10 +199,6 @@ $(function(){
 		}  */
 		else{
 			$("#searchList").html("");
-		console.log("prtype="+prtype);	
-		console.log("width="+width);	
-		console.log("height="+height);	
-		console.log("siteid="+siteid);	
 			MasDwrService.getSlotList(prtype, width, height, siteid,
 		   		function(data) {
 					var htmlstr = '';
@@ -210,15 +207,18 @@ $(function(){
 					{
 						for(var k=0; k<data.length; k++) {
 							htmlstr += '<tr>';
-							htmlstr += '<td><input type="checkbox" name="ckslot" onclick="checkSlot(this)"';
+							htmlstr += '<td class="textCenter">';
+							if($('#add'+data[k].slotid).length==0) {
+							
+							htmlstr +='<input type="checkbox" name="ckslot" onclick="checkSlot(this)"';
 							htmlstr += ' id="chkBox'+data[k].slotid+'"'; 
 							htmlstr += ' value="'+data[k].slotid+'"'; 
 							htmlstr += ' sitename="'+data[k].sitename+'"'; 
 							htmlstr += ' slotname="'+data[k].slotname+'"'; 
-							if($('#add'+data[k].slotid).length>0) {
-								htmlstr += ' checked';
-							}
+							
+							
 							htmlstr +='"/>';
+							}
 							htmlstr +='</td>';
 							htmlstr += '<td>'+data[k].sitename+'</td>';
 							htmlstr += '<td class="textLeft">'+data[k].slotname+'</td>';
@@ -228,7 +228,7 @@ $(function(){
 						}
 					} else {
 						htmlstr += '<tr>';
-						htmlstr += '<td colspan="5">조건에 맞는 위치가 없습니다.</td>';
+						htmlstr += '<td  class="textCenter" colspan="5">조건에 맞는 위치가 없습니다.</td>';
 						htmlstr += '</tr>';
 						
 					}
@@ -353,6 +353,7 @@ $(function(){
 				<input type="hidden" name="p" id="page"/>
                     <div class="form-inline">
                         <div class="form-group">
+                        <%-- 
                             <select id="s_siteid" name="s_siteid" class="form-control input-sm" style="width:140px">
                                 <option value="0">사이트 선택</option>
                                 <%for(int i=0;i<sitelist.size();i++){ 
@@ -372,20 +373,10 @@ $(function(){
 	                                  <%} 
                                 } %>
                             </select>
-                        <div class="form-group formGroupPadd">
-                            <select name="s_type" class="form-control input-sm">
-                             <option value="">광고상품</option>
-                                <%for(int i=0;i<codelist.size();i++){ 
-                                	Map<String,String> code = codelist.get(i);
-                                %>
-                                <option value="<%=String.valueOf(code.get("isid")) %>" <%=s_type.equals(String.valueOf(code.get("isid")))?"selected":"" %>><%=code.get("isname") %></option>                               
-                                <%} %>
-                            </select>
-                        </div>
+                        --%>
                             <select name="sch_column" class="form-control input-sm" style="width:140px">
                             <option value="groupname">위치그룹</option>
                             <option value="slotname">위치</option>
-                            <option value="secname">섹션</option>
                             <option value="sitename">사이트</option>
                             </select>
                         </div>
@@ -409,8 +400,7 @@ $(function(){
                 <table class="listTable">
 				<colgroup>
 				<col width="40">
-				<col width="80"><!-- 광고상품 -->				
-				<col width="200"><!-- 그룹명 -->
+			<col width="200"><!-- 그룹명 -->
 				<col width="60"><!-- 사이즈 -->
 			     <col width="60"><!-- 위치수 -->
 			   <col width="100"><!-- 등록일 -->
@@ -419,8 +409,7 @@ $(function(){
 				<thead>
                         <tr>
                             <th>No</th>
-               <th>광고상품</th>  
-                                         <th>그룹명</th>  
+                            <th>그룹명</th>  
                             <th>사이즈</th>  
                             <th>위치 개수</th>  
                             <th>최종수정</th>
@@ -441,8 +430,7 @@ for(int k=0; k<grouplist.size(); k++){
                     
                         <tr>
                             <td><%=skip+(k+1) %></td>
-                            <td><%=slot.get("prtypename") %></td>
-                            <td><a href="#none" name="groupmod" groupid="<%=String.valueOf(slot.get("groupid"))%>"><%=slot.get("groupname") %></a></td>
+                            <td class="textLeft"><a href="#none" name="groupmod" groupid="<%=String.valueOf(slot.get("groupid"))%>"><%=slot.get("groupname") %></a></td>
                             <td><%=String.valueOf(slot.get("width")) %> x <%=String.valueOf(slot.get("height")) %></td>
                             <td class="textLeft"><%=slot.get("slotstr").replaceAll("\n", "<br/>") %></td>
                             <td><%=DateUtil.getYMDHM(slot.get("updatedate"),"-") %></td>
@@ -571,7 +559,7 @@ for(int k=0; k<grouplist.size(); k++){
                              <tr>
                                  <th>설명</th>
                                 <td class="textLeft">
-                                    <textarea name="memo" class="form-control" rows="3"  maxlength="100"></textarea>
+                                    <textarea id="memo" name="memo" class="form-control" rows="3"  maxlength="100"></textarea>
                                 </td>
                             </tr>
                          

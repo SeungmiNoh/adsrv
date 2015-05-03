@@ -19,25 +19,37 @@ public class SitemgrDaoiBatis implements SitemgrDao {
 	}
 
 	
-	public List<Map<String,String>> getSiteList(Map<String, String> map){		
+	public List<Map<String,String>> getSiteList(Map<String, String> map){	
+		String sql = "getSiteList";
+		if(StringUtil.isNull(map.get("page")).equals("Y")){
+			sql = "getSitePageList";
+		}
 		try {
-			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getSiteList", map);
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList(sql, map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
 	public List<Map<String,String>> getSectionList(Map<String, String> map){
+		String sql = "getSectionList";
+		if(StringUtil.isNull(map.get("page")).equals("Y")){
+			sql = "getSectionPageList";
+		}
 		try {
-			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getSectionList", map);
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList(sql, map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
 	public List<Slot> getSlotList(Map<String, String> map){
 		String sql = "getSlotList";
-		if(!StringUtil.isNull(map.get("adsid")).equals("") || !StringUtil.isNull(map.get("cpid")).equals("")) {
+		if(StringUtil.isNull(map.get("search")).equals("Y")){
+			sql = "getSlotSearchList";
+		} else if(StringUtil.isNull(map.get("page")).equals("Y")){
+			sql = "getSlotPageList";
+		} else if(!StringUtil.isNull(map.get("adsid")).equals("") || !StringUtil.isNull(map.get("cpid")).equals("")) {
 			sql = "getAdsSlotList";
-		}		
+		}  
 		try {
 			return (List<Slot>) sqlMapClientTemplateMaster.queryForList(sql, map);
 		} catch (EmptyResultDataAccessException e) {
@@ -112,8 +124,12 @@ public class SitemgrDaoiBatis implements SitemgrDao {
 	}
 	
 	public List<Map<String,String>> getSlgroupList(Map<String, String> map){
+		String sql = "getSlgroupList";
+		if(StringUtil.isNull(map.get("page")).equals("Y")){
+			sql = "getSlgroupPageList";
+		}
 		try {
-			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getSlgroupList", map);
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList(sql, map);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
@@ -204,6 +220,12 @@ public class SitemgrDaoiBatis implements SitemgrDao {
 			return null;
 		}
 	}
-
+	public List<Map<String,String>> getSlotRunAdsList(Map<String, String> map){
+		try {
+			return (List<Map<String,String>>) sqlMapClientTemplateMaster.queryForList("getSlotRunAdsList", map);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
 
 }
